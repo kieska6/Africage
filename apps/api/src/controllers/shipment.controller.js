@@ -32,14 +32,8 @@ class ShipmentController {
       // - Apply search
       // - Return paginated results
       
-      const { shipments, total } = await shipmentService.getShipments(req.query);
-      const pagination = {
-        page: parseInt(req.query.page) || 1,
-        limit: parseInt(req.query.limit) || 10,
-        total
-      };
-      
-      return paginatedResponse(res, shipments, pagination, 'Shipments retrieved successfully');
+      const shipments = await shipmentService.getShipments(req.query);
+      return successResponse(res, shipments, 'Shipments retrieved successfully');
     } catch (error) {
       next(error);
     }

@@ -18,10 +18,10 @@ export function LoginForm() {
     setLoading(true);
     setError('');
 
-    const { error } = await signIn(email, password);
+    const result = await signIn(email, password);
 
-    if (error) {
-      setError(error.message);
+    if (result.error) {
+      setError(result.error);
     } else {
       navigate('/dashboard');
     }

@@ -6,8 +6,12 @@ import { Input } from '../ui/Input';
 import { Alert } from '../ui/Alert';
 
 export function SignupForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+  });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -15,27 +19,31 @@ export function SignupForm() {
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    if (password !== confirmPassword) {
+    if (formData.password !== confirmPassword) {
       setError('Les mots de passe ne correspondent pas');
       setLoading(false);
       return;
     }
 
-    if (password.length < 6) {
+    if (formData.password.length < 6) {
       setError('Le mot de passe doit contenir au moins 6 caractères');
       setLoading(false);
       return;
     }
 
-    const { error } = await signUp(email, password);
+    const result = await signUp(formData);
 
-    if (error) {
-      setError(error.message);
+    if (result.error) {
+      setError(result.error);
     } else {
       setSuccess(true);
       setTimeout(() => {
@@ -72,11 +80,33 @@ export function SignupForm() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex space-x-4">
+            <Input
+              label="Prénom"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              required
+              placeholder="Votre prénom"
+              className="w-1/2"
+            />
+            <Input
+              label="Nom"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              required
+              placeholder="Votre nom"
+              className="w-1/2"
+            />
+          </div>
+
           <Input
             label="Email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             required
             placeholder="votre@email.com"
           />
@@ -84,8 +114,9 @@ export function SignupForm() {
           <Input
             label="Mot de passe"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
             required
             placeholder="••••••••"
           />

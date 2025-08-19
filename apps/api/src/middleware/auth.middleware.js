@@ -1,6 +1,5 @@
-const jwt = require('jsonwebtoken');
-const { errorResponse } = require('../utils/response');
-const prisma = require('../utils/prisma');
+const authService = require('../services/auth.service');
+const { createError } = require('../utils/error');
 
 /**
  * Middleware d'authentification JWT
@@ -11,21 +10,19 @@ const authenticateToken = async (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token) {
-      return errorResponse(res, 'Access token required', 401);
+      throw createError(401, 'Access token is required for authentication.');
     }
 
-    // TODO: Implement JWT verification
-    // const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    const decoded = authService.verifyToken(token);
     
-    // if (!user) {
-    //   return errorResponse(res, 'User not found', 401);
-    // }
+    // Attach a lightweight user object to the request
+    // The full user object can be fetched by the controller if needed
+    req.user = { id: decoded.userId };
 
-    // req.user = user;
     next();
   } catch (error) {
-    return errorResponse(res, 'Invalid or expired token', 401);
+    // Pass the error to the global error handler
+    next(error);
   }
 };
 
@@ -33,24 +30,39 @@ const authenticateToken = async (req, res, next) => {
  * Middleware pour vérifier les rôles utilisateur
  */
 const requireRole = (roles) => {
-  return (req, res, next) => {
-    // TODO: Implement role verification
-    // if (!req.user || !roles.includes(req.user.role)) {
-    //   return errorResponse(res, 'Insufficient permissions', 403);
-    // }
-    next();
+  return async (req, res, next) => {
+    try {
+      if (!req.user || !req.user.id) {
+        throw createError(401, 'Authentication required.');
+      }
+
+      const user = await authService.getCurrentUser(req.user.id);
+
+      if (!roles.includes(user.role)) {
+        throw createError(403, 'Insufficient permissions to access this resource.');
+      }
+
+      // For convenience, attach the full user object after role check
+      req.user = user;
+      next();
+    } catch (error) {
+      next(error);
+    }
   };
 };
 
 /**
  * Middleware pour vérifier que l'utilisateur est vérifié
  */
-const requireVerifiedUser = (req, res, next) => {
-  // TODO: Implement user verification check
-  // if (!req.user || req.user.status !== 'VERIFIED') {
-  //   return errorResponse(res, 'Account verification required', 403);
-  // }
-  next();
+const requireVerifiedUser = async (req, res, next) => {
+  try {
+     if (!req.user || req.user.status !== 'VERIFIED') {
+       throw createError(403, 'Account verification is required to perform this action.');
+     }
+    next();
+  } catch(error) {
+    next(error);
+  }
 };
 
 module.exports = {

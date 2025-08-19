@@ -32,14 +32,8 @@ class TripController {
       // - Apply search
       // - Return paginated results
       
-      const { trips, total } = await tripService.getTrips(req.query);
-      const pagination = {
-        page: parseInt(req.query.page) || 1,
-        limit: parseInt(req.query.limit) || 10,
-        total
-      };
-      
-      return paginatedResponse(res, trips, pagination, 'Trips retrieved successfully');
+      const trips = await tripService.getTrips(req.query);
+      return successResponse(res, trips, 'Trips retrieved successfully');
     } catch (error) {
       next(error);
     }
