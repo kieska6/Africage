@@ -10,15 +10,12 @@ class AuthController {
    */
   async register(req, res, next) {
     try {
-      // TODO: Implement user registration logic
-      // - Hash password
-      // - Create user in database
-      // - Generate JWT token
-      // - Send welcome email
-      
       const result = await authService.register(req.body);
-      return successResponse(res, result, 'User registered successfully', 201);
+      return successResponse(res, result, 'Utilisateur créé avec succès', 201);
     } catch (error) {
+      if (error.message.includes('existe déjà')) {
+        return errorResponse(res, error.message, 409);
+      }
       next(error);
     }
   }
@@ -28,14 +25,12 @@ class AuthController {
    */
   async login(req, res, next) {
     try {
-      // TODO: Implement user login logic
-      // - Validate credentials
-      // - Generate JWT token
-      // - Update lastLoginAt
-      
       const result = await authService.login(req.body);
-      return successResponse(res, result, 'Login successful');
+      return successResponse(res, result, 'Connexion réussie');
     } catch (error) {
+      if (error.message.includes('incorrect')) {
+        return errorResponse(res, error.message, 401);
+      }
       next(error);
     }
   }
@@ -45,11 +40,8 @@ class AuthController {
    */
   async logout(req, res, next) {
     try {
-      // TODO: Implement logout logic
-      // - Invalidate token (blacklist or remove from session)
-      
       await authService.logout(req.user.id);
-      return successResponse(res, null, 'Logout successful');
+      return successResponse(res, null, 'Déconnexion réussie');
     } catch (error) {
       next(error);
     }
@@ -60,12 +52,8 @@ class AuthController {
    */
   async forgotPassword(req, res, next) {
     try {
-      // TODO: Implement forgot password logic
-      // - Generate reset token
-      // - Send reset email
-      
       await authService.forgotPassword(req.body.email);
-      return successResponse(res, null, 'Password reset email sent');
+      return successResponse(res, null, 'Email de réinitialisation envoyé');
     } catch (error) {
       next(error);
     }
@@ -76,13 +64,8 @@ class AuthController {
    */
   async resetPassword(req, res, next) {
     try {
-      // TODO: Implement password reset logic
-      // - Validate reset token
-      // - Hash new password
-      // - Update user password
-      
       await authService.resetPassword(req.body);
-      return successResponse(res, null, 'Password reset successful');
+      return successResponse(res, null, 'Mot de passe réinitialisé avec succès');
     } catch (error) {
       next(error);
     }
@@ -93,10 +76,8 @@ class AuthController {
    */
   async refreshToken(req, res, next) {
     try {
-      // TODO: Implement token refresh logic
-      
       const result = await authService.refreshToken(req.user.id);
-      return successResponse(res, result, 'Token refreshed');
+      return successResponse(res, result, 'Token rafraîchi');
     } catch (error) {
       next(error);
     }
@@ -107,10 +88,8 @@ class AuthController {
    */
   async getCurrentUser(req, res, next) {
     try {
-      // TODO: Return current user data (without sensitive info)
-      
       const user = await authService.getCurrentUser(req.user.id);
-      return successResponse(res, user, 'User data retrieved');
+      return successResponse(res, user, 'Données utilisateur récupérées');
     } catch (error) {
       next(error);
     }

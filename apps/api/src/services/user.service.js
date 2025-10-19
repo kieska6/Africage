@@ -8,99 +8,296 @@ class UserService {
    * Obtenir le profil complet d'un utilisateur
    */
   async getProfile(userId) {
-    // TODO: Fetch user profile from database
-    // - Include all profile information
-    // - Exclude sensitive data (password)
-    // - Include verification status
-    
-    throw new Error('Not implemented');
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        profilePicture: true,
+        dateOfBirth: true,
+        role: true,
+        status: true,
+        isPhoneVerified: true,
+        isEmailVerified: true,
+        isIdentityVerified: true,
+        identityDocument: true,
+        city: true,
+        country: true,
+        address: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLoginAt: true
+      }
+    });
+
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    return user;
   }
 
   /**
    * Mettre à jour le profil utilisateur
    */
   async updateProfile(userId, updateData) {
-    // TODO: Update user profile
-    // - Validate update data
-    // - Update user in database
-    // - Return updated profile
-    
-    throw new Error('Not implemented');
+    const allowedFields = [
+      'firstName', 'lastName', 'phone', 'dateOfBirth', 
+      'city', 'country', 'address'
+    ];
+
+    const dataToUpdate = {};
+    Object.keys(updateData).forEach(key => {
+      if (allowedFields.includes(key)) {
+        dataToUpdate[key] = updateData[key];
+      }
+    });
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: dataToUpdate,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        profilePicture: true,
+        dateOfBirth: true,
+        role: true,
+        status: true,
+        city: true,
+        country: true,
+        address: true,
+        updatedAt: true
+      }
+    });
+
+    return updatedUser;
   }
 
   /**
    * Upload d'avatar
    */
   async uploadAvatar(userId, file) {
-    // TODO: Handle avatar upload
-    // - Validate file type and size
-    // - Upload to cloud storage (Cloudinary/S3)
-    // - Update user profilePicture URL
-    // - Delete old avatar if exists
-    
-    throw new Error('Not implemented');
+    // TODO: Implémenter l'upload vers un service cloud (Cloudinary/S3)
+    // Pour l'instant, on simule avec une URL fictive
+    const avatarUrl = `https://example.com/avatars/${userId}-${Date.now()}.jpg`;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { profilePicture: avatarUrl },
+      select: {
+        id: true,
+        profilePicture: true
+      }
+    });
+
+    return { profilePicture: updatedUser.profilePicture };
   }
 
   /**
    * Vérification du numéro de téléphone
    */
   async verifyPhone(userId, verificationData) {
-    // TODO: Implement phone verification
-    // - Send SMS with verification code
-    // - Verify code and update isPhoneVerified
-    // - Return verification status
-    
-    throw new Error('Not implemented');
+    const { phone, verificationCode } = verificationData;
+
+    // TODO: Implémenter la vérification SMS réelle
+    // Pour l'instant, on accepte le code "123456"
+    if (verificationCode !== '123456') {
+      throw new Error('Code de vérification incorrect');
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { 
+        phone,
+        isPhoneVerified: true 
+      },
+      select: {
+        id: true,
+        phone: true,
+        isPhoneVerified: true
+      }
+    });
+
+    return updatedUser;
   }
 
   /**
    * Vérification d'identité (KYC)
    */
   async verifyIdentity(userId, identityData) {
-    // TODO: Implement identity verification
-    // - Upload identity document
-    // - Create verification request
-    // - Update verification status
-    
-    throw new Error('Not implemented');
+    const { documentType, documentUrl } = identityData;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { 
+        identityDocument: documentUrl,
+        // Pour l'instant, on marque automatiquement comme vérifié
+        isIdentityVerified: true,
+        status: 'VERIFIED'
+      },
+      select: {
+        id: true,
+        isIdentityVerified: true,
+        status: true
+      }
+    });
+
+    return updatedUser;
   }
 
   /**
    * Obtenir les statistiques de l'utilisateur
    */
   async getUserStats(userId) {
-    // TODO: Calculate user statistics
-    // - Count shipments sent
-    // - Count trips completed
-    // - Calculate average rating
-    // - Calculate total earnings
-    // - Return comprehensive stats
-    
-    throw new Error('Not implemented');
+    const [
+      shipmentsCount,
+      tripsCount,
+      completedTransactions,
+      averageRating
+    ] = await Promise.all([
+      prisma.shipment.count({
+        where: { senderId: userId }
+      }),
+      prisma.trip.count({
+        where: { travelerId: userId }
+      }),
+      prisma.transaction.count({
+        where: {
+          OR: [
+            { senderId: userId },
+            { travelerId: userId }
+          ],
+          status: 'COMPLETED'
+        }
+      }),
+      prisma.review.aggregate({
+        where: { revieweeId: userId },
+        _avg: { rating: true }
+      })
+    ]);
+
+    return {
+      shipmentsCount,
+      tripsCount,
+      completedTransactions,
+      averageRating: averageRating._avg.rating || 0,
+      totalEarnings: 0 // TODO: Calculer les gains réels
+    };
   }
 
   /**
    * Obtenir la liste des utilisateurs (admin)
    */
   async getUsers(queryParams) {
-    // TODO: Get paginated list of users
-    // - Apply filters (role, status, city, etc.)
-    // - Apply search on name and email
-    // - Return paginated results
+    const { page = 1, limit = 10, search, role, status } = queryParams;
+    const skip = (page - 1) * limit;
+
+    const where = {};
     
-    throw new Error('Not implemented');
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+
+    if (role) {
+      where.role = role;
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        skip,
+        take: parseInt(limit),
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          status: true,
+          city: true,
+          country: true,
+          createdAt: true,
+          lastLoginAt: true
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.user.count({ where })
+    ]);
+
+    return { users, total };
   }
 
   /**
    * Obtenir un utilisateur par ID (profil public)
    */
   async getUserById(userId) {
-    // TODO: Get user public profile
-    // - Fetch user data
-    // - Include public information only
-    // - Include ratings and reviews summary
-    
-    throw new Error('Not implemented');
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        profilePicture: true,
+        city: true,
+        country: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        // Inclure les statistiques publiques
+        sentShipments: {
+          select: { id: true },
+          where: { status: { not: 'CANCELED' } }
+        },
+        trips: {
+          select: { id: true },
+          where: { status: { not: 'CANCELED' } }
+        },
+        receivedReviews: {
+          select: { rating: true }
+        }
+      }
+    });
+
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    // Calculer les statistiques publiques
+    const averageRating = user.receivedReviews.length > 0
+      ? user.receivedReviews.reduce((sum, review) => sum + review.rating, 0) / user.receivedReviews.length
+      : 0;
+
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      profilePicture: user.profilePicture,
+      city: user.city,
+      country: user.country,
+      role: user.role,
+      status: user.status,
+      createdAt: user.createdAt,
+      stats: {
+        shipmentsCount: user.sentShipments.length,
+        tripsCount: user.trips.length,
+        averageRating: Math.round(averageRating * 10) / 10,
+        reviewsCount: user.receivedReviews.length
+      }
+    };
   }
 }
 

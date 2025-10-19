@@ -1,5 +1,5 @@
 const notificationService = require('../services/notification.service');
-const { successResponse, errorResponse } = require('../utils/response');
+const { successResponse, errorResponse, paginatedResponse } = require('../utils/response');
 
 /**
  * Contrôleur pour la gestion des notifications
@@ -10,12 +10,15 @@ class NotificationController {
    */
   async getNotifications(req, res, next) {
     try {
-      // TODO: Get user notifications
-      // - Apply pagination
-      // - Order by creation date (newest first)
+      const { notifications, total } = await notificationService.getNotifications(req.user.id, req.query);
       
-      const notifications = await notificationService.getNotifications(req.user.id, req.query);
-      return successResponse(res, notifications, 'Notifications retrieved successfully');
+      const pagination = {
+        page: parseInt(req.query.page) || 1,
+        limit: parseInt(req.query.limit) || 20,
+        total
+      };
+      
+      return paginatedResponse(res, notifications, pagination, 'Notifications récupérées avec succès');
     } catch (error) {
       next(error);
     }
@@ -26,10 +29,8 @@ class NotificationController {
    */
   async getUnreadCount(req, res, next) {
     try {
-      // TODO: Count unread notifications
-      
       const count = await notificationService.getUnreadCount(req.user.id);
-      return successResponse(res, { count }, 'Unread count retrieved successfully');
+      return successResponse(res, { count }, 'Nombre de notifications non lues récupéré');
     } catch (error) {
       next(error);
     }
@@ -40,13 +41,15 @@ class NotificationController {
    */
   async markAsRead(req, res, next) {
     try {
-      // TODO: Mark notification as read
-      // - Verify ownership
-      // - Update isRead and readAt
-      
       const notification = await notificationService.markAsRead(req.params.id, req.user.id);
-      return successResponse(res, notification, 'Notification marked as read');
+      return successResponse(res, notification, 'Notification marquée comme lue');
     } catch (error) {
+      if (error.message.includes('non trouvée')) {
+        return errorResponse(res, error.message, 404);
+      }
+      if (error.message.includes('pas autorisé')) {
+        return errorResponse(res, error.message, 403);
+      }
       next(error);
     }
   }
@@ -56,10 +59,8 @@ class NotificationController {
    */
   async markAllAsRead(req, res, next) {
     try {
-      // TODO: Mark all user notifications as read
-      
       const result = await notificationService.markAllAsRead(req.user.id);
-      return successResponse(res, result, 'All notifications marked as read');
+      return successResponse(res, result, 'Toutes les notifications marquées comme lues');
     } catch (error) {
       next(error);
     }
@@ -70,12 +71,15 @@ class NotificationController {
    */
   async deleteNotification(req, res, next) {
     try {
-      // TODO: Delete notification
-      // - Verify ownership
-      
       await notificationService.deleteNotification(req.params.id, req.user.id);
-      return successResponse(res, null, 'Notification deleted successfully');
+      return successResponse(res, null, 'Notification supprimée avec succès');
     } catch (error) {
+      if (error.message.includes('non trouvée')) {
+        return errorResponse(res, error.message, 404);
+      }
+      if (error.message.includes('pas autorisé')) {
+        return errorResponse(res, error.message, 403);
+      }
       next(error);
     }
   }
