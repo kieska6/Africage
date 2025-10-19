@@ -8,6 +8,8 @@ import { SignupPage } from './pages/SignupPage';
 import { PricingPage } from './pages/PricingPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SuccessPage } from './pages/SuccessPage';
+import { ShipmentsPage } from './pages/ShipmentsPage';
+import { NewShipmentPage } from './pages/NewShipmentPage';
 import { useAuth } from './hooks/useAuth';
 
 function App() {
@@ -36,6 +38,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shipments"
+            element={
+              <ProtectedRoute>
+                <ShipmentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shipments/new"
+            element={
+              <ProtectedRoute>
+                <NewShipmentPage />
               </ProtectedRoute>
             }
           />
