@@ -109,6 +109,17 @@ export function DashboardPage() {
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h2>
+          
+          {/* Bouton principal de création d'annonce */}
+          <div className="mb-6">
+            <Link to="/create-shipment">
+              <Button className="w-full bg-primary hover:bg-primary/90 text-white py-4 text-lg font-semibold rounded-2xl">
+                <Package className="w-6 h-6 mr-3" />
+                Publier une annonce de colis
+              </Button>
+            </Link>
+          </div>
+          
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link to="/shipments/new">
               <Button variant="outline" className="justify-start p-4 h-auto w-full">

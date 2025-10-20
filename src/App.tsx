@@ -10,6 +10,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { SuccessPage } from './pages/SuccessPage';
 import { ShipmentsPage } from './pages/ShipmentsPage';
 import { NewShipmentPage } from './pages/NewShipmentPage';
+import { CreateShipmentPage } from './pages/CreateShipmentPage';
 import { useAuth } from './hooks/useAuth';
 
 function App() {
@@ -54,6 +55,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <NewShipmentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-shipment"
+            element={
+              <ProtectedRoute>
+                <CreateShipmentPage />
               </ProtectedRoute>
             }
           />
