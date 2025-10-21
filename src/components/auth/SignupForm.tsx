@@ -40,7 +40,7 @@ export function SignupForm() {
       return;
     }
 
-    const { error } = await signUp(email, password, firstName, lastName);
+    const { error } = await signUpWithMetadata(email, password, firstName, lastName);
 
     if (error) {
       setError(error.message);

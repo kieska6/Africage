@@ -43,7 +43,7 @@ export function useAuth() {
     return { data, error };
   };
 
-  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
+  const signUpWithMetadata = async (email: string, password: string, firstName: string, lastName: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -68,6 +68,7 @@ export function useAuth() {
     loading,
     signIn,
     signUp,
+    signUpWithMetadata,
     signOut,
   };
 }
