@@ -9,6 +9,8 @@ export function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -19,6 +21,12 @@ export function SignupForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    if (!firstName.trim() || !lastName.trim()) {
+      setError('Le prénom et le nom sont requis');
+      setLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Les mots de passe ne correspondent pas');
@@ -32,7 +40,7 @@ export function SignupForm() {
       return;
     }
 
-    const { error } = await signUp(email, password);
+    const { error } = await signUp(email, password, firstName, lastName);
 
     if (error) {
       setError(error.message);
@@ -72,6 +80,25 @@ export function SignupForm() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Prénom"
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+              placeholder="Votre prénom"
+            />
+            <Input
+              label="Nom"
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              placeholder="Votre nom"
+            />
+          </div>
+
           <Input
             label="Email"
             type="email"

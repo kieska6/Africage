@@ -43,6 +43,21 @@ export function useAuth() {
     return { data, error };
   };
 
+  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: undefined, // Disable email confirmation
+        data: {
+          first_name: firstName,
+          last_name: lastName
+        }
+      },
+    });
+    return { data, error };
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     return { error };
