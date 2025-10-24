@@ -40,18 +40,32 @@ export function SignupForm() {
       return;
     }
 
-    const { error } = await signUpWithMetadata(email, password, firstName, lastName);
+    try {
+      const { data, error } = await signUp({
+        email: email,
+        password: password,
+        options: {
+          emailRedirectTo: undefined, // Disable email confirmation
+          data: {
+            first_name: firstName,
+            last_name: lastName
+          }
+        }
+      });
 
-    if (error) {
-      setError(error.message);
-    } else {
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000);
+      if (error) {
+        setError(error.message);
+      } else {
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue lors de la création du compte');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   if (success) {
