@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useSubscription } from '../hooks/useSubscription';
 import { Button } from '../components/ui/Button';
-import { Package, CreditCard, User, TrendingUp, Suitcase } from 'lucide-react';
+import { Package, CreditCard, User, TrendingUp, Briefcase } from 'lucide-react';
 
 export function DashboardPage() {
   const { user } = useAuth();
@@ -119,7 +119,7 @@ export function DashboardPage() {
             </Link>
             <Link to="/travel">
               <Button className="w-full bg-accent hover:bg-accent/90 text-white py-4 text-lg font-semibold rounded-2xl">
-                <Suitcase className="w-6 h-6 mr-3" />
+                <Briefcase className="w-6 h-6 mr-3" />
                 Voyager
               </Button>
             </Link>
@@ -138,7 +138,7 @@ export function DashboardPage() {
 
             <Link to="/trips">
               <Button variant="outline" className="justify-start p-4 h-auto w-full">
-                <Suitcase className="w-5 h-5 mr-3" />
+                <Briefcase className="w-5 h-5 mr-3" />
                 <div className="text-left">
                   <div className="font-medium">Mes voyages</div>
                   <div className="text-sm text-gray-500">Gérer vos trajets</div>

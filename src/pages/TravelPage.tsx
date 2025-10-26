@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { Suitcase, Search } from 'lucide-react';
+import { Briefcase, Search } from 'lucide-react';
 
 export function TravelPage() {
   return (
@@ -18,7 +18,7 @@ export function TravelPage() {
 
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div className="bg-white rounded-4xl shadow-xl p-8 text-center">
-            <Suitcase className="w-16 h-16 text-primary mx-auto mb-6" />
+            <Briefcase className="w-16 h-16 text-primary mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-neutral-800 mb-4">
               Publier un voyage
             </h2>
