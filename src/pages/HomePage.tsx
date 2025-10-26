@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Layout } from '../components/layout/Layout';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Search, Package, Users, Shield, MapPin, Calendar, DollarSign } from 'lucide-react';
@@ -14,7 +13,7 @@ export function HomePage() {
   };
 
   return (
-    <Layout>
+    <>
       {/* Hero Section */}
       <section className="bg-accent text-white py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
@@ -309,6 +308,6 @@ export function HomePage() {
           </div>
         </div>
       </section>
-    </Layout>
+    </>
   );
 }

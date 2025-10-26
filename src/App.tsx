@@ -28,45 +28,47 @@ function App() {
     <Router>
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <Routes>
-          <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <HomePage />} />
-          <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
-          <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/success" element={<SuccessPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/shipments"
-            element={
-              <ProtectedRoute>
-                <ShipmentsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/shipments/new"
-            element={
-              <ProtectedRoute>
-                <NewShipmentPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/create-shipment"
-            element={
-              <ProtectedRoute>
-                <CreateShipmentPage />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <main>
+          <Routes>
+            <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <HomePage />} />
+            <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+            <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/success" element={<SuccessPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/shipments"
+              element={
+                <ProtectedRoute>
+                  <ShipmentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/shipments/new"
+              element={
+                <ProtectedRoute>
+                  <NewShipmentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/create-shipment"
+              element={
+                <ProtectedRoute>
+                  <CreateShipmentPage />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
       </div>
     </Router>
   );
