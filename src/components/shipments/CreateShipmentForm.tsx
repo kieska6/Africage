@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Alert } from '../ui/Alert';
+import { Select } from '../ui/Select';
 import { Package, MapPin, DollarSign, Ruler } from 'lucide-react';
 
 interface ShipmentFormData {
@@ -19,7 +20,19 @@ interface ShipmentFormData {
   width: string;
   height: string;
   proposed_price: string;
+  currency: string;
 }
+
+const currencies = [
+  { code: 'XOF', name: 'Franc CFA (BCEAO)' },
+  { code: 'XAF', name: 'Franc CFA (BEAC)' },
+  { code: 'NGN', name: 'Naira Nigérian' },
+  { code: 'GHS', name: 'Cedi Ghanéen' },
+  { code: 'KES', name: 'Shilling Kenyan' },
+  { code: 'ZAR', name: 'Rand Sud-africain' },
+  { code: 'EUR', name: 'Euro' },
+  { code: 'USD', name: 'Dollar Américain' },
+];
 
 export function CreateShipmentForm() {
   const { user } = useAuth();
@@ -36,14 +49,15 @@ export function CreateShipmentForm() {
     length: '',
     width: '',
     height: '',
-    proposed_price: ''
+    proposed_price: '',
+    currency: ''
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -65,7 +79,7 @@ export function CreateShipmentForm() {
     try {
       // Validation des champs requis
       if (!formData.title || !formData.pickup_city || !formData.delivery_city || 
-          !formData.weight || !formData.proposed_price) {
+          !formData.weight || !formData.proposed_price || !formData.currency) {
         throw new Error('Veuillez remplir tous les champs obligatoires');
       }
 
@@ -85,7 +99,7 @@ export function CreateShipmentForm() {
         width: formData.width ? parseFloat(formData.width) : null,
         height: formData.height ? parseFloat(formData.height) : null,
         proposed_price: parseFloat(formData.proposed_price),
-        currency: 'XOF',
+        currency: formData.currency,
         status: 'PENDING_MATCH'
       };
 
@@ -291,18 +305,31 @@ export function CreateShipmentForm() {
             Récompense
           </h3>
         </div>
-
-        <Input
-          label="Récompense proposée (XOF) *"
-          name="proposed_price"
-          type="number"
-          min="1000"
-          step="500"
-          value={formData.proposed_price}
-          onChange={handleInputChange}
-          placeholder="Ex: 25000"
-          required
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <Input
+            label="Récompense proposée *"
+            name="proposed_price"
+            type="number"
+            min="1"
+            step="any"
+            value={formData.proposed_price}
+            onChange={handleInputChange}
+            placeholder="Ex: 25000"
+            required
+          />
+          <Select
+            label="Devise *"
+            name="currency"
+            value={formData.currency}
+            onChange={handleInputChange}
+            required
+          >
+            <option value="" disabled>Choisir une devise</option>
+            {currencies.map(c => (
+              <option key={c.code} value={c.code}>{c.name} ({c.code})</option>
+            ))}
+          </Select>
+        </div>
         <p className="text-sm text-neutral-500">
           Montant que vous êtes prêt à payer pour le transport de votre colis.
         </p>
