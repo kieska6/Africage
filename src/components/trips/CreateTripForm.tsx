@@ -60,8 +60,6 @@ export function CreateTripForm() {
   });
 
   const [countries, setCountries] = useState<Country[]>([]);
-  const [departureCities, setDepartureCities] = useState<City[]>([]);
-  const [arrivalCities, setArrivalCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -70,30 +68,6 @@ export function CreateTripForm() {
     const sortedCountries = [...(countriesWithCities as Country[])].sort((a, b) => a.name.localeCompare(b.name));
     setCountries(sortedCountries);
   }, []);
-
-  useEffect(() => {
-    const countryData = countries.find(c => c.name === formData.departure_country);
-    if (countryData && Array.isArray(countryData.cities)) {
-      const sortedCities = [...countryData.cities]
-        .filter(city => city && city.name)
-        .sort((a, b) => a.name.localeCompare(b.name));
-      setDepartureCities(sortedCities);
-    } else {
-      setDepartureCities([]);
-    }
-  }, [formData.departure_country, countries]);
-
-  useEffect(() => {
-    const countryData = countries.find(c => c.name === formData.arrival_country);
-    if (countryData && Array.isArray(countryData.cities)) {
-      const sortedCities = [...countryData.cities]
-        .filter(city => city && city.name)
-        .sort((a, b) => a.name.localeCompare(b.name));
-      setArrivalCities(sortedCities);
-    } else {
-      setArrivalCities([]);
-    }
-  }, [formData.arrival_country, countries]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -197,10 +171,7 @@ export function CreateTripForm() {
             </Select>
           </div>
           <div>
-            <Select label="Ville de départ *" name="departure_city" value={formData.departure_city} onChange={handleInputChange} required disabled={!formData.departure_country || departureCities.length === 0}>
-              <option value="">Choisir une ville</option>
-              {departureCities.map(c => <option key={`${c.id}-${c.name}`} value={c.name}>{c.name}</option>)}
-            </Select>
+            <Input label="Ville de départ *" name="departure_city" value={formData.departure_city} onChange={handleInputChange} required placeholder="Ex: Dakar" />
           </div>
           <div>
             <Select label="Pays d'arrivée *" name="arrival_country" value={formData.arrival_country} onChange={(e) => handleCountryChange(e, 'arrival')} required>
@@ -209,10 +180,7 @@ export function CreateTripForm() {
             </Select>
           </div>
           <div>
-            <Select label="Ville d'arrivée *" name="arrival_city" value={formData.arrival_city} onChange={handleInputChange} required disabled={!formData.arrival_country || arrivalCities.length === 0}>
-              <option value="">Choisir une ville</option>
-              {arrivalCities.map(c => <option key={`${c.id}-${c.name}`} value={c.name}>{c.name}</option>)}
-            </Select>
+            <Input label="Ville d'arrivée *" name="arrival_city" value={formData.arrival_city} onChange={handleInputChange} required placeholder="Ex: Abidjan" />
           </div>
         </div>
       </div>
