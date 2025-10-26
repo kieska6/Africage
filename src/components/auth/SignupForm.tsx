@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Alert } from '../ui/Alert';
+import { GoogleIcon } from '../ui/GoogleIcon';
 
 export function SignupForm() {
   const [email, setEmail] = useState('');
@@ -12,9 +13,10 @@ export function SignupForm() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,6 +67,16 @@ export function SignupForm() {
       setError(err.message || 'Une erreur est survenue lors de la création du compte');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    setError('');
+    const { error } = await signInWithGoogle();
+    if (error) {
+      setError(error.message);
+      setGoogleLoading(false);
     }
   };
 
@@ -148,6 +160,27 @@ export function SignupForm() {
             Créer un compte
           </Button>
         </form>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">OU</span>
+          </div>
+        </div>
+
+        <div>
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center"
+            onClick={handleGoogleSignIn}
+            loading={googleLoading}
+          >
+            <GoogleIcon className="mr-2" />
+            Continuer avec Google
+          </Button>
+        </div>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">

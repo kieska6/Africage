@@ -42,11 +42,19 @@ export function useAuth() {
     return { error };
   };
 
+  const signInWithGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    });
+    return { data, error };
+  };
+
   return {
     user,
     loading,
     signIn,
     signUp,
     signOut,
+    signInWithGoogle,
   };
 }
