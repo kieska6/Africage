@@ -73,12 +73,26 @@ export function CreateTripForm() {
 
   useEffect(() => {
     const countryData = countries.find(c => c.name === formData.departure_country);
-    setDepartureCities(countryData?.cities?.sort((a, b) => a.name.localeCompare(b.name)) || []);
+    if (countryData && Array.isArray(countryData.cities)) {
+      const sortedCities = countryData.cities
+        .filter(city => city && city.name)
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setDepartureCities(sortedCities);
+    } else {
+      setDepartureCities([]);
+    }
   }, [formData.departure_country, countries]);
 
   useEffect(() => {
     const countryData = countries.find(c => c.name === formData.arrival_country);
-    setArrivalCities(countryData?.cities?.sort((a, b) => a.name.localeCompare(b.name)) || []);
+    if (countryData && Array.isArray(countryData.cities)) {
+      const sortedCities = countryData.cities
+        .filter(city => city && city.name)
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setArrivalCities(sortedCities);
+    } else {
+      setArrivalCities([]);
+    }
   }, [formData.arrival_country, countries]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
