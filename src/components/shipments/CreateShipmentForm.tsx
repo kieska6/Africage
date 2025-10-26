@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
@@ -115,8 +115,6 @@ export function CreateShipmentForm() {
   });
 
   const [countries, setCountries] = useState<Country[]>([]);
-  const [pickupCities, setPickupCities] = useState<City[]>([]);
-  const [deliveryCities, setDeliveryCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -125,6 +123,26 @@ export function CreateShipmentForm() {
     const sortedCountries = [...(countriesWithCities as Country[])].sort((a, b) => a.name.localeCompare(b.name));
     setCountries(sortedCountries);
   }, []);
+
+  const pickupCities = useMemo(() => {
+    const countryData = countries.find(c => c.name === formData.pickup_country);
+    if (countryData && Array.isArray(countryData.cities)) {
+      return [...countryData.cities]
+        .filter(city => city && city.name)
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return [];
+  }, [formData.pickup_country, countries]);
+
+  const deliveryCities = useMemo(() => {
+    const countryData = countries.find(c => c.name === formData.delivery_country);
+    if (countryData && Array.isArray(countryData.cities)) {
+      return [...countryData.cities]
+        .filter(city => city && city.name)
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return [];
+  }, [formData.delivery_country, countries]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -136,29 +154,18 @@ export function CreateShipmentForm() {
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'pickup' | 'delivery') => {
     const countryName = e.target.value;
-    const countryData = countries.find(c => c.name === countryName);
-    
-    let cities: City[] = [];
-    if (countryData && Array.isArray(countryData.cities)) {
-      cities = [...countryData.cities]
-          .filter(city => city && city.name)
-          .sort((a, b) => a.name.localeCompare(b.name));
-    }
-
     if (type === 'pickup') {
       setFormData(prev => ({
         ...prev,
         pickup_country: countryName,
         pickup_city: ''
       }));
-      setPickupCities(cities);
     } else {
       setFormData(prev => ({
         ...prev,
         delivery_country: countryName,
         delivery_city: ''
       }));
-      setDeliveryCities(cities);
     }
   };
 
