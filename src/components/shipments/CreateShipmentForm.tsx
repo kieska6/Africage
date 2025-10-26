@@ -115,8 +115,6 @@ export function CreateShipmentForm() {
   });
 
   const [countries, setCountries] = useState<Country[]>([]);
-  const [pickupCities, setPickupCities] = useState<City[]>([]);
-  const [deliveryCities, setDeliveryCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -125,32 +123,6 @@ export function CreateShipmentForm() {
     const sortedCountries = [...(countriesWithCities as Country[])].sort((a, b) => a.name.localeCompare(b.name));
     setCountries(sortedCountries);
   }, []);
-
-  // Effect to update pickup cities when pickup country changes
-  useEffect(() => {
-    const countryData = countries.find(c => c.name === formData.pickup_country);
-    if (countryData && Array.isArray(countryData.cities)) {
-      const sortedCities = [...countryData.cities]
-        .filter(city => city && city.name)
-        .sort((a, b) => a.name.localeCompare(b.name));
-      setPickupCities(sortedCities);
-    } else {
-      setPickupCities([]);
-    }
-  }, [formData.pickup_country, countries]);
-
-  // Effect to update delivery cities when delivery country changes
-  useEffect(() => {
-    const countryData = countries.find(c => c.name === formData.delivery_country);
-    if (countryData && Array.isArray(countryData.cities)) {
-      const sortedCities = [...countryData.cities]
-        .filter(city => city && city.name)
-        .sort((a, b) => a.name.localeCompare(b.name));
-      setDeliveryCities(sortedCities);
-    } else {
-      setDeliveryCities([]);
-    }
-  }, [formData.delivery_country, countries]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -316,19 +288,15 @@ export function CreateShipmentForm() {
                 <option key={country.iso2} value={country.name}>{country.name}</option>
               ))}
             </Select>
-            <Select
+            <Input
               label="Ville de départ *"
               name="pickup_city"
               value={formData.pickup_city}
               onChange={handleInputChange}
               required
-              disabled={!formData.pickup_country || pickupCities.length === 0}
-            >
-              <option value="" disabled>Choisir une ville</option>
-              {pickupCities.map(city => (
-                <option key={`${city.id}-${city.name}`} value={city.name}>{city.name}</option>
-              ))}
-            </Select>
+              placeholder="Ex: Dakar"
+              disabled={!formData.pickup_country}
+            />
           </div>
 
           <div className="space-y-4">
@@ -345,19 +313,15 @@ export function CreateShipmentForm() {
                 <option key={country.iso2} value={country.name}>{country.name}</option>
               ))}
             </Select>
-            <Select
+            <Input
               label="Ville d'arrivée *"
               name="delivery_city"
               value={formData.delivery_city}
               onChange={handleInputChange}
               required
-              disabled={!formData.delivery_country || deliveryCities.length === 0}
-            >
-              <option value="" disabled>Choisir une ville</option>
-              {deliveryCities.map(city => (
-                <option key={`${city.id}-${city.name}`} value={city.name}>{city.name}</option>
-              ))}
-            </Select>
+              placeholder="Ex: Abidjan"
+              disabled={!formData.delivery_country}
+            />
           </div>
         </div>
       </div>
