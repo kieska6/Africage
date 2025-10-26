@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
@@ -115,6 +115,8 @@ export function CreateShipmentForm() {
   });
 
   const [countries, setCountries] = useState<Country[]>([]);
+  const [pickupCities, setPickupCities] = useState<City[]>([]);
+  const [deliveryCities, setDeliveryCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -124,24 +126,30 @@ export function CreateShipmentForm() {
     setCountries(sortedCountries);
   }, []);
 
-  const pickupCities = useMemo(() => {
+  // Effect to update pickup cities when pickup country changes
+  useEffect(() => {
     const countryData = countries.find(c => c.name === formData.pickup_country);
     if (countryData && Array.isArray(countryData.cities)) {
-      return [...countryData.cities]
+      const sortedCities = [...countryData.cities]
         .filter(city => city && city.name)
         .sort((a, b) => a.name.localeCompare(b.name));
+      setPickupCities(sortedCities);
+    } else {
+      setPickupCities([]);
     }
-    return [];
   }, [formData.pickup_country, countries]);
 
-  const deliveryCities = useMemo(() => {
+  // Effect to update delivery cities when delivery country changes
+  useEffect(() => {
     const countryData = countries.find(c => c.name === formData.delivery_country);
     if (countryData && Array.isArray(countryData.cities)) {
-      return [...countryData.cities]
+      const sortedCities = [...countryData.cities]
         .filter(city => city && city.name)
         .sort((a, b) => a.name.localeCompare(b.name));
+      setDeliveryCities(sortedCities);
+    } else {
+      setDeliveryCities([]);
     }
-    return [];
   }, [formData.delivery_country, countries]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -314,11 +322,11 @@ export function CreateShipmentForm() {
               value={formData.pickup_city}
               onChange={handleInputChange}
               required
-              disabled={pickupCities.length === 0}
+              disabled={!formData.pickup_country || pickupCities.length === 0}
             >
               <option value="" disabled>Choisir une ville</option>
               {pickupCities.map(city => (
-                <option key={city.id} value={city.name}>{city.name}</option>
+                <option key={`${city.id}-${city.name}`} value={city.name}>{city.name}</option>
               ))}
             </Select>
           </div>
@@ -343,11 +351,11 @@ export function CreateShipmentForm() {
               value={formData.delivery_city}
               onChange={handleInputChange}
               required
-              disabled={deliveryCities.length === 0}
+              disabled={!formData.delivery_country || deliveryCities.length === 0}
             >
               <option value="" disabled>Choisir une ville</option>
               {deliveryCities.map(city => (
-                <option key={city.id} value={city.name}>{city.name}</option>
+                <option key={`${city.id}-${city.name}`} value={city.name}>{city.name}</option>
               ))}
             </Select>
           </div>
