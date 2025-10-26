@@ -14,7 +14,7 @@ interface Shipment {
   pickup_country: string;
   delivery_city: string;
   delivery_country: string;
-  proposed_price: number;
+  proposed_price: number | null;
   currency: string;
   status: string;
   created_at: string;
@@ -193,7 +193,7 @@ export function ShipmentsPage() {
                   </div>
                   <div className="flex items-center text-gray-600">
                     <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                    <span>{shipment.proposed_price?.toLocaleString() ?? 'N/A'} {shipment.currency}</span>
+                    <span>{shipment.proposed_price != null ? shipment.proposed_price.toLocaleString() : 'N/A'} {shipment.currency}</span>
                   </div>
                 </div>
 
