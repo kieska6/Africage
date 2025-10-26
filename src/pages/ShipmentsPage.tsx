@@ -193,7 +193,7 @@ export function ShipmentsPage() {
                   </div>
                   <div className="flex items-center text-gray-600">
                     <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                    <span>{shipment.proposed_price.toLocaleString()} {shipment.currency}</span>
+                    <span>{shipment.proposed_price?.toLocaleString() ?? 'N/A'} {shipment.currency}</span>
                   </div>
                 </div>
 
