@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User, SignUpWithPasswordCredentials } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
 export function useAuth() {
@@ -32,29 +32,8 @@ export function useAuth() {
     return { data, error };
   };
 
-  const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: undefined, // Disable email confirmation
-      },
-    });
-    return { data, error };
-  };
-
-  const signUpWithMetadata = async (email: string, password: string, firstName: string, lastName: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: undefined, // Disable email confirmation
-        data: {
-          first_name: firstName,
-          last_name: lastName
-        }
-      },
-    });
+  const signUp = async (credentials: SignUpWithPasswordCredentials) => {
+    const { data, error } = await supabase.auth.signUp(credentials);
     return { data, error };
   };
 
@@ -68,7 +47,6 @@ export function useAuth() {
     loading,
     signIn,
     signUp,
-    signUpWithMetadata,
     signOut,
   };
 }
