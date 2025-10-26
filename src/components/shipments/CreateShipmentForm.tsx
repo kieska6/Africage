@@ -137,7 +137,11 @@ export function CreateShipmentForm() {
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'pickup' | 'delivery') => {
     const countryName = e.target.value;
     const countryData = countries.find(c => c.name === countryName);
-    const cities = countryData ? [...countryData.cities].sort((a, b) => a.name.localeCompare(b.name)) : [];
+    const cities = countryData 
+      ? [...countryData.cities]
+          .filter(city => city && city.name) // Filter out cities without a name
+          .sort((a, b) => a.name.localeCompare(b.name)) 
+      : [];
 
     if (type === 'pickup') {
       setFormData(prev => ({
