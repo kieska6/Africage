@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
@@ -7,6 +7,7 @@ import { Input } from '../ui/Input';
 import { Alert } from '../ui/Alert';
 import { Select } from '../ui/Select';
 import { Package, MapPin, DollarSign, Ruler } from 'lucide-react';
+import countriesWithCities from '../../data/countries+cities.json';
 
 interface ShipmentFormData {
   title: string;
@@ -21,6 +22,17 @@ interface ShipmentFormData {
   height: string;
   proposed_price: string;
   currency: string;
+}
+
+interface Country {
+  name: string;
+  iso2: string;
+  cities: City[];
+}
+
+interface City {
+  id: number;
+  name: string;
 }
 
 const currencies = [
@@ -102,9 +114,17 @@ export function CreateShipmentForm() {
     currency: ''
   });
 
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [pickupCities, setPickupCities] = useState<City[]>([]);
+  const [deliveryCities, setDeliveryCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const sortedCountries = [...(countriesWithCities as Country[])].sort((a, b) => a.name.localeCompare(b.name));
+    setCountries(sortedCountries);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -112,6 +132,28 @@ export function CreateShipmentForm() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'pickup' | 'delivery') => {
+    const countryName = e.target.value;
+    const countryData = countries.find(c => c.name === countryName);
+    const cities = countryData ? [...countryData.cities].sort((a, b) => a.name.localeCompare(b.name)) : [];
+
+    if (type === 'pickup') {
+      setFormData(prev => ({
+        ...prev,
+        pickup_country: countryName,
+        pickup_city: '' // Reset city on country change
+      }));
+      setPickupCities(cities);
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        delivery_country: countryName,
+        delivery_city: '' // Reset city on country change
+      }));
+      setDeliveryCities(cities);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,7 +169,7 @@ export function CreateShipmentForm() {
 
     try {
       // Validation des champs requis
-      if (!formData.title || !formData.pickup_city || !formData.delivery_city || 
+      if (!formData.title || !formData.pickup_city || !formData.pickup_country || !formData.delivery_city || !formData.delivery_country ||
           !formData.weight || !formData.proposed_price || !formData.currency) {
         throw new Error('Veuillez remplir tous les champs obligatoires');
       }
@@ -135,14 +177,14 @@ export function CreateShipmentForm() {
       // Préparation des données pour Supabase
       const shipmentData = {
         sender_id: user.id,
-        title: formData.title.trim(),
-        description: formData.description.trim() || null,
-        pickup_city: formData.pickup_city.trim(),
-        pickup_country: formData.pickup_country.trim() || 'Non spécifié',
-        delivery_city: formData.delivery_city.trim(),
-        delivery_country: formData.delivery_country.trim() || 'Non spécifié',
-        pickup_address: `${formData.pickup_city}, ${formData.pickup_country || 'Non spécifié'}`,
-        delivery_address: `${formData.delivery_city}, ${formData.delivery_country || 'Non spécifié'}`,
+        title: formData.title,
+        description: formData.description || null,
+        pickup_city: formData.pickup_city,
+        pickup_country: formData.pickup_country,
+        delivery_city: formData.delivery_city,
+        delivery_country: formData.delivery_country,
+        pickup_address: `${formData.pickup_city}, ${formData.pickup_country}`,
+        delivery_address: `${formData.delivery_city}, ${formData.delivery_country}`,
         weight: parseFloat(formData.weight),
         length: formData.length ? parseFloat(formData.length) : null,
         width: formData.width ? parseFloat(formData.width) : null,
@@ -153,11 +195,9 @@ export function CreateShipmentForm() {
       };
 
       // Insertion dans Supabase
-      const { data, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('shipments')
-        .insert([shipmentData])
-        .select()
-        .single();
+        .insert([shipmentData]);
 
       if (insertError) {
         throw insertError;
@@ -249,40 +289,60 @@ export function CreateShipmentForm() {
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <h4 className="font-medium text-neutral-700">Point de départ</h4>
-            <Input
+            <Select
+              label="Pays de départ *"
+              name="pickup_country"
+              value={formData.pickup_country}
+              onChange={(e) => handleCountryChange(e, 'pickup')}
+              required
+            >
+              <option value="" disabled>Choisir un pays</option>
+              {countries.map(country => (
+                <option key={country.iso2} value={country.name}>{country.name}</option>
+              ))}
+            </Select>
+            <Select
               label="Ville de départ *"
               name="pickup_city"
               value={formData.pickup_city}
               onChange={handleInputChange}
-              placeholder="Ex: Dakar"
               required
-            />
-            <Input
-              label="Pays de départ"
-              name="pickup_country"
-              value={formData.pickup_country}
-              onChange={handleInputChange}
-              placeholder="Ex: Sénégal"
-            />
+              disabled={pickupCities.length === 0}
+            >
+              <option value="" disabled>Choisir une ville</option>
+              {pickupCities.map(city => (
+                <option key={city.id} value={city.name}>{city.name}</option>
+              ))}
+            </Select>
           </div>
 
           <div className="space-y-4">
             <h4 className="font-medium text-neutral-700">Destination</h4>
-            <Input
+            <Select
+              label="Pays d'arrivée *"
+              name="delivery_country"
+              value={formData.delivery_country}
+              onChange={(e) => handleCountryChange(e, 'delivery')}
+              required
+            >
+              <option value="" disabled>Choisir un pays</option>
+              {countries.map(country => (
+                <option key={country.iso2} value={country.name}>{country.name}</option>
+              ))}
+            </Select>
+            <Select
               label="Ville d'arrivée *"
               name="delivery_city"
               value={formData.delivery_city}
               onChange={handleInputChange}
-              placeholder="Ex: Abidjan"
               required
-            />
-            <Input
-              label="Pays d'arrivée"
-              name="delivery_country"
-              value={formData.delivery_country}
-              onChange={handleInputChange}
-              placeholder="Ex: Côte d'Ivoire"
-            />
+              disabled={deliveryCities.length === 0}
+            >
+              <option value="" disabled>Choisir une ville</option>
+              {deliveryCities.map(city => (
+                <option key={city.id} value={city.name}>{city.name}</option>
+              ))}
+            </Select>
           </div>
         </div>
       </div>
