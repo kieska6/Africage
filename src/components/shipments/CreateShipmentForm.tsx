@@ -137,24 +137,26 @@ export function CreateShipmentForm() {
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'pickup' | 'delivery') => {
     const countryName = e.target.value;
     const countryData = countries.find(c => c.name === countryName);
-    const cities = countryData 
-      ? [...countryData.cities]
-          .filter(city => city && city.name) // Filter out cities without a name
-          .sort((a, b) => a.name.localeCompare(b.name)) 
-      : [];
+    
+    let cities: City[] = [];
+    if (countryData && Array.isArray(countryData.cities)) {
+      cities = [...countryData.cities]
+          .filter(city => city && city.name)
+          .sort((a, b) => a.name.localeCompare(b.name));
+    }
 
     if (type === 'pickup') {
       setFormData(prev => ({
         ...prev,
         pickup_country: countryName,
-        pickup_city: '' // Reset city on country change
+        pickup_city: ''
       }));
       setPickupCities(cities);
     } else {
       setFormData(prev => ({
         ...prev,
         delivery_country: countryName,
-        delivery_city: '' // Reset city on country change
+        delivery_city: ''
       }));
       setDeliveryCities(cities);
     }
@@ -172,13 +174,11 @@ export function CreateShipmentForm() {
     setError('');
 
     try {
-      // Validation des champs requis
       if (!formData.title || !formData.pickup_city || !formData.pickup_country || !formData.delivery_city || !formData.delivery_country ||
           !formData.weight || !formData.proposed_price || !formData.currency) {
         throw new Error('Veuillez remplir tous les champs obligatoires');
       }
 
-      // Préparation des données pour Supabase
       const shipmentData = {
         sender_id: user.id,
         title: formData.title,
@@ -198,7 +198,6 @@ export function CreateShipmentForm() {
         status: 'PENDING_MATCH'
       };
 
-      // Insertion dans Supabase
       const { error: insertError } = await supabase
         .from('shipments')
         .insert([shipmentData]);
@@ -209,7 +208,6 @@ export function CreateShipmentForm() {
 
       setSuccess(true);
       
-      // Redirection après succès
       setTimeout(() => {
         navigate('/dashboard');
       }, 2000);
@@ -248,7 +246,6 @@ export function CreateShipmentForm() {
         <Alert type="error" message={error} />
       )}
 
-      {/* Informations générales */}
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
           <Package className="w-5 h-5 text-accent" />
@@ -281,7 +278,6 @@ export function CreateShipmentForm() {
         </div>
       </div>
 
-      {/* Adresses */}
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
           <MapPin className="w-5 h-5 text-accent" />
@@ -351,7 +347,6 @@ export function CreateShipmentForm() {
         </div>
       </div>
 
-      {/* Dimensions et poids */}
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
           <Ruler className="w-5 h-5 text-accent" />
@@ -410,7 +405,6 @@ export function CreateShipmentForm() {
         </div>
       </div>
 
-      {/* Récompense */}
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
           <DollarSign className="w-5 h-5 text-accent" />
@@ -448,7 +442,6 @@ export function CreateShipmentForm() {
         </p>
       </div>
 
-      {/* Boutons d'action */}
       <div className="flex flex-col sm:flex-row gap-4 pt-6">
         <Button
           type="button"
