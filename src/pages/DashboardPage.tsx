@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useSubscription } from '../hooks/useSubscription';
 import { Button } from '../components/ui/Button';
-import { Package, CreditCard, User, TrendingUp } from 'lucide-react';
+import { Package, CreditCard, User, TrendingUp, Suitcase } from 'lucide-react';
 
 export function DashboardPage() {
   const { user } = useAuth();
@@ -110,33 +110,38 @@ export function DashboardPage() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h2>
           
-          {/* Bouton principal de création d'annonce */}
-          <div className="mb-6">
-            <Link to="/create-shipment">
+          <div className="grid sm:grid-cols-2 gap-6 mb-6">
+            <Link to="/send-package">
               <Button className="w-full bg-primary hover:bg-primary/90 text-white py-4 text-lg font-semibold rounded-2xl">
                 <Package className="w-6 h-6 mr-3" />
-                Publier une annonce de colis
+                Envoyer un colis
+              </Button>
+            </Link>
+            <Link to="/travel">
+              <Button className="w-full bg-accent hover:bg-accent/90 text-white py-4 text-lg font-semibold rounded-2xl">
+                <Suitcase className="w-6 h-6 mr-3" />
+                Voyager
               </Button>
             </Link>
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Link to="/shipments/new">
+            <Link to="/shipments">
               <Button variant="outline" className="justify-start p-4 h-auto w-full">
                 <Package className="w-5 h-5 mr-3" />
                 <div className="text-left">
-                  <div className="font-medium">Nouveau colis</div>
-                  <div className="text-sm text-gray-500">Créer une annonce d'envoi</div>
+                  <div className="font-medium">Mes envois</div>
+                  <div className="text-sm text-gray-500">Suivre vos colis</div>
                 </div>
               </Button>
             </Link>
 
-            <Link to="/shipments">
+            <Link to="/trips">
               <Button variant="outline" className="justify-start p-4 h-auto w-full">
-                <TrendingUp className="w-5 h-5 mr-3" />
+                <Suitcase className="w-5 h-5 mr-3" />
                 <div className="text-left">
-                  <div className="font-medium">Mes envois</div>
-                  <div className="text-sm text-gray-500">Suivre vos colis</div>
+                  <div className="font-medium">Mes voyages</div>
+                  <div className="text-sm text-gray-500">Gérer vos trajets</div>
                 </div>
               </Button>
             </Link>

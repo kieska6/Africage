@@ -11,6 +11,11 @@ import { SuccessPage } from './pages/SuccessPage';
 import { ShipmentsPage } from './pages/ShipmentsPage';
 import { CreateShipmentPage } from './pages/CreateShipmentPage';
 import { useAuth } from './hooks/useAuth';
+import { SendPackagePage } from './pages/SendPackagePage';
+import { TravelPage } from './pages/TravelPage';
+import { TripsPage } from './pages/TripsPage';
+import { CreateTripPage } from './pages/CreateTripPage';
+import { ShipmentsListPage } from './pages/ShipmentsListPage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -34,6 +39,8 @@ function App() {
             <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/success" element={<SuccessPage />} />
+            
+            {/* Protected Routes */}
             <Route
               path="/dashboard"
               element={
@@ -55,6 +62,46 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CreateShipmentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/send-package"
+              element={
+                <ProtectedRoute>
+                  <SendPackagePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/travel"
+              element={
+                <ProtectedRoute>
+                  <TravelPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trips"
+              element={
+                <ProtectedRoute>
+                  <TripsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/create-trip"
+              element={
+                <ProtectedRoute>
+                  <CreateTripPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/shipments-list"
+              element={
+                <ProtectedRoute>
+                  <ShipmentsListPage />
                 </ProtectedRoute>
               }
             />
