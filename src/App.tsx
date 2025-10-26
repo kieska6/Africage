@@ -9,7 +9,6 @@ import { PricingPage } from './pages/PricingPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SuccessPage } from './pages/SuccessPage';
 import { ShipmentsPage } from './pages/ShipmentsPage';
-import { NewShipmentPage } from './pages/NewShipmentPage';
 import { CreateShipmentPage } from './pages/CreateShipmentPage';
 import { useAuth } from './hooks/useAuth';
 
@@ -48,14 +47,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ShipmentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/shipments/new"
-              element={
-                <ProtectedRoute>
-                  <NewShipmentPage />
                 </ProtectedRoute>
               }
             />

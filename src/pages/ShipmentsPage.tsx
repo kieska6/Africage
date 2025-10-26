@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Package, Plus, MapPin, Calendar, DollarSign, Eye } from 'lucide-react';
 
@@ -9,16 +10,16 @@ interface Shipment {
   title: string;
   description?: string;
   weight: number;
-  pickupCity: string;
-  pickupCountry: string;
-  deliveryCity: string;
-  deliveryCountry: string;
-  proposedPrice: number;
+  pickup_city: string;
+  pickup_country: string;
+  delivery_city: string;
+  delivery_country: string;
+  proposed_price: number;
   currency: string;
   status: string;
-  createdAt: string;
-  isUrgent: boolean;
-  isFragile: boolean;
+  created_at: string;
+  is_urgent: boolean;
+  is_fragile: boolean;
 }
 
 export function ShipmentsPage() {
@@ -28,58 +29,30 @@ export function ShipmentsPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchMyShipments();
-  }, []);
+    if (user) {
+      fetchMyShipments();
+    }
+  }, [user]);
 
   const fetchMyShipments = async () => {
+    if (!user) return;
+
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/shipments/my-shipments', {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`
-      //   }
-      // });
-      // const data = await response.json();
+      setError('');
       
-      // Mock data for now
-      const mockShipments: Shipment[] = [
-        {
-          id: '1',
-          title: 'iPhone 15 Pro Max',
-          description: 'Nouveau iPhone en parfait état',
-          weight: 0.5,
-          pickupCity: 'Dakar',
-          pickupCountry: 'Sénégal',
-          deliveryCity: 'Abidjan',
-          deliveryCountry: 'Côte d\'Ivoire',
-          proposedPrice: 25000,
-          currency: 'XOF',
-          status: 'PENDING_MATCH',
-          createdAt: '2024-01-15T10:00:00Z',
-          isUrgent: true,
-          isFragile: true
-        },
-        {
-          id: '2',
-          title: 'Documents importants',
-          description: 'Dossier administratif urgent',
-          weight: 0.2,
-          pickupCity: 'Bamako',
-          pickupCountry: 'Mali',
-          deliveryCity: 'Ouagadougou',
-          deliveryCountry: 'Burkina Faso',
-          proposedPrice: 15000,
-          currency: 'XOF',
-          status: 'IN_TRANSIT',
-          createdAt: '2024-01-10T14:30:00Z',
-          isUrgent: true,
-          isFragile: false
-        }
-      ];
+      const { data, error: fetchError } = await supabase
+        .from('shipments')
+        .select('*')
+        .eq('sender_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (fetchError) {
+        throw fetchError;
+      }
       
-      setShipments(mockShipments);
-    } catch (err) {
+      setShipments(data || []);
+    } catch (err: any) {
       setError('Erreur lors du chargement des envois');
       console.error('Error fetching shipments:', err);
     } finally {
@@ -143,7 +116,7 @@ export function ShipmentsPage() {
               Gérez et suivez tous vos colis
             </p>
           </div>
-          <Link to="/shipments/new">
+          <Link to="/create-shipment">
             <Button className="flex items-center">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau colis
@@ -166,7 +139,7 @@ export function ShipmentsPage() {
             <p className="text-gray-600 mb-6">
               Créez votre première annonce de colis pour commencer
             </p>
-            <Link to="/shipments/new">
+            <Link to="/create-shipment">
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
                 Créer une annonce
@@ -186,12 +159,12 @@ export function ShipmentsPage() {
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shipment.status)}`}>
                         {getStatusText(shipment.status)}
                       </span>
-                      {shipment.isUrgent && (
+                      {shipment.is_urgent && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                           Urgent
                         </span>
                       )}
-                      {shipment.isFragile && (
+                      {shipment.is_fragile && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                           Fragile
                         </span>
@@ -211,7 +184,7 @@ export function ShipmentsPage() {
                   <div className="flex items-center text-gray-600">
                     <MapPin className="w-4 h-4 mr-2 text-gray-400" />
                     <span>
-                      {shipment.pickupCity}, {shipment.pickupCountry} → {shipment.deliveryCity}, {shipment.deliveryCountry}
+                      {shipment.pickup_city}, {shipment.pickup_country} → {shipment.delivery_city}, {shipment.delivery_country}
                     </span>
                   </div>
                   <div className="flex items-center text-gray-600">
@@ -220,7 +193,7 @@ export function ShipmentsPage() {
                   </div>
                   <div className="flex items-center text-gray-600">
                     <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                    <span>{shipment.proposedPrice.toLocaleString()} {shipment.currency}</span>
+                    <span>{shipment.proposed_price.toLocaleString()} {shipment.currency}</span>
                   </div>
                 </div>
 
@@ -228,7 +201,7 @@ export function ShipmentsPage() {
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
-                      Créé le {new Date(shipment.createdAt).toLocaleDateString('fr-FR')}
+                      Créé le {new Date(shipment.created_at).toLocaleDateString('fr-FR')}
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm">
