@@ -74,7 +74,7 @@ export function CreateTripForm() {
   useEffect(() => {
     const countryData = countries.find(c => c.name === formData.departure_country);
     if (countryData && Array.isArray(countryData.cities)) {
-      const sortedCities = countryData.cities
+      const sortedCities = [...countryData.cities]
         .filter(city => city && city.name)
         .sort((a, b) => a.name.localeCompare(b.name));
       setDepartureCities(sortedCities);
@@ -86,7 +86,7 @@ export function CreateTripForm() {
   useEffect(() => {
     const countryData = countries.find(c => c.name === formData.arrival_country);
     if (countryData && Array.isArray(countryData.cities)) {
-      const sortedCities = countryData.cities
+      const sortedCities = [...countryData.cities]
         .filter(city => city && city.name)
         .sort((a, b) => a.name.localeCompare(b.name));
       setArrivalCities(sortedCities);
@@ -197,9 +197,9 @@ export function CreateTripForm() {
             </Select>
           </div>
           <div>
-            <Select label="Ville de départ *" name="departure_city" value={formData.departure_city} onChange={handleInputChange} required disabled={!formData.departure_country}>
+            <Select label="Ville de départ *" name="departure_city" value={formData.departure_city} onChange={handleInputChange} required disabled={!formData.departure_country || departureCities.length === 0}>
               <option value="">Choisir une ville</option>
-              {departureCities.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+              {departureCities.map(c => <option key={`${c.id}-${c.name}`} value={c.name}>{c.name}</option>)}
             </Select>
           </div>
           <div>
@@ -209,9 +209,9 @@ export function CreateTripForm() {
             </Select>
           </div>
           <div>
-            <Select label="Ville d'arrivée *" name="arrival_city" value={formData.arrival_city} onChange={handleInputChange} required disabled={!formData.arrival_country}>
+            <Select label="Ville d'arrivée *" name="arrival_city" value={formData.arrival_city} onChange={handleInputChange} required disabled={!formData.arrival_country || arrivalCities.length === 0}>
               <option value="">Choisir une ville</option>
-              {arrivalCities.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+              {arrivalCities.map(c => <option key={`${c.id}-${c.name}`} value={c.name}>{c.name}</option>)}
             </Select>
           </div>
         </div>
