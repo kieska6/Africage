@@ -2,8 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
-import { Package, Plus } from 'lucide-react';
+import { Package, Plus, Inbox } from 'lucide-react';
 import { ShipmentList } from '../components/shipments/ShipmentList';
+import { IncomingOfferList } from '../components/offers/IncomingOfferList';
 
 export function DashboardPage() {
   const { user } = useAuth();
@@ -28,6 +29,18 @@ export function DashboardPage() {
           </Link>
         </div>
 
+        {/* Section des offres reçues */}
+        <div className="bg-white rounded-4xl shadow-xl p-8 mb-8">
+          <div className="flex items-center mb-6">
+            <Inbox className="w-6 h-6 text-accent mr-3" />
+            <h2 className="text-2xl font-bold text-neutral-800">
+              Mes Offres Reçues
+            </h2>
+          </div>
+          <IncomingOfferList />
+        </div>
+
+        {/* Section des annonces de colis */}
         <div className="bg-white rounded-4xl shadow-xl p-8">
           <div className="flex items-center mb-6">
             <Package className="w-6 h-6 text-accent mr-3" />
