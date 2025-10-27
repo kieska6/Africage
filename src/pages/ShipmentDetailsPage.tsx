@@ -26,7 +26,7 @@ interface Shipment {
   width: number | null;
   height: number | null;
   created_at: string;
-  users: UserProfile;
+  users: UserProfile | null;
 }
 
 export function ShipmentDetailsPage() {
@@ -176,14 +176,16 @@ export function ShipmentDetailsPage() {
               <div className="bg-neutral-50 rounded-2xl p-6">
                 <h3 className="text-lg font-semibold text-neutral-800 mb-4 text-center">Expéditeur</h3>
                 <div className="flex flex-col items-center text-center">
-                  {shipment.users.profile_picture ? (
+                  {shipment.users && shipment.users.profile_picture ? (
                     <img src={shipment.users.profile_picture} alt="Expéditeur" className="w-20 h-20 rounded-full mb-3" />
                   ) : (
                     <div className="w-20 h-20 rounded-full bg-neutral-200 flex items-center justify-center mx-auto mb-3">
                       <User className="w-10 h-10 text-neutral-500" />
                     </div>
                   )}
-                  <p className="font-bold text-neutral-900">{shipment.users.first_name} {shipment.users.last_name}</p>
+                  <p className="font-bold text-neutral-900">
+                    {shipment.users ? `${shipment.users.first_name} ${shipment.users.last_name}` : 'Utilisateur inconnu'}
+                  </p>
                 </div>
                 
                 {canMakeOffer && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Loader2, ServerCrash, Briefcase, MapPin, Calendar, Weight, User, MessageSquare } from 'lucide-react';
+import { Loader2, ServerCrash, Briefcase, MapPin, Calendar, Weight, User, MessageSquare, DollarSign } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 interface UserProfile {
@@ -22,7 +22,7 @@ interface Trip {
   price_per_kg: number;
   currency: string;
   created_at: string;
-  users: UserProfile;
+  users: UserProfile | null;
 }
 
 export function TripDetailsPage() {
@@ -118,14 +118,16 @@ export function TripDetailsPage() {
             <div className="md:col-span-1 space-y-6">
               <div className="bg-neutral-50 rounded-2xl p-6 text-center">
                 <h3 className="text-lg font-semibold text-neutral-800 mb-4">Voyageur</h3>
-                {trip.users.profile_picture ? (
+                {trip.users && trip.users.profile_picture ? (
                   <img src={trip.users.profile_picture} alt="Voyageur" className="w-20 h-20 rounded-full mx-auto mb-3" />
                 ) : (
                   <div className="w-20 h-20 rounded-full bg-neutral-200 flex items-center justify-center mx-auto mb-3">
                     <User className="w-10 h-10 text-neutral-500" />
                   </div>
                 )}
-                <p className="font-bold text-neutral-900">{trip.users.first_name} {trip.users.last_name}</p>
+                <p className="font-bold text-neutral-900">
+                  {trip.users ? `${trip.users.first_name} ${trip.users.last_name}` : 'Utilisateur inconnu'}
+                </p>
                 <Button className="w-full mt-6 bg-primary hover:bg-primary/90 text-white">
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Contacter le voyageur
