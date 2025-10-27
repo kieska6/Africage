@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '../ui/Button';
-import { Package, MapPin, User, Send } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { Alert } from '../ui/Alert';
+import { Package, MapPin, User, Send, Check } from 'lucide-react';
 
 // Définition des types pour les données
 interface Sender {
@@ -22,9 +24,42 @@ interface Transaction {
 
 interface AcceptedShipmentCardProps {
   transaction: Transaction;
+  onUpdate: () => void; // Callback pour rafraîchir la liste
 }
 
-export function AcceptedShipmentCard({ transaction }: AcceptedShipmentCardProps) {
+export function AcceptedShipmentCard({ transaction, onUpdate }: AcceptedShipmentCardProps) {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [error, setError] = useState('');
+  const [isDelivered, setIsDelivered] = useState(false);
+
+  const handleMarkAsDelivered = async () => {
+    setIsUpdating(true);
+    setError('');
+
+    try {
+      const { error: updateError } = await supabase
+        .from('transactions')
+        .update({ status: 'DELIVERED' })
+        .eq('id', transaction.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setIsDelivered(true);
+      // Attendre un court instant pour que l'utilisateur voie le changement, puis rafraîchir
+      setTimeout(() => {
+        onUpdate();
+      }, 1500);
+
+    } catch (err: any) {
+      setError("Une erreur est survenue lors de la mise à jour. Veuillez réessayer.");
+      console.error("Error marking as delivered:", err);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="bg-white p-4 rounded-lg border border-neutral-200 shadow-sm transition-all hover:shadow-md">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -45,13 +80,26 @@ export function AcceptedShipmentCard({ transaction }: AcceptedShipmentCardProps)
         <div className="w-full sm:w-auto">
           <Button
             variant="outline"
-            className="w-full"
+            className={`w-full ${isDelivered ? 'bg-green-50 border-green-300 text-green-700' : ''}`}
+            onClick={handleMarkAsDelivered}
+            loading={isUpdating}
+            disabled={isDelivered}
           >
-            <Send className="w-4 h-4 mr-2" />
-            Marquer comme livré
+            {isDelivered ? (
+              <>
+                <Check className="w-4 h-4 mr-2" />
+                Livré !
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4 mr-2" />
+                Marquer comme livré
+              </>
+            )}
           </Button>
         </div>
       </div>
+      {error && <Alert type="error" message={error} className="mt-3" />}
     </div>
   );
 }

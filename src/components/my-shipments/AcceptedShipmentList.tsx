@@ -92,7 +92,11 @@ export function AcceptedShipmentList() {
   return (
     <div className="space-y-4">
       {shipments.map((transaction) => (
-        <AcceptedShipmentCard key={transaction.id} transaction={transaction} />
+        <AcceptedShipmentCard
+          key={transaction.id}
+          transaction={transaction}
+          onUpdate={fetchAcceptedShipments}
+        />
       ))}
     </div>
   );
