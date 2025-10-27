@@ -34,7 +34,7 @@ interface Trip {
   departure_date: string;
   arrival_date: string;
   available_weight: number;
-  traveler: Traveler;
+  traveler: Traveler | null;
 }
 
 export function HomePage() {
@@ -58,7 +58,7 @@ export function HomePage() {
             .limit(4),
           supabase
             .from('trips')
-            .select('*, traveler:users(first_name, last_name, profile_picture)')
+            .select('*, traveler:users!traveler_id(first_name, last_name, profile_picture)')
             .order('created_at', { ascending: false })
             .limit(4)
         ]);

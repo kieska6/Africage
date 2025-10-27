@@ -21,7 +21,7 @@ interface Trip {
   available_weight: number;
   price_per_kg: number | null;
   currency: string;
-  traveler: Traveler;
+  traveler: Traveler | null;
 }
 
 export function TripsPage() {
@@ -48,7 +48,7 @@ export function TripsPage() {
           available_weight,
           price_per_kg,
           currency,
-          traveler:users (
+          traveler:users!traveler_id (
             first_name,
             last_name,
             profile_picture

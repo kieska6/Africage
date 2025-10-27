@@ -17,7 +17,7 @@ interface Trip {
   departure_date: string;
   arrival_date: string;
   available_weight: number;
-  traveler: Traveler;
+  traveler: Traveler | null;
 }
 
 interface TripCardProps {
@@ -32,14 +32,17 @@ export function TripCard({ trip }: TripCardProps) {
     });
   };
 
+  const travelerName = trip.traveler ? `${trip.traveler.first_name} ${trip.traveler.last_name}` : 'Utilisateur inconnu';
+  const travelerProfilePicture = trip.traveler ? trip.traveler.profile_picture : null;
+
   return (
     <Link to={`/trips/${trip.id}`} className="block h-full">
       <div className="bg-white rounded-4xl p-6 shadow-lg hover:shadow-xl transition-shadow flex flex-col h-full border border-neutral-200">
         <div className="flex items-center mb-4">
-          {trip.traveler.profile_picture ? (
+          {travelerProfilePicture ? (
             <img
-              src={trip.traveler.profile_picture}
-              alt={`${trip.traveler.first_name} ${trip.traveler.last_name}`}
+              src={travelerProfilePicture}
+              alt={travelerName}
               className="w-10 h-10 rounded-full object-cover mr-3"
             />
           ) : (
@@ -49,7 +52,7 @@ export function TripCard({ trip }: TripCardProps) {
           )}
           <div>
             <p className="font-semibold text-neutral-800 truncate">
-              {trip.traveler.first_name} {trip.traveler.last_name}
+              {travelerName}
             </p>
             <p className="text-sm text-neutral-500">Voyageur</p>
           </div>
