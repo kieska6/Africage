@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/Button';
-import { MapPin, Calendar, Weight, DollarSign, User } from 'lucide-react';
+import { MapPin, Calendar, Weight, User } from 'lucide-react';
 
 interface Traveler {
   first_name: string;
@@ -17,8 +17,6 @@ interface Trip {
   departure_date: string;
   arrival_date: string;
   available_weight: number;
-  price_per_kg: number | null;
-  currency: string;
   traveler: Traveler;
 }
 
@@ -31,66 +29,51 @@ export function TripCard({ trip }: TripCardProps) {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric',
     });
   };
 
   return (
-    <div className="bg-white rounded-4xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-neutral-200 flex flex-col h-full">
+    <div className="bg-white rounded-4xl p-6 shadow-lg hover:shadow-xl transition-shadow flex flex-col h-full">
       <div className="flex items-center mb-4">
         {trip.traveler.profile_picture ? (
           <img
             src={trip.traveler.profile_picture}
             alt={`${trip.traveler.first_name} ${trip.traveler.last_name}`}
-            className="w-12 h-12 rounded-full object-cover mr-4"
+            className="w-10 h-10 rounded-full object-cover mr-3"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-neutral-200 flex items-center justify-center mr-4">
-            <User className="w-6 h-6 text-neutral-500" />
+          <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center mr-3">
+            <User className="w-5 h-5 text-neutral-500" />
           </div>
         )}
         <div>
-          <p className="font-semibold text-neutral-800">
+          <p className="font-semibold text-neutral-800 truncate">
             {trip.traveler.first_name} {trip.traveler.last_name}
           </p>
-          <p className="text-sm text-neutral-500">Voyageur vérifié</p>
+          <p className="text-sm text-neutral-500">Voyageur</p>
         </div>
       </div>
-
-      <h3 className="text-xl font-bold text-neutral-800 mb-3 truncate">{trip.title}</h3>
-
-      <div className="space-y-3 text-neutral-600 text-sm mb-4 flex-grow">
+      
+      <h3 className="text-lg font-bold text-neutral-800 mb-3 truncate">{trip.title}</h3>
+      
+      <div className="space-y-2 text-neutral-600 text-sm mb-4 flex-grow">
         <div className="flex items-center">
-          <MapPin className="w-4 h-4 mr-3 text-neutral-400" />
-          <span>
-            <span className="font-medium">{trip.departure_city}</span> → <span className="font-medium">{trip.arrival_city}</span>
-          </span>
+          <MapPin className="w-4 h-4 mr-2 text-neutral-400" />
+          <span className="truncate">{trip.departure_city} → {trip.arrival_city}</span>
         </div>
         <div className="flex items-center">
-          <Calendar className="w-4 h-4 mr-3 text-neutral-400" />
-          <span>
-            {formatDate(trip.departure_date)} - {formatDate(trip.arrival_date)}
-          </span>
+          <Calendar className="w-4 h-4 mr-2 text-neutral-400" />
+          <span>{formatDate(trip.departure_date)} - {formatDate(trip.arrival_date)}</span>
         </div>
         <div className="flex items-center">
-          <Weight className="w-4 h-4 mr-3 text-neutral-400" />
-          <span>
-            Capacité restante : <span className="font-medium">{trip.available_weight} kg</span>
-          </span>
+          <Weight className="w-4 h-4 mr-2 text-neutral-400" />
+          <span>{trip.available_weight} kg disponibles</span>
         </div>
-        {trip.price_per_kg && (
-          <div className="flex items-center">
-            <DollarSign className="w-4 h-4 mr-3 text-neutral-400" />
-            <span>
-              Prix : <span className="font-medium">{trip.price_per_kg.toLocaleString()} {trip.currency}/kg</span>
-            </span>
-          </div>
-        )}
       </div>
-
+      
       <Link to={`/trips/${trip.id}`} className="mt-auto">
         <Button className="w-full bg-accent hover:bg-accent/90 text-white rounded-2xl">
-          Voir les détails
+          Voir le trajet
         </Button>
       </Link>
     </div>

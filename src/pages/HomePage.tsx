@@ -1,14 +1,87 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Search, Package, Users, Shield, MapPin, Calendar, DollarSign } from 'lucide-react';
+import { Search, Package, Users, Shield, Loader2, ServerCrash, Briefcase } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { ShipmentCard } from '../components/shipments/ShipmentCard';
+import { TripCard } from '../components/trips/TripCard';
+
+// Interfaces for the data
+interface Shipment {
+  id: string;
+  title: string;
+  pickup_city: string;
+  delivery_city: string;
+  delivery_date_by: string | null;
+  proposed_price: number | null;
+  currency: string;
+  weight: number;
+  is_urgent: boolean;
+}
+
+interface Traveler {
+  first_name: string;
+  last_name: string;
+  profile_picture: string | null;
+}
+
+interface Trip {
+  id: string;
+  title: string;
+  departure_city: string;
+  arrival_city: string;
+  departure_date: string;
+  arrival_date: string;
+  available_weight: number;
+  traveler: Traveler;
+}
 
 export function HomePage() {
   const [trackingCode, setTrackingCode] = useState('');
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchHomePageData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const [shipmentsResponse, tripsResponse] = await Promise.all([
+          supabase
+            .from('shipments')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(4),
+          supabase
+            .from('trips')
+            .select('*, traveler:users(first_name, last_name, profile_picture)')
+            .order('created_at', { ascending: false })
+            .limit(4)
+        ]);
+
+        if (shipmentsResponse.error) throw shipmentsResponse.error;
+        if (tripsResponse.error) throw tripsResponse.error;
+
+        setShipments(shipmentsResponse.data || []);
+        setTrips(tripsResponse.data as Trip[] || []);
+
+      } catch (err: any) {
+        console.error("Error fetching home page data:", err);
+        setError("Impossible de charger les dernières annonces. Veuillez réessayer plus tard.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomePageData();
+  }, []);
 
   const handleTrackPackage = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement package tracking
     console.log('Tracking package:', trackingCode);
   };
 
@@ -112,7 +185,7 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Recent Announcements Section */}
+      {/* Recent Shipments Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-neutral-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -123,160 +196,45 @@ export function HomePage() {
               Découvrez les dernières demandes d'envoi de colis dans toute l'Afrique
             </p>
           </div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Announcement Card 1 */}
-            <div className="bg-white rounded-4xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                  Urgent
-                </span>
-                <span className="text-neutral-500 text-sm">Il y a 2h</span>
-              </div>
-              
-              <h3 className="text-xl font-bold text-neutral-800 mb-2">
-                iPhone 15 Pro Max
-              </h3>
-              
-              <div className="flex items-center text-neutral-600 mb-2">
-                <MapPin className="w-4 h-4 mr-2" />
-                <span className="text-sm">Dakar → Abidjan</span>
-              </div>
-              
-              <div className="flex items-center text-neutral-600 mb-4">
-                <Calendar className="w-4 h-4 mr-2" />
-                <span className="text-sm">Avant le 25 Jan</span>
-              </div>
-              
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center text-green-600 font-bold">
-                  <DollarSign className="w-4 h-4 mr-1" />
-                  <span>25 000 XOF</span>
-                </div>
-                <span className="text-neutral-500 text-sm">0.5 kg</span>
-              </div>
-              
-              <Button className="w-full bg-accent hover:bg-accent/90 text-white rounded-2xl">
-                Voir les détails
-              </Button>
-            </div>
-
-            {/* Announcement Card 2 */}
-            <div className="bg-white rounded-4xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                  Standard
-                </span>
-                <span className="text-neutral-500 text-sm">Il y a 5h</span>
-              </div>
-              
-              <h3 className="text-xl font-bold text-neutral-800 mb-2">
-                Documents officiels
-              </h3>
-              
-              <div className="flex items-center text-neutral-600 mb-2">
-                <MapPin className="w-4 h-4 mr-2" />
-                <span className="text-sm">Bamako → Ouagadougou</span>
-              </div>
-              
-              <div className="flex items-center text-neutral-600 mb-4">
-                <Calendar className="w-4 h-4 mr-2" />
-                <span className="text-sm">Avant le 30 Jan</span>
-              </div>
-              
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center text-green-600 font-bold">
-                  <DollarSign className="w-4 h-4 mr-1" />
-                  <span>15 000 XOF</span>
-                </div>
-                <span className="text-neutral-500 text-sm">0.2 kg</span>
-              </div>
-              
-              <Button className="w-full bg-accent hover:bg-accent/90 text-white rounded-2xl">
-                Voir les détails
-              </Button>
-            </div>
-
-            {/* Announcement Card 3 */}
-            <div className="bg-white rounded-4xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-medium">
-                  Fragile
-                </span>
-                <span className="text-neutral-500 text-sm">Il y a 1j</span>
-              </div>
-              
-              <h3 className="text-xl font-bold text-neutral-800 mb-2">
-                Médicaments
-              </h3>
-              
-              <div className="flex items-center text-neutral-600 mb-2">
-                <MapPin className="w-4 h-4 mr-2" />
-                <span className="text-sm">Accra → Lagos</span>
-              </div>
-              
-              <div className="flex items-center text-neutral-600 mb-4">
-                <Calendar className="w-4 h-4 mr-2" />
-                <span className="text-sm">Avant le 28 Jan</span>
-              </div>
-              
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center text-green-600 font-bold">
-                  <DollarSign className="w-4 h-4 mr-1" />
-                  <span>35 000 XOF</span>
-                </div>
-                <span className="text-neutral-500 text-sm">1.2 kg</span>
-              </div>
-              
-              <Button className="w-full bg-accent hover:bg-accent/90 text-white rounded-2xl">
-                Voir les détails
-              </Button>
-            </div>
-
-            {/* Announcement Card 4 */}
-            <div className="bg-white rounded-4xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <span className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm font-medium">
-                  Express
-                </span>
-                <span className="text-neutral-500 text-sm">Il y a 3j</span>
-              </div>
-              
-              <h3 className="text-xl font-bold text-neutral-800 mb-2">
-                Vêtements traditionnels
-              </h3>
-              
-              <div className="flex items-center text-neutral-600 mb-2">
-                <MapPin className="w-4 h-4 mr-2" />
-                <span className="text-sm">Kinshasa → Brazzaville</span>
-              </div>
-              
-              <div className="flex items-center text-neutral-600 mb-4">
-                <Calendar className="w-4 h-4 mr-2" />
-                <span className="text-sm">Avant le 2 Fév</span>
-              </div>
-              
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center text-green-600 font-bold">
-                  <DollarSign className="w-4 h-4 mr-1" />
-                  <span>20 000 XOF</span>
-                </div>
-                <span className="text-neutral-500 text-sm">2.0 kg</span>
-              </div>
-              
-              <Button className="w-full bg-accent hover:bg-accent/90 text-white rounded-2xl">
-                Voir les détails
-              </Button>
-            </div>
+            {loading && <div className="col-span-full flex justify-center items-center py-10"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}
+            {error && <div className="col-span-full text-center py-10 bg-red-50 rounded-2xl"><ServerCrash className="w-10 h-10 text-red-500 mx-auto mb-2" /><p className="text-red-600">{error}</p></div>}
+            {!loading && !error && shipments.length === 0 && <div className="col-span-full text-center py-10 bg-neutral-100 rounded-2xl"><p className="text-neutral-600">Aucune annonce de colis pour le moment.</p></div>}
+            {!loading && !error && shipments.map(shipment => <ShipmentCard key={shipment.id} shipment={shipment} />)}
           </div>
-
           <div className="text-center mt-12">
-            <Button 
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl text-lg font-semibold"
-            >
-              Voir toutes les annonces
-            </Button>
+            <Link to="/shipments-list">
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl text-lg font-semibold">
+                Voir toutes les annonces
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Recent Trips Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-4">
+              Trajets récents
+            </h2>
+            <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
+              Trouvez un voyageur qui se rend à votre destination
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {loading && <div className="col-span-full flex justify-center items-center py-10"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}
+            {error && <div className="col-span-full text-center py-10 bg-red-50 rounded-2xl"><ServerCrash className="w-10 h-10 text-red-500 mx-auto mb-2" /><p className="text-red-600">{error}</p></div>}
+            {!loading && !error && trips.length === 0 && <div className="col-span-full text-center py-10 bg-neutral-100 rounded-2xl"><p className="text-neutral-600">Aucun trajet publié pour le moment.</p></div>}
+            {!loading && !error && trips.map(trip => <TripCard key={trip.id} trip={trip} />)}
+          </div>
+          <div className="text-center mt-12">
+            <Link to="/trips">
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl text-lg font-semibold">
+                Voir tous les trajets
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
