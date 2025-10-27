@@ -16,6 +16,8 @@ import { TravelPage } from './pages/TravelPage';
 import { TripsPage } from './pages/TripsPage';
 import { CreateTripPage } from './pages/CreateTripPage';
 import { ShipmentsListPage } from './pages/ShipmentsListPage';
+import { ShipmentDetailsPage } from './pages/ShipmentDetailsPage';
+import { TripDetailsPage } from './pages/TripDetailsPage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -34,12 +36,16 @@ function App() {
         <Header />
         <main>
           <Routes>
-            <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <HomePage />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
             <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/success" element={<SuccessPage />} />
             
+            {/* Public Detail Pages */}
+            <Route path="/shipments/:id" element={<ShipmentDetailsPage />} />
+            <Route path="/trips/:id" element={<TripDetailsPage />} />
+
             {/* Protected Routes */}
             <Route
               path="/dashboard"
