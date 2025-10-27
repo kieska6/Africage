@@ -22,7 +22,7 @@ interface Trip {
   price_per_kg: number;
   currency: string;
   created_at: string;
-  users: UserProfile | null;
+  traveler: UserProfile | null;
 }
 
 export function TripDetailsPage() {
@@ -39,7 +39,7 @@ export function TripDetailsPage() {
         setLoading(true);
         const { data, error: fetchError } = await supabase
           .from('trips')
-          .select('*, users(first_name, last_name, profile_picture)')
+          .select('*, traveler:users!traveler_id(first_name, last_name, profile_picture)')
           .eq('id', id)
           .single();
 
@@ -118,15 +118,15 @@ export function TripDetailsPage() {
             <div className="md:col-span-1 space-y-6">
               <div className="bg-neutral-50 rounded-2xl p-6 text-center">
                 <h3 className="text-lg font-semibold text-neutral-800 mb-4">Voyageur</h3>
-                {trip.users && trip.users.profile_picture ? (
-                  <img src={trip.users.profile_picture} alt="Voyageur" className="w-20 h-20 rounded-full mx-auto mb-3" />
+                {trip.traveler && trip.traveler.profile_picture ? (
+                  <img src={trip.traveler.profile_picture} alt="Voyageur" className="w-20 h-20 rounded-full mx-auto mb-3" />
                 ) : (
                   <div className="w-20 h-20 rounded-full bg-neutral-200 flex items-center justify-center mx-auto mb-3">
                     <User className="w-10 h-10 text-neutral-500" />
                   </div>
                 )}
                 <p className="font-bold text-neutral-900">
-                  {trip.users ? `${trip.users.first_name} ${trip.users.last_name}` : 'Utilisateur inconnu'}
+                  {trip.traveler ? `${trip.traveler.first_name} ${trip.traveler.last_name}` : 'Utilisateur inconnu'}
                 </p>
                 <Button className="w-full mt-6 bg-primary hover:bg-primary/90 text-white">
                   <MessageSquare className="w-4 h-4 mr-2" />
