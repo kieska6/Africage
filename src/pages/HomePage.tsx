@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -39,50 +39,100 @@ interface Trip {
 
 export function HomePage() {
   const [trackingCode, setTrackingCode] = useState('');
+  
+  // States for data
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
+  
+  // States for search inputs
+  const [shipmentDeparture, setShipmentDeparture] = useState('');
+  const [shipmentArrival, setShipmentArrival] = useState('');
+  const [tripDeparture, setTripDeparture] = useState('');
+  const [tripArrival, setTripArrival] = useState('');
+
+  // States for loading and errors
   const [loading, setLoading] = useState(true);
+  const [shipmentLoading, setShipmentLoading] = useState(false);
+  const [tripLoading, setTripLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchHomePageData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchShipments = useCallback(async (departure?: string, arrival?: string) => {
+    setShipmentLoading(true);
+    try {
+      let query = supabase
+        .from('shipments')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        const [shipmentsResponse, tripsResponse] = await Promise.all([
-          supabase
-            .from('shipments')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(4),
-          supabase
-            .from('trips')
-            .select('*, traveler:users!traveler_id(first_name, last_name, profile_picture)')
-            .order('created_at', { ascending: false })
-            .limit(4)
-        ]);
-
-        if (shipmentsResponse.error) throw shipmentsResponse.error;
-        if (tripsResponse.error) throw tripsResponse.error;
-
-        setShipments(shipmentsResponse.data || []);
-        setTrips(tripsResponse.data as Trip[] || []);
-
-      } catch (err: any) {
-        console.error("Error fetching home page data:", err);
-        setError("Impossible de charger les dernières annonces. Veuillez réessayer plus tard.");
-      } finally {
-        setLoading(false);
+      if (departure) {
+        query = query.ilike('pickup_city', `%${departure}%`);
       }
-    };
+      if (arrival) {
+        query = query.ilike('delivery_city', `%${arrival}%`);
+      }
 
-    fetchHomePageData();
+      const { data, error: fetchError } = await query.limit(4);
+      if (fetchError) throw fetchError;
+      setShipments(data || []);
+    } catch (err) {
+      console.error("Error fetching shipments:", err);
+      setError("Impossible de charger les annonces de colis.");
+    } finally {
+      setShipmentLoading(false);
+    }
   }, []);
+
+  const fetchTrips = useCallback(async (departure?: string, arrival?: string) => {
+    setTripLoading(true);
+    try {
+      let query = supabase
+        .from('trips')
+        .select('*, traveler:users!traveler_id(first_name, last_name, profile_picture)')
+        .order('created_at', { ascending: false });
+
+      if (departure) {
+        query = query.ilike('departure_city', `%${departure}%`);
+      }
+      if (arrival) {
+        query = query.ilike('arrival_city', `%${arrival}%`);
+      }
+
+      const { data, error: fetchError } = await query.limit(4);
+      if (fetchError) throw fetchError;
+      setTrips(data as Trip[] || []);
+    } catch (err) {
+      console.error("Error fetching trips:", err);
+      setError("Impossible de charger les trajets.");
+    } finally {
+      setTripLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchShipments(),
+        fetchTrips()
+      ]);
+      setLoading(false);
+    };
+    fetchInitialData();
+  }, [fetchShipments, fetchTrips]);
 
   const handleTrackPackage = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Tracking package:', trackingCode);
+  };
+
+  const handleShipmentSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchShipments(shipmentDeparture, shipmentArrival);
+  };
+
+  const handleTripSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchTrips(tripDeparture, tripArrival);
   };
 
   return (
@@ -188,7 +238,7 @@ export function HomePage() {
       {/* Recent Shipments Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-neutral-50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-4">
               Annonces récentes
             </h2>
@@ -196,10 +246,17 @@ export function HomePage() {
               Découvrez les dernières demandes d'envoi de colis dans toute l'Afrique
             </p>
           </div>
+          
+          <form onSubmit={handleShipmentSearch} className="max-w-2xl mx-auto grid sm:grid-cols-3 gap-4 items-end mb-12 bg-white p-6 rounded-2xl shadow-sm">
+            <Input placeholder="Ville de départ" value={shipmentDeparture} onChange={e => setShipmentDeparture(e.target.value)} />
+            <Input placeholder="Ville d'arrivée" value={shipmentArrival} onChange={e => setShipmentArrival(e.target.value)} />
+            <Button type="submit" loading={shipmentLoading} className="h-12"><Search className="w-4 h-4 mr-2" />Rechercher</Button>
+          </form>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading && <div className="col-span-full flex justify-center items-center py-10"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}
             {error && <div className="col-span-full text-center py-10 bg-red-50 rounded-2xl"><ServerCrash className="w-10 h-10 text-red-500 mx-auto mb-2" /><p className="text-red-600">{error}</p></div>}
-            {!loading && !error && shipments.length === 0 && <div className="col-span-full text-center py-10 bg-neutral-100 rounded-2xl"><p className="text-neutral-600">Aucune annonce de colis pour le moment.</p></div>}
+            {!loading && !error && shipments.length === 0 && <div className="col-span-full text-center py-10 bg-neutral-100 rounded-2xl"><p className="text-neutral-600">Aucune annonce de colis trouvée pour cette recherche.</p></div>}
             {!loading && !error && shipments.map(shipment => <ShipmentCard key={shipment.id} shipment={shipment} />)}
           </div>
           <div className="text-center mt-12">
@@ -215,7 +272,7 @@ export function HomePage() {
       {/* Recent Trips Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-4">
               Trajets récents
             </h2>
@@ -223,10 +280,17 @@ export function HomePage() {
               Trouvez un voyageur qui se rend à votre destination
             </p>
           </div>
+
+          <form onSubmit={handleTripSearch} className="max-w-2xl mx-auto grid sm:grid-cols-3 gap-4 items-end mb-12 bg-neutral-50 p-6 rounded-2xl">
+            <Input placeholder="Ville de départ" value={tripDeparture} onChange={e => setTripDeparture(e.target.value)} />
+            <Input placeholder="Ville d'arrivée" value={tripArrival} onChange={e => setTripArrival(e.target.value)} />
+            <Button type="submit" loading={tripLoading} className="h-12"><Search className="w-4 h-4 mr-2" />Rechercher</Button>
+          </form>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading && <div className="col-span-full flex justify-center items-center py-10"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}
             {error && <div className="col-span-full text-center py-10 bg-red-50 rounded-2xl"><ServerCrash className="w-10 h-10 text-red-500 mx-auto mb-2" /><p className="text-red-600">{error}</p></div>}
-            {!loading && !error && trips.length === 0 && <div className="col-span-full text-center py-10 bg-neutral-100 rounded-2xl"><p className="text-neutral-600">Aucun trajet publié pour le moment.</p></div>}
+            {!loading && !error && trips.length === 0 && <div className="col-span-full text-center py-10 bg-neutral-100 rounded-2xl"><p className="text-neutral-600">Aucun trajet trouvé pour cette recherche.</p></div>}
             {!loading && !error && trips.map(trip => <TripCard key={trip.id} trip={trip} />)}
           </div>
           <div className="text-center mt-12">
