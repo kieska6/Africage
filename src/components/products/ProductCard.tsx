@@ -57,11 +57,11 @@ export function ProductCard({ product, isPopular = false }: ProductCardProps) {
 
   return (
     <div className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl ${
-      isPopular ? 'border-indigo-500 scale-105' : 'border-gray-200 hover:border-indigo-300'
+      isPopular ? 'border-accent scale-105' : 'border-neutral-200 hover:border-accent/70'
     }`}>
       {isPopular && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-          <div className="bg-indigo-500 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center">
+          <div className="bg-accent text-white px-4 py-1 rounded-full text-sm font-medium flex items-center">
             <Star className="w-4 h-4 mr-1 fill-current" />
             Le plus populaire
           </div>
@@ -70,21 +70,21 @@ export function ProductCard({ product, isPopular = false }: ProductCardProps) {
 
       <div className="p-8">
         <div className="text-center mb-6">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
-          <div className="text-4xl font-bold text-indigo-600 mb-4">{product.price}</div>
-          <p className="text-gray-600 leading-relaxed">{product.description}</p>
+          <h3 className="text-2xl font-bold text-neutral-900 mb-2">{product.name}</h3>
+          <div className="text-4xl font-bold text-accent mb-4">{product.price}</div>
+          <p className="text-neutral-600 leading-relaxed">{product.description}</p>
         </div>
 
         <div className="space-y-3 mb-8">
-          <div className="flex items-center text-sm text-gray-600">
+          <div className="flex items-center text-sm text-neutral-600">
             <Check className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" />
             <span>Paiement sécurisé</span>
           </div>
-          <div className="flex items-center text-sm text-gray-600">
+          <div className="flex items-center text-sm text-neutral-600">
             <Check className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" />
             <span>Accès immédiat</span>
           </div>
-          <div className="flex items-center text-sm text-gray-600">
+          <div className="flex items-center text-sm text-neutral-600">
             <Check className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" />
             <span>Support client 24/7</span>
           </div>

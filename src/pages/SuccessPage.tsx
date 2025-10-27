@@ -17,18 +17,18 @@ export function SuccessPage() {
   }, [refetch]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         <div className="bg-white p-8 rounded-lg shadow-lg text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
           
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl font-bold text-neutral-900 mb-4">
             Paiement réussi !
           </h1>
           
-          <p className="text-gray-600 mb-8">
+          <p className="text-neutral-600 mb-8">
             Votre achat a été traité avec succès. Vous pouvez maintenant profiter 
             de tous les avantages de votre pack.
           </p>
@@ -49,8 +49,8 @@ export function SuccessPage() {
             </Link>
           </div>
 
-          <div className="mt-8 p-4 bg-indigo-50 rounded-lg">
-            <p className="text-sm text-indigo-700">
+          <div className="mt-8 p-4 bg-accent/10 rounded-lg">
+            <p className="text-sm text-accent">
               <strong>Prochaines étapes :</strong> Consultez votre tableau de bord 
               pour commencer à utiliser vos tokens et créer votre première annonce d'envoi.
             </p>

@@ -73,7 +73,7 @@ export function ShipmentsPage() {
       case 'CANCELED':
         return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-neutral-100 text-neutral-800';
     }
   };
 
@@ -96,10 +96,10 @@ export function ShipmentsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-neutral-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         </div>
       </div>
@@ -107,12 +107,12 @@ export function ShipmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-neutral-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Mes envois</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-3xl font-bold text-neutral-900">Mes envois</h1>
+            <p className="text-neutral-600 mt-2">
               Gérez et suivez tous vos colis
             </p>
           </div>
@@ -131,12 +131,12 @@ export function ShipmentsPage() {
         )}
 
         {shipments.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-12 text-center">
+            <Package className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-neutral-900 mb-2">
               Aucun envoi pour le moment
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-neutral-600 mb-6">
               Créez votre première annonce de colis pour commencer
             </p>
             <Link to="/create-shipment">
@@ -149,11 +149,11 @@ export function ShipmentsPage() {
         ) : (
           <div className="grid gap-6">
             {shipments.map((shipment) => (
-              <div key={shipment.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div key={shipment.id} className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-neutral-900">
                         {shipment.title}
                       </h3>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shipment.status)}`}>
@@ -171,7 +171,7 @@ export function ShipmentsPage() {
                       )}
                     </div>
                     {shipment.description && (
-                      <p className="text-gray-600 mb-3">{shipment.description}</p>
+                      <p className="text-neutral-600 mb-3">{shipment.description}</p>
                     )}
                   </div>
                   <Button variant="outline" size="sm">
@@ -181,24 +181,24 @@ export function ShipmentsPage() {
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                  <div className="flex items-center text-neutral-600">
+                    <MapPin className="w-4 h-4 mr-2 text-neutral-400" />
                     <span>
                       {shipment.pickup_city}, {shipment.pickup_country} → {shipment.delivery_city}, {shipment.delivery_country}
                     </span>
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <Package className="w-4 h-4 mr-2 text-gray-400" />
+                  <div className="flex items-center text-neutral-600">
+                    <Package className="w-4 h-4 mr-2 text-neutral-400" />
                     <span>{shipment.weight} kg</span>
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
+                  <div className="flex items-center text-neutral-600">
+                    <DollarSign className="w-4 h-4 mr-2 text-neutral-400" />
                     <span>{shipment.proposed_price != null ? shipment.proposed_price.toLocaleString() : 'N/A'} {shipment.currency}</span>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="mt-4 pt-4 border-t border-neutral-200">
+                  <div className="flex items-center justify-between text-sm text-neutral-500">
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
                       Créé le {new Date(shipment.created_at).toLocaleDateString('fr-FR')}

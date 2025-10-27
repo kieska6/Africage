@@ -4,13 +4,13 @@ import { products } from '../stripe-config';
 
 export function PricingPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
             Choisissez votre pack
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
             Des solutions adaptées à tous vos besoins d'envoi. 
             Commencez avec notre pack découverte ou optez pour nos offres premium.
           </p>
@@ -28,14 +28,14 @@ export function PricingPage() {
 
         <div className="mt-16 text-center">
           <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-bold text-neutral-900 mb-4">
               Garantie de satisfaction
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-neutral-600 mb-6">
               Nous sommes convaincus de la qualité de notre service. 
               Si vous n'êtes pas satisfait, nous vous remboursons intégralement.
             </p>
-            <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-500">
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-neutral-500">
               <div className="flex items-center">
                 <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                 Paiement sécurisé
