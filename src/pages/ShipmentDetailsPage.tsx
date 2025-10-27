@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../../hooks/useAuth';
-import { Loader2, ServerCrash, Package, MapPin, DollarSign, Ruler, Weight, User, MessageSquare, CheckCircle } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { Loader2, ServerCrash, MapPin, Ruler, Weight, User, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Alert } from '../components/ui/Alert';
 
