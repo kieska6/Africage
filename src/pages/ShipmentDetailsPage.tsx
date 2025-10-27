@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Loader2, ServerCrash, Package, MapPin, DollarSign, Ruler, Weight, User, MessageSquare } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import { Loader2, ServerCrash, Package, MapPin, DollarSign, Ruler, Weight, User, MessageSquare, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { Alert } from '../components/ui/Alert';
 
 interface UserProfile {
   first_name: string;
@@ -12,6 +14,7 @@ interface UserProfile {
 
 interface Shipment {
   id: string;
+  sender_id: string;
   title: string;
   description: string;
   pickup_city: string;
@@ -28,19 +31,29 @@ interface Shipment {
 
 export function ShipmentDetailsPage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  
   const [shipment, setShipment] = useState<Shipment | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [offerSent, setOfferSent] = useState(false);
+  const [actionError, setActionError] = useState('');
+
   useEffect(() => {
-    const fetchShipment = async () => {
+    const fetchShipmentAndOffer = async () => {
       if (!id) return;
 
       try {
         setLoading(true);
+        setError(null);
+        setActionError('');
+
+        // Fetch shipment details
         const { data, error: fetchError } = await supabase
           .from('shipments')
-          .select('*, users(first_name, last_name, profile_picture)')
+          .select('*, sender_id, users(first_name, last_name, profile_picture)')
           .eq('id', id)
           .single();
 
@@ -48,6 +61,23 @@ export function ShipmentDetailsPage() {
         if (!data) throw new Error("Annonce non trouvée");
 
         setShipment(data as Shipment);
+
+        // If user is logged in, check for an existing offer
+        if (user) {
+          const { data: offerData, error: offerError } = await supabase
+            .from('transactions')
+            .select('id')
+            .eq('shipment_id', id)
+            .eq('traveler_id', user.id)
+            .maybeSingle();
+          
+          if (offerError) console.error("Error checking for existing offer:", offerError);
+          
+          if (offerData) {
+            setOfferSent(true);
+          }
+        }
+
       } catch (err: any) {
         setError("Impossible de charger les détails de l'annonce.");
         console.error(err);
@@ -56,8 +86,36 @@ export function ShipmentDetailsPage() {
       }
     };
 
-    fetchShipment();
-  }, [id]);
+    fetchShipmentAndOffer();
+  }, [id, user]);
+
+  const handleMakeOffer = async () => {
+    if (!user || !shipment) return;
+
+    setIsSubmitting(true);
+    setActionError('');
+
+    // Generate a simple 6-digit security code
+    const security_code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const { error: insertError } = await supabase.from('transactions').insert({
+      shipment_id: shipment.id,
+      traveler_id: user.id,
+      sender_id: shipment.sender_id,
+      status: 'PENDING',
+      agreed_price: shipment.proposed_price,
+      currency: shipment.currency,
+      security_code,
+    });
+
+    if (insertError) {
+      setActionError("Une erreur est survenue lors de l'envoi de votre offre. Veuillez réessayer.");
+      console.error("Error making offer:", insertError);
+    } else {
+      setOfferSent(true);
+    }
+    setIsSubmitting(false);
+  };
 
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen"><Loader2 className="w-12 h-12 text-primary animate-spin" /></div>;
@@ -76,6 +134,8 @@ export function ShipmentDetailsPage() {
   if (!shipment) {
     return <div className="text-center py-20">Annonce non trouvée.</div>;
   }
+
+  const canMakeOffer = user && user.id !== shipment.sender_id;
 
   return (
     <div className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -113,20 +173,37 @@ export function ShipmentDetailsPage() {
               </div>
             </div>
             <div className="md:col-span-1 space-y-6">
-              <div className="bg-neutral-50 rounded-2xl p-6 text-center">
-                <h3 className="text-lg font-semibold text-neutral-800 mb-4">Expéditeur</h3>
-                {shipment.users.profile_picture ? (
-                  <img src={shipment.users.profile_picture} alt="Expéditeur" className="w-20 h-20 rounded-full mx-auto mb-3" />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-neutral-200 flex items-center justify-center mx-auto mb-3">
-                    <User className="w-10 h-10 text-neutral-500" />
-                  </div>
+              <div className="bg-neutral-50 rounded-2xl p-6">
+                <h3 className="text-lg font-semibold text-neutral-800 mb-4 text-center">Expéditeur</h3>
+                <div className="flex flex-col items-center text-center">
+                  {shipment.users.profile_picture ? (
+                    <img src={shipment.users.profile_picture} alt="Expéditeur" className="w-20 h-20 rounded-full mb-3" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-neutral-200 flex items-center justify-center mx-auto mb-3">
+                      <User className="w-10 h-10 text-neutral-500" />
+                    </div>
+                  )}
+                  <p className="font-bold text-neutral-900">{shipment.users.first_name} {shipment.users.last_name}</p>
+                </div>
+                
+                {canMakeOffer && (
+                  <Button 
+                    onClick={handleMakeOffer}
+                    loading={isSubmitting}
+                    disabled={offerSent}
+                    className="w-full mt-6 bg-primary hover:bg-primary/90 text-white"
+                  >
+                    {offerSent ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Offre envoyée !
+                      </>
+                    ) : (
+                      'Proposer de prendre en charge'
+                    )}
+                  </Button>
                 )}
-                <p className="font-bold text-neutral-900">{shipment.users.first_name} {shipment.users.last_name}</p>
-                <Button className="w-full mt-6 bg-primary hover:bg-primary/90 text-white">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Contacter l'expéditeur
-                </Button>
+                {actionError && <Alert type="error" message={actionError} className="mt-4" />}
               </div>
             </div>
           </div>
