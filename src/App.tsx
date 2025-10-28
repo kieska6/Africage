@@ -21,6 +21,7 @@ import { TripDetailsPage } from './pages/TripDetailsPage';
 import { UserProfilePage } from './pages/UserProfilePage';
 import { LeaveReviewPage } from './pages/LeaveReviewPage';
 import { MessagesPage } from './pages/MessagesPage';
+import { ConversationPage } from './pages/ConversationPage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -128,6 +129,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MessagesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/messages/:conversationId"
+              element={
+                <ProtectedRoute>
+                  <ConversationPage />
                 </ProtectedRoute>
               }
             />
