@@ -174,10 +174,12 @@ export function ShipmentsPage() {
                       <p className="text-neutral-600 mb-3">{shipment.description}</p>
                     )}
                   </div>
-                  <Button variant="outline" size="sm">
-                    <Eye className="w-4 h-4 mr-2" />
-                    Voir détails
-                  </Button>
+                  <Link to={`/shipments/${shipment.id}`}>
+                    <Button variant="outline" size="sm" as="div">
+                      <Eye className="w-4 h-4 mr-2" />
+                      Voir détails
+                    </Button>
+                  </Link>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-4 text-sm">
