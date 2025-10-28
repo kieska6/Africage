@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Loader2, ServerCrash, User, Package, Briefcase } from 'lucide-react';
+import { Loader2, ServerCrash, User, Package, Briefcase, Star } from 'lucide-react';
 import { ShipmentCard } from '../components/shipments/ShipmentCard';
 import { TripCard } from '../components/trips/TripCard';
 
@@ -12,6 +12,17 @@ interface UserProfile {
   last_name: string;
   profile_picture: string | null;
   created_at: string;
+}
+
+interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  reviewer: {
+    first_name: string;
+    last_name: string;
+  }
 }
 
 interface Shipment {
@@ -48,6 +59,7 @@ export function UserProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,10 +70,11 @@ export function UserProfilePage() {
         setLoading(true);
         setError(null);
 
-        const [profileRes, shipmentsRes, tripsRes] = await Promise.all([
+        const [profileRes, shipmentsRes, tripsRes, reviewsRes] = await Promise.all([
           supabase.from('users').select('*').eq('id', id).single(),
           supabase.from('shipments').select('*').eq('sender_id', id).order('created_at', { ascending: false }),
-          supabase.from('trips').select('*, traveler:users!traveler_id(first_name, last_name, profile_picture)').eq('traveler_id', id).order('created_at', { ascending: false })
+          supabase.from('trips').select('*, traveler:users!traveler_id(first_name, last_name, profile_picture)').eq('traveler_id', id).order('created_at', { ascending: false }),
+          supabase.from('reviews').select('*, reviewer:users!reviews_reviewer_id_fkey(first_name, last_name)').eq('reviewee_id', id)
         ]);
 
         if (profileRes.error) throw new Error("Profil utilisateur non trouvé.");
@@ -73,6 +86,9 @@ export function UserProfilePage() {
         if (tripsRes.error) throw tripsRes.error;
         setTrips(tripsRes.data as Trip[] || []);
 
+        if (reviewsRes.error) throw reviewsRes.error;
+        setReviews(reviewsRes.data as Review[] || []);
+
       } catch (err: any) {
         setError("Impossible de charger le profil.");
         console.error(err);
@@ -83,6 +99,10 @@ export function UserProfilePage() {
 
     fetchProfileData();
   }, [id]);
+
+  const averageRating = reviews.length > 0
+    ? (reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length).toFixed(1)
+    : 'N/A';
 
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen"><Loader2 className="w-12 h-12 text-primary animate-spin" /></div>;
@@ -112,10 +132,42 @@ export function UserProfilePage() {
           <div>
             <h1 className="text-4xl font-bold text-neutral-800">{profile.first_name} {profile.last_name}</h1>
             <p className="text-neutral-500 mt-2">Membre depuis {new Date(profile.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}</p>
+            <div className="flex items-center gap-2 mt-3 text-lg">
+              <Star className="w-6 h-6 text-yellow-400 fill-current" />
+              <span className="font-bold text-neutral-700">{averageRating}</span>
+              <span className="text-neutral-500">({reviews.length} avis)</span>
+            </div>
           </div>
         </div>
 
-        {/* Shipments Section */}
+        <div className="mb-12">
+          <div className="flex items-center mb-6">
+            <Star className="w-6 h-6 text-accent mr-3" />
+            <h2 className="text-2xl font-bold text-neutral-800">Avis reçus</h2>
+          </div>
+          {reviews.length > 0 ? (
+            <div className="space-y-6">
+              {reviews.map(review => (
+                <div key={review.id} className="bg-white p-6 rounded-2xl shadow-sm border">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-semibold">{review.reviewer.first_name} {review.reviewer.last_name}</p>
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-5 h-5 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-neutral-300'}`} />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-neutral-600 italic">"{review.comment}"</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-neutral-100 rounded-2xl">
+              <p className="text-neutral-600">{profile.first_name} n'a pas encore reçu d'avis.</p>
+            </div>
+          )}
+        </div>
+
         <div className="mb-12">
           <div className="flex items-center mb-6">
             <Package className="w-6 h-6 text-accent mr-3" />
@@ -132,7 +184,6 @@ export function UserProfilePage() {
           )}
         </div>
 
-        {/* Trips Section */}
         <div>
           <div className="flex items-center mb-6">
             <Briefcase className="w-6 h-6 text-accent mr-3" />

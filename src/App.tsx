@@ -19,6 +19,7 @@ import { ShipmentsListPage } from './pages/ShipmentsListPage';
 import { ShipmentDetailsPage } from './pages/ShipmentDetailsPage';
 import { TripDetailsPage } from './pages/TripDetailsPage';
 import { UserProfilePage } from './pages/UserProfilePage';
+import { LeaveReviewPage } from './pages/LeaveReviewPage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -110,6 +111,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ShipmentsListPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave-review/:transactionId"
+              element={
+                <ProtectedRoute>
+                  <LeaveReviewPage />
                 </ProtectedRoute>
               }
             />
