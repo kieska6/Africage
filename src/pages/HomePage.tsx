@@ -314,19 +314,23 @@ export function HomePage() {
             pour leurs envois à travers l'Afrique
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl text-lg font-semibold"
-            >
-              Envoyer un colis
-            </Button>
-            <Button 
-              size="lg"
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-accent px-8 py-4 rounded-2xl text-lg font-semibold"
-            >
-              Devenir voyageur
-            </Button>
+            <Link to="/send-package">
+              <Button 
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl text-lg font-semibold"
+              >
+                Envoyer un colis
+              </Button>
+            </Link>
+            <Link to="/travel">
+              <Button 
+                size="lg"
+                variant="outline"
+                className="border-2 border-white text-white hover:bg-white hover:text-accent px-8 py-4 rounded-2xl text-lg font-semibold"
+              >
+                Devenir voyageur
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
