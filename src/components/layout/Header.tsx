@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
 import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard } from 'lucide-react';
 import { NotificationsBell } from '../notifications/NotificationsBell';
-import logo from '../../assets/logo.png'; // Import du nouveau logo
+import logo from '../../assets/logo.png';
 
 export function Header() {
   const { user, signOut } = useAuth();
