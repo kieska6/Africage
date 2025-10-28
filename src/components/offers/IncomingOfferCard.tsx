@@ -3,6 +3,7 @@ import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
 import { Alert } from '../ui/Alert';
 import { Check, User, Package } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 // Définition des types pour les données de la transaction
 interface Traveler {
@@ -28,11 +29,17 @@ interface IncomingOfferCardProps {
 }
 
 export function IncomingOfferCard({ transaction, onOfferAccepted }: IncomingOfferCardProps) {
+  const { user } = useAuth();
   const [isAccepting, setIsAccepting] = useState(false);
   const [error, setError] = useState('');
   const [isAccepted, setIsAccepted] = useState(false);
 
   const handleAcceptOffer = async () => {
+    if (!user) {
+      setError("Vous devez être connecté pour accepter une offre.");
+      return;
+    }
+
     setIsAccepting(true);
     setError('');
 
@@ -52,6 +59,17 @@ export function IncomingOfferCard({ transaction, onOfferAccepted }: IncomingOffe
         .eq('id', transaction.shipment_id);
 
       if (shipmentError) throw shipmentError;
+
+      // Étape 3: Créer une nouvelle conversation
+      const { error: conversationError } = await supabase
+        .from('conversations')
+        .insert({
+          shipment_id: transaction.shipment_id,
+          sender_id: user.id, // L'utilisateur actuel est l'expéditeur
+          traveler_id: transaction.traveler_id,
+        });
+
+      if (conversationError) throw conversationError;
 
       // Si tout réussit
       setIsAccepted(true);

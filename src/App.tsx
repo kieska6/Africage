@@ -20,6 +20,7 @@ import { ShipmentDetailsPage } from './pages/ShipmentDetailsPage';
 import { TripDetailsPage } from './pages/TripDetailsPage';
 import { UserProfilePage } from './pages/UserProfilePage';
 import { LeaveReviewPage } from './pages/LeaveReviewPage';
+import { MessagesPage } from './pages/MessagesPage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -119,6 +120,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <LeaveReviewPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <MessagesPage />
                 </ProtectedRoute>
               }
             />

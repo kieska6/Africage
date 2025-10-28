@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
-import { Package } from 'lucide-react';
+import { Package, MessageSquare } from 'lucide-react';
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -41,6 +41,12 @@ export function Header() {
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
+                <Link to="/messages">
+                  <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4" />
+                    Messages
+                  </Button>
+                </Link>
                 <Link to="/dashboard">
                   <Button variant="ghost" size="sm">
                     Tableau de bord
