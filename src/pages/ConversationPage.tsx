@@ -13,10 +13,16 @@ interface Message {
   created_at: string;
 }
 
+interface Conversation {
+    sender_id: string;
+    traveler_id: string;
+}
+
 export function ConversationPage() {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [conversation, setConversation] = useState<Conversation | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
@@ -32,23 +38,37 @@ export function ConversationPage() {
   useEffect(() => {
     if (!conversationId) return;
 
-    const fetchMessages = async () => {
+    const fetchInitialData = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      const { data: convoData, error: convoError } = await supabase
+        .from('conversations')
+        .select('sender_id, traveler_id')
+        .eq('id', conversationId)
+        .single();
+
+      if (convoError) {
+        console.error('Error fetching conversation details:', convoError);
+        setLoading(false);
+        return;
+      }
+      setConversation(convoData);
+
+      const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
         .select('*')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching messages:', error);
+      if (messagesError) {
+        console.error('Error fetching messages:', messagesError);
       } else {
-        setMessages(data || []);
+        setMessages(messagesData || []);
       }
       setLoading(false);
     };
 
-    fetchMessages();
+    fetchInitialData();
 
     const channel = supabase
       .channel(`chat:${conversationId}`)
@@ -73,7 +93,7 @@ export function ConversationPage() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !user || !conversationId) return;
+    if (!newMessage.trim() || !user || !conversationId || !conversation) return;
 
     const content = newMessage.trim();
     setNewMessage('');
@@ -87,6 +107,15 @@ export function ConversationPage() {
     if (error) {
       console.error('Error sending message:', error);
       setNewMessage(content); // Restore message on error
+    } else {
+      // Send notification to the other user
+      const recipientId = user.id === conversation.sender_id ? conversation.traveler_id : conversation.sender_id;
+      await supabase.from('notifications').insert({
+        recipient_id: recipientId,
+        type: 'NEW_MESSAGE',
+        related_entity_id: conversationId,
+        content: `Vous avez reçu un nouveau message.`
+      });
     }
   };
 

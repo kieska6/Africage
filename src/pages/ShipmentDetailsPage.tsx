@@ -97,7 +97,7 @@ export function ShipmentDetailsPage() {
 
     const security_code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const { error: insertError } = await supabase.from('transactions').insert({
+    const { data: newTransaction, error: insertError } = await supabase.from('transactions').insert({
       shipment_id: shipment.id,
       traveler_id: user.id,
       sender_id: shipment.sender_id,
@@ -105,12 +105,24 @@ export function ShipmentDetailsPage() {
       agreed_price: shipment.proposed_price,
       currency: shipment.currency,
       security_code,
-    });
+    }).select('id').single();
 
     if (insertError) {
       setActionError("Une erreur est survenue lors de l'envoi de votre offre. Veuillez réessayer.");
       console.error("Error making offer:", insertError);
     } else {
+      // Send notification to the sender
+      const { error: notificationError } = await supabase.from('notifications').insert({
+        recipient_id: shipment.sender_id,
+        type: 'NEW_OFFER',
+        related_entity_id: newTransaction.id,
+        content: `Vous avez reçu une nouvelle offre pour : ${shipment.title}`
+      });
+
+      if (notificationError) {
+        console.error("Error creating notification:", notificationError);
+      }
+
       setOfferSent(true);
     }
     setIsSubmitting(false);

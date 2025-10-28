@@ -61,15 +61,25 @@ export function IncomingOfferCard({ transaction, onOfferAccepted }: IncomingOffe
       if (shipmentError) throw shipmentError;
 
       // Étape 3: Créer une nouvelle conversation
-      const { error: conversationError } = await supabase
+      const { data: newConversation, error: conversationError } = await supabase
         .from('conversations')
         .insert({
           shipment_id: transaction.shipment_id,
           sender_id: user.id, // L'utilisateur actuel est l'expéditeur
           traveler_id: transaction.traveler_id,
-        });
+        }).select('id').single();
 
       if (conversationError) throw conversationError;
+
+      // Étape 4: Envoyer une notification au voyageur
+      const { error: notificationError } = await supabase.from('notifications').insert({
+        recipient_id: transaction.traveler_id,
+        type: 'OFFER_ACCEPTED',
+        related_entity_id: newConversation.id,
+        content: `Votre offre pour "${transaction.shipments.title}" a été acceptée.`
+      });
+
+      if (notificationError) console.error("Error creating notification:", notificationError);
 
       // Si tout réussit
       setIsAccepted(true);

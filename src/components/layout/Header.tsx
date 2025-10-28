@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
 import { Package, MessageSquare } from 'lucide-react';
+import { NotificationsBell } from '../notifications/NotificationsBell';
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -41,6 +42,7 @@ export function Header() {
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
+                <NotificationsBell />
                 <Link to="/messages">
                   <Button variant="ghost" size="sm" className="flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />
