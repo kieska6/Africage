@@ -50,7 +50,7 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-            <img src={logo} alt="Africage" className="h-10 w-auto" />
+            <img src={logo} alt="AFRICAGE" className="h-10 w-auto" />
           </Link>
 
           {/* Navigation Links - Desktop */}
