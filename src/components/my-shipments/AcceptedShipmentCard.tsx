@@ -19,7 +19,7 @@ interface Shipment {
 interface Transaction {
   id: string;
   shipments: Shipment;
-  users: Sender;
+  users: Sender | null;
 }
 
 interface AcceptedShipmentCardProps {
@@ -74,7 +74,7 @@ export function AcceptedShipmentCard({ transaction, onUpdate }: AcceptedShipment
           </div>
           <div className="flex items-center text-neutral-500 text-sm">
             <User className="w-4 h-4 mr-2" />
-            <span>Pour : {transaction.users.first_name} {transaction.users.last_name}</span>
+            <span>Pour : {transaction.users?.first_name} {transaction.users?.last_name}</span>
           </div>
         </div>
         <div className="w-full sm:w-auto">

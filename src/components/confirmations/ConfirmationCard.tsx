@@ -18,7 +18,7 @@ interface Transaction {
   id: string;
   shipment_id: string;
   shipments: Shipment;
-  users: Traveler;
+  users: Traveler | null;
 }
 
 interface ConfirmationCardProps {
@@ -71,7 +71,7 @@ export function ConfirmationCard({ transaction, onConfirmed }: ConfirmationCardP
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex-1">
           <p className="text-neutral-700">
-            Le colis <strong className="font-semibold text-neutral-900">"{transaction.shipments.title}"</strong> a été marqué comme livré par <strong className="font-semibold text-neutral-900">{transaction.users.first_name} {transaction.users.last_name}</strong>.
+            Le colis <strong className="font-semibold text-neutral-900">"{transaction.shipments.title}"</strong> a été marqué comme livré par <strong className="font-semibold text-neutral-900">{transaction.users?.first_name} {transaction.users?.last_name}</strong>.
           </p>
         </div>
         <div className="w-full sm:w-auto">

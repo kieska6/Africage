@@ -20,7 +20,7 @@ interface Transaction {
   traveler_id: string;
   shipment_id: string;
   shipments: Shipment;
-  users: Traveler;
+  users: Traveler | null;
 }
 
 interface IncomingOfferCardProps {
@@ -105,7 +105,7 @@ export function IncomingOfferCard({ transaction, onOfferAccepted }: IncomingOffe
           </div>
           <div className="flex items-center text-neutral-800 font-semibold">
             <User className="w-4 h-4 mr-2 text-accent" />
-            <span>De la part de : {transaction.users.first_name} {transaction.users.last_name}</span>
+            <span>De la part de : {transaction.users?.first_name} {transaction.users?.last_name}</span>
           </div>
         </div>
         <div className="w-full sm:w-auto">
