@@ -121,22 +121,43 @@ export function UserProfilePage() {
   return (
     <div className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-4xl shadow-xl p-8 mb-12 flex flex-col sm:flex-row items-center gap-8">
-          {profile.profile_picture ? (
-            <img src={profile.profile_picture} alt="Profil" className="w-32 h-32 rounded-full object-cover border-4 border-primary" />
-          ) : (
-            <div className="w-32 h-32 rounded-full bg-neutral-200 flex items-center justify-center border-4 border-primary">
-              <User className="w-16 h-16 text-neutral-500" />
+        <div className="bg-white rounded-4xl shadow-xl p-8 mb-12">
+          <div className="flex flex-col sm:flex-row items-center gap-8">
+            {profile.profile_picture ? (
+              <img src={profile.profile_picture} alt="Profil" className="w-32 h-32 rounded-full object-cover border-4 border-primary" />
+            ) : (
+              <div className="w-32 h-32 rounded-full bg-neutral-200 flex items-center justify-center border-4 border-primary">
+                <User className="w-16 h-16 text-neutral-500" />
+              </div>
+            )}
+            <div>
+              <h1 className="text-4xl font-bold text-neutral-800">{profile.first_name} {profile.last_name}</h1>
+              <p className="text-neutral-500 mt-2">Membre depuis {new Date(profile.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}</p>
+              <div className="flex items-center gap-2 mt-3 text-lg">
+                <Star className="w-6 h-6 text-yellow-400 fill-current" />
+                <span className="font-bold text-neutral-700">{averageRating}</span>
+                <span className="text-neutral-500">({reviews.length} avis)</span>
+              </div>
             </div>
-          )}
-          <div>
-            <h1 className="text-4xl font-bold text-neutral-800">{profile.first_name} {profile.last_name}</h1>
-            <p className="text-neutral-500 mt-2">Membre depuis {new Date(profile.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}</p>
-            <div className="flex items-center gap-2 mt-3 text-lg">
-              <Star className="w-6 h-6 text-yellow-400 fill-current" />
-              <span className="font-bold text-neutral-700">{averageRating}</span>
-              <span className="text-neutral-500">({reviews.length} avis)</span>
-            </div>
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center mb-12">
+          <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <Package className="w-10 h-10 text-accent mx-auto mb-3" />
+            <p className="text-3xl font-bold text-neutral-800">{shipments.length}</p>
+            <p className="text-neutral-600">Colis envoyés</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <Briefcase className="w-10 h-10 text-accent mx-auto mb-3" />
+            <p className="text-3xl font-bold text-neutral-800">{trips.length}</p>
+            <p className="text-neutral-600">Voyages effectués</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <Star className="w-10 h-10 text-accent mx-auto mb-3" />
+            <p className="text-3xl font-bold text-neutral-800">{reviews.length}</p>
+            <p className="text-neutral-600">Avis reçus</p>
           </div>
         </div>
 
@@ -162,7 +183,7 @@ export function UserProfilePage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-neutral-100 rounded-2xl">
+            <div className="text-center py-12 bg-white rounded-2xl border">
               <p className="text-neutral-600">{profile.first_name} n'a pas encore reçu d'avis.</p>
             </div>
           )}
@@ -178,7 +199,7 @@ export function UserProfilePage() {
               {shipments.map(shipment => <ShipmentCard key={shipment.id} shipment={shipment} />)}
             </div>
           ) : (
-            <div className="text-center py-12 bg-neutral-100 rounded-2xl">
+            <div className="text-center py-12 bg-white rounded-2xl border">
               <p className="text-neutral-600">{profile.first_name} n'a publié aucune annonce de colis pour le moment.</p>
             </div>
           )}
@@ -194,7 +215,7 @@ export function UserProfilePage() {
               {trips.map(trip => <TripCard key={trip.id} trip={trip} />)}
             </div>
           ) : (
-            <div className="text-center py-12 bg-neutral-100 rounded-2xl">
+            <div className="text-center py-12 bg-white rounded-2xl border">
               <p className="text-neutral-600">{profile.first_name} n'a publié aucun trajet pour le moment.</p>
             </div>
           )}
