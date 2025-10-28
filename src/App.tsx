@@ -18,6 +18,7 @@ import { CreateTripPage } from './pages/CreateTripPage';
 import { ShipmentsListPage } from './pages/ShipmentsListPage';
 import { ShipmentDetailsPage } from './pages/ShipmentDetailsPage';
 import { TripDetailsPage } from './pages/TripDetailsPage';
+import { UserProfilePage } from './pages/UserProfilePage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -45,6 +46,7 @@ function App() {
             {/* Public Detail Pages */}
             <Route path="/shipments/:id" element={<ShipmentDetailsPage />} />
             <Route path="/trips/:id" element={<TripDetailsPage />} />
+            <Route path="/users/:id" element={<UserProfilePage />} />
 
             {/* Protected Routes */}
             <Route

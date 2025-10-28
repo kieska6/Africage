@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { Loader2, ServerCrash, MapPin, Ruler, Weight, User, CheckCircle } from 'lucide-react';
@@ -182,9 +182,9 @@ export function ShipmentDetailsPage() {
                       <User className="w-10 h-10 text-neutral-500" />
                     </div>
                   )}
-                  <p className="font-bold text-neutral-900">
+                  <Link to={`/users/${shipment.sender_id}`} className="font-bold text-neutral-900 hover:text-accent transition-colors">
                     {shipment.sender ? `${shipment.sender.first_name} ${shipment.sender.last_name}` : 'Utilisateur inconnu'}
-                  </p>
+                  </Link>
                 </div>
                 
                 {canMakeOffer && (

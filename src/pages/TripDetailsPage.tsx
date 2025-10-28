@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Loader2, ServerCrash, Briefcase, MapPin, Calendar, Weight, User, MessageSquare, DollarSign } from 'lucide-react';
 import { Button } from '../components/ui/Button';
@@ -12,6 +12,7 @@ interface UserProfile {
 
 interface Trip {
   id: string;
+  traveler_id: string;
   title: string;
   description: string;
   departure_city: string;
@@ -125,9 +126,9 @@ export function TripDetailsPage() {
                     <User className="w-10 h-10 text-neutral-500" />
                   </div>
                 )}
-                <p className="font-bold text-neutral-900">
+                <Link to={`/users/${trip.traveler_id}`} className="font-bold text-neutral-900 hover:text-accent transition-colors">
                   {trip.traveler ? `${trip.traveler.first_name} ${trip.traveler.last_name}` : 'Utilisateur inconnu'}
-                </p>
+                </Link>
                 <Button className="w-full mt-6 bg-primary hover:bg-primary/90 text-white">
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Contacter le voyageur
