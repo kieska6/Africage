@@ -151,7 +151,7 @@ export function CreateTripForm() {
 
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
-          <Briefcase className="w-5 h-5 text-accent" />
+          <Briefcase className="w-5 h-5 text-primary" />
           <h3 className="text-xl font-semibold text-neutral-800">Détails du voyage</h3>
         </div>
         <Input label="Titre du voyage *" name="title" value={formData.title} onChange={handleInputChange} placeholder="Ex: Voyage d'affaires Dakar - Abidjan" required />
@@ -160,7 +160,7 @@ export function CreateTripForm() {
 
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
-          <MapPin className="w-5 h-5 text-accent" />
+          <MapPin className="w-5 h-5 text-primary" />
           <h3 className="text-xl font-semibold text-neutral-800">Itinéraire</h3>
         </div>
         <div className="grid md:grid-cols-2 gap-6">
@@ -187,7 +187,7 @@ export function CreateTripForm() {
 
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
-          <Calendar className="w-5 h-5 text-accent" />
+          <Calendar className="w-5 h-5 text-primary" />
           <h3 className="text-xl font-semibold text-neutral-800">Dates</h3>
         </div>
         <div className="grid md:grid-cols-2 gap-6">
@@ -198,7 +198,7 @@ export function CreateTripForm() {
 
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
-          <Weight className="w-5 h-5 text-accent" />
+          <Weight className="w-5 h-5 text-primary" />
           <h3 className="text-xl font-semibold text-neutral-800">Capacité et Prix</h3>
         </div>
         <div className="grid md:grid-cols-2 gap-6">

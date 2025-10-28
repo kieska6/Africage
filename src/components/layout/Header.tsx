@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
-import { Package, MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard } from 'lucide-react';
+import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard } from 'lucide-react';
 import { NotificationsBell } from '../notifications/NotificationsBell';
+import logo from '../../assets/logo.png'; // Import du nouveau logo
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -49,16 +50,15 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-            <Package className="w-8 h-8 text-accent" />
-            <span className="text-2xl font-bold text-accent">Africage</span>
+            <img src={logo} alt="Africage" className="h-10 w-auto" />
           </Link>
 
           {/* Navigation Links - Desktop */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/send-package" className="text-neutral-700 hover:text-accent transition-colors font-medium">
+            <Link to="/send-package" className="text-neutral-700 hover:text-primary transition-colors font-medium">
               Envoyer un colis
             </Link>
-            <Link to="/travel" className="text-neutral-700 hover:text-accent transition-colors font-medium">
+            <Link to="/travel" className="text-neutral-700 hover:text-primary transition-colors font-medium">
               Voyager
             </Link>
           </nav>
@@ -74,7 +74,7 @@ export function Header() {
                 
                 {/* Profile Dropdown */}
                 <div className="relative" ref={profileMenuRef}>
-                  <button onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} className="w-9 h-9 bg-accent text-white rounded-full flex items-center justify-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent">
+                  <button onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} className="w-9 h-9 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                     {userInitials.toUpperCase()}
                   </button>
                   {isProfileMenuOpen && (
@@ -117,7 +117,7 @@ export function Header() {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-neutral-700 hover:text-accent p-2">
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-neutral-700 hover:text-primary p-2">
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -128,10 +128,10 @@ export function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-neutral-200">
           <div className="px-4 pt-2 pb-4 space-y-2">
-            <Link to="/send-package" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-accent font-medium">
+            <Link to="/send-package" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">
               Envoyer un colis
             </Link>
-            <Link to="/travel" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-accent font-medium">
+            <Link to="/travel" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">
               Voyager
             </Link>
             
@@ -143,9 +143,9 @@ export function Header() {
                   <span className="font-medium text-neutral-700">Notifications</span>
                   <NotificationsBell />
                 </div>
-                <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-accent font-medium">Tableau de bord</Link>
-                <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-accent font-medium">Mon Profil</Link>
-                <Link to="/messages" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-accent font-medium">Messages</Link>
+                <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Tableau de bord</Link>
+                <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Mon Profil</Link>
+                <Link to="/messages" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Messages</Link>
                 <Button variant="outline" className="w-full mt-2" onClick={handleSignOut}>
                   Déconnexion
                 </Button>

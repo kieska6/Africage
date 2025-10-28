@@ -74,7 +74,7 @@ export function LoginForm() {
           <Button
             type="submit"
             loading={loading}
-            className="w-full"
+            className="w-full bg-primary hover:bg-primary/90 text-white"
           >
             Se connecter
           </Button>
@@ -104,7 +104,7 @@ export function LoginForm() {
         <div className="mt-6 text-center">
           <p className="text-sm text-neutral-600">
             Pas encore de compte ?{' '}
-            <Link to="/signup" className="text-accent hover:text-accent/90 font-medium">
+            <Link to="/signup" className="text-primary hover:text-primary/90 font-medium">
               Créer un compte
             </Link>
           </p>

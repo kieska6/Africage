@@ -71,7 +71,7 @@ export function DashboardPage() {
               </Button>
             </Link>
             <Link to="/create-shipment">
-              <Button size="lg">
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white">
                 <Plus className="w-5 h-5 mr-2" />
                 Publier une annonce
               </Button>
@@ -83,21 +83,21 @@ export function DashboardPage() {
           <div className="space-y-8">
             <div className="bg-white rounded-4xl shadow-xl p-8">
               <div className="flex items-center mb-6">
-                <Bell className="w-6 h-6 text-accent mr-3" />
+                <Bell className="w-6 h-6 text-primary mr-3" />
                 <h2 className="text-2xl font-bold text-neutral-800">Confirmations en attente</h2>
               </div>
               <ConfirmationList />
             </div>
             <div className="bg-white rounded-4xl shadow-xl p-8">
               <div className="flex items-center mb-6">
-                <Inbox className="w-6 h-6 text-accent mr-3" />
+                <Inbox className="w-6 h-6 text-primary mr-3" />
                 <h2 className="text-2xl font-bold text-neutral-800">Mes Offres Reçues</h2>
               </div>
               <IncomingOfferList />
             </div>
              <div className="bg-white rounded-4xl shadow-xl p-8">
               <div className="flex items-center mb-6">
-                <History className="w-6 h-6 text-accent mr-3" />
+                <History className="w-6 h-6 text-primary mr-3" />
                 <h2 className="text-2xl font-bold text-neutral-800">Historique des transactions</h2>
               </div>
               <div className="space-y-4">
@@ -106,7 +106,7 @@ export function DashboardPage() {
                     <p className="text-neutral-700">Colis: "{tx.shipments.title}"</p>
                     {!tx.review_left && (
                       <Link to={`/leave-review/${tx.id}`}>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary/10">
                           <Star className="w-4 h-4 mr-2" />
                           Laisser un avis
                         </Button>
@@ -120,14 +120,14 @@ export function DashboardPage() {
           <div className="space-y-8">
             <div className="bg-white rounded-4xl shadow-xl p-8">
               <div className="flex items-center mb-6">
-                <Briefcase className="w-6 h-6 text-accent mr-3" />
+                <Briefcase className="w-6 h-6 text-primary mr-3" />
                 <h2 className="text-2xl font-bold text-neutral-800">Mes Transports à Venir</h2>
               </div>
               <AcceptedShipmentList />
             </div>
             <div className="bg-white rounded-4xl shadow-xl p-8">
               <div className="flex items-center mb-6">
-                <Package className="w-6 h-6 text-accent mr-3" />
+                <Package className="w-6 h-6 text-primary mr-3" />
                 <h2 className="text-2xl font-bold text-neutral-800">Mes Annonces de Colis</h2>
               </div>
               <ShipmentList />

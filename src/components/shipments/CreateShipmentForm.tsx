@@ -235,7 +235,7 @@ export function CreateShipmentForm() {
 
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
-          <Package className="w-5 h-5 text-accent" />
+          <Package className="w-5 h-5 text-primary" />
           <h3 className="text-xl font-semibold text-neutral-800">
             Informations du colis
           </h3>
@@ -267,7 +267,7 @@ export function CreateShipmentForm() {
 
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
-          <MapPin className="w-5 h-5 text-accent" />
+          <MapPin className="w-5 h-5 text-primary" />
           <h3 className="text-xl font-semibold text-neutral-800">
             Itinéraire
           </h3>
@@ -328,7 +328,7 @@ export function CreateShipmentForm() {
 
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
-          <Ruler className="w-5 h-5 text-accent" />
+          <Ruler className="w-5 h-5 text-primary" />
           <h3 className="text-xl font-semibold text-neutral-800">
             Dimensions et poids
           </h3>
@@ -386,7 +386,7 @@ export function CreateShipmentForm() {
 
       <div className="space-y-6">
         <div className="flex items-center space-x-2 mb-4">
-          <DollarSign className="w-5 h-5 text-accent" />
+          <DollarSign className="w-5 h-5 text-primary" />
           <h3 className="text-xl font-semibold text-neutral-800">
             Récompense
           </h3>

@@ -35,7 +35,7 @@ export function SuccessPage() {
 
           <div className="space-y-4">
             <Link to="/dashboard">
-              <Button className="w-full flex items-center justify-center">
+              <Button className="w-full flex items-center justify-center bg-primary hover:bg-primary/90 text-white">
                 <Package className="w-4 h-4 mr-2" />
                 Aller au tableau de bord
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -43,14 +43,14 @@ export function SuccessPage() {
             </Link>
             
             <Link to="/pricing">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">
                 Voir les autres packs
               </Button>
             </Link>
           </div>
 
-          <div className="mt-8 p-4 bg-accent/10 rounded-lg">
-            <p className="text-sm text-accent">
+          <div className="mt-8 p-4 bg-primary/10 rounded-lg">
+            <p className="text-sm text-primary">
               <strong>Prochaines étapes :</strong> Consultez votre tableau de bord 
               pour commencer à utiliser vos tokens et créer votre première annonce d'envoi.
             </p>

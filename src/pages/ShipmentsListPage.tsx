@@ -92,7 +92,7 @@ export function ShipmentsListPage() {
               onChange={(e) => setArrival(e.target.value)}
               placeholder="Ex: Abidjan"
             />
-            <Button type="submit" className="w-full h-12 text-base" loading={loading}>
+            <Button type="submit" className="w-full h-12 text-base bg-primary hover:bg-primary/90 text-white" loading={loading}>
               <Search className="w-5 h-5 mr-2" />
               Rechercher
             </Button>

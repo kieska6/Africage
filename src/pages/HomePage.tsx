@@ -138,12 +138,12 @@ export function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-accent text-white py-20 px-4 sm:px-6 lg:px-8">
+      <section className="bg-primary text-white py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
             Envoyez n'importe quoi,
             <br />
-            <span className="text-primary">n'importe où en Afrique</span>
+            <span className="text-accent">n'importe où en Afrique</span>
           </h1>
           <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-3xl mx-auto">
             Connectez-vous avec des voyageurs de confiance pour envoyer vos colis 
@@ -167,7 +167,7 @@ export function HomePage() {
               </div>
               <Button
                 type="submit"
-                className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl text-lg font-semibold"
+                className="bg-accent hover:bg-accent/90 text-white px-8 py-4 rounded-2xl text-lg font-semibold"
               >
                 <Search className="w-5 h-5 mr-2" />
                 Suivre le colis
@@ -304,7 +304,7 @@ export function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-accent text-white">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-primary text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Prêt à commencer ?
@@ -317,7 +317,7 @@ export function HomePage() {
             <Link to="/send-package">
               <Button 
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl text-lg font-semibold"
+                className="bg-accent hover:bg-accent/90 text-white px-8 py-4 rounded-2xl text-lg font-semibold"
               >
                 Envoyer un colis
               </Button>
@@ -326,7 +326,7 @@ export function HomePage() {
               <Button 
                 size="lg"
                 variant="outline"
-                className="border-2 border-white text-white hover:bg-white hover:text-accent px-8 py-4 rounded-2xl text-lg font-semibold"
+                className="border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-4 rounded-2xl text-lg font-semibold"
               >
                 Devenir voyageur
               </Button>

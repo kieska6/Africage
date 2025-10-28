@@ -66,7 +66,7 @@ export function ShipmentCard({ shipment }: ShipmentCardProps) {
           </div>
         </div>
         
-        <Button as="div" className="w-full bg-accent hover:bg-accent/90 text-white rounded-2xl mt-auto">
+        <Button as="div" className="w-full bg-primary hover:bg-primary/90 text-white rounded-2xl mt-auto">
           Voir les détails
         </Button>
       </div>

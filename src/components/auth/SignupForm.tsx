@@ -155,7 +155,7 @@ export function SignupForm() {
           <Button
             type="submit"
             loading={loading}
-            className="w-full"
+            className="w-full bg-primary hover:bg-primary/90 text-white"
           >
             Créer un compte
           </Button>
@@ -185,7 +185,7 @@ export function SignupForm() {
         <div className="mt-6 text-center">
           <p className="text-sm text-neutral-600">
             Déjà un compte ?{' '}
-            <Link to="/login" className="text-accent hover:text-accent/90 font-medium">
+            <Link to="/login" className="text-primary hover:text-primary/90 font-medium">
               Se connecter
             </Link>
           </p>

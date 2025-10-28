@@ -117,7 +117,7 @@ export function ShipmentsPage() {
             </p>
           </div>
           <Link to="/create-shipment">
-            <Button className="flex items-center">
+            <Button className="flex items-center bg-primary hover:bg-primary/90 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau colis
             </Button>
@@ -140,7 +140,7 @@ export function ShipmentsPage() {
               Créez votre première annonce de colis pour commencer
             </p>
             <Link to="/create-shipment">
-              <Button>
+              <Button className="bg-primary hover:bg-primary/90 text-white">
                 <Plus className="w-4 h-4 mr-2" />
                 Créer une annonce
               </Button>
@@ -175,7 +175,7 @@ export function ShipmentsPage() {
                     )}
                   </div>
                   <Link to={`/shipments/${shipment.id}`}>
-                    <Button variant="outline" size="sm" as="div">
+                    <Button variant="outline" size="sm" as="div" className="border-primary text-primary hover:bg-primary/10">
                       <Eye className="w-4 h-4 mr-2" />
                       Voir détails
                     </Button>
@@ -206,11 +206,11 @@ export function ShipmentsPage() {
                       Créé le {new Date(shipment.created_at).toLocaleDateString('fr-FR')}
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary/10">
                         Modifier
                       </Button>
                       {shipment.status === 'PENDING_MATCH' && (
-                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                        <Button variant="outline" size="sm" className="border-red-600 text-red-600 hover:bg-red-50">
                           Annuler
                         </Button>
                       )}
