@@ -22,6 +22,7 @@ import { UserProfilePage } from './pages/UserProfilePage';
 import { LeaveReviewPage } from './pages/LeaveReviewPage';
 import { MessagesPage } from './pages/MessagesPage';
 import { ConversationPage } from './pages/ConversationPage';
+import { ProfilePage } from './pages/ProfilePage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -57,6 +58,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
                 </ProtectedRoute>
               }
             />
