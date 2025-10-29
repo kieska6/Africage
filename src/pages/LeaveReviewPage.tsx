@@ -69,7 +69,7 @@ export function LeaveReviewPage() {
         <div className="bg-white rounded-4xl shadow-xl p-8">
           {user && (
             <LeaveReviewForm
-              transactionId={transaction.id}
+              transaction={transaction}
               revieweeId={revieweeId}
               reviewerId={user.id}
               onReviewSubmitted={() => navigate('/dashboard')}
