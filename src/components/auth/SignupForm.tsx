@@ -47,7 +47,7 @@ export function SignupForm() {
         email: email,
         password: password,
         options: {
-          emailRedirectTo: undefined, // Disable email confirmation
+          emailRedirectTo: `${window.location.origin}/login`, // Redirect after email confirmation
           data: {
             first_name: firstName,
             last_name: lastName
@@ -59,9 +59,7 @@ export function SignupForm() {
         setError(error.message);
       } else {
         setSuccess(true);
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 2000);
+        // No longer navigating automatically. User must confirm email.
       }
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue lors de la création du compte');
@@ -87,7 +85,7 @@ export function SignupForm() {
           <Alert
             type="success"
             title="Compte créé avec succès !"
-            message="Vous allez être redirigé vers votre tableau de bord..."
+            message="Veuillez consulter votre boîte de réception pour confirmer votre adresse e-mail."
           />
         </div>
       </div>
