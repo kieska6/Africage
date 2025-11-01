@@ -42,12 +42,12 @@ serve(async (req) => {
 
     // Déterminez combien de tokens ajouter en fonction du produit acheté
     let tokensToAdd = 0;
-    if (product_id === 'prod_SjVx6UIeCx970t') { // Remplacez par votre ID de produit pour 10 tokens
-      tokensToAdd = 10;
-    } else if (product_id === 'prod_SjVoF9FTWbHX2D') { // Remplacez par votre ID de produit pour 50 tokens
-      tokensToAdd = 50;
-    } else if (product_id === 'prod_SjVnqXIJqtlej7') { // Remplacez par votre ID de produit pour 100 tokens
-      tokensToAdd = 100;
+    if (product_id === 'prod_SjVnqXIJqtlej7') { // Pack Découverte
+      tokensToAdd = 1;
+    } else if (product_id === 'prod_SjVoF9FTWbHX2D') { // Pack Avantage
+      tokensToAdd = 5;
+    } else if (product_id === 'prod_SjVx6UIeCx970t') { // Pack Premium
+      tokensToAdd = 12;
     }
 
     if (tokensToAdd > 0) {
