@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { supabase } from '../lib/supabase';
 import { Alert } from '../components/ui/Alert';
-import { Loader2, ServerCrash, Coins, Star } from 'lucide-react';
+import { Loader2, Coins, Star } from 'lucide-react';
+import { useTokenBalance } from '../hooks/useTokenBalance';
 
 // Liens de paiement Stripe mis à jour
 const STRIPE_LINK_DISCOVERY = 'https://buy.stripe.com/bJe00i0u1ck1dqf0Pcbsc04'; // Pack Découverte
@@ -38,38 +38,7 @@ const tokenPacks = [
 
 export function BuyTokensPage() {
   const { user } = useAuth();
-  const [tokenBalance, setTokenBalance] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchTokenBalance = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('users')
-          .select('token_balance')
-          .eq('id', user.id)
-          .single();
-
-        if (fetchError) throw fetchError;
-        
-        // La colonne token_balance peut ne pas exister, prévoir ce cas
-        setTokenBalance(data?.token_balance ?? 0);
-
-      } catch (err: any) {
-        setError("Impossible de récupérer votre solde de tokens.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTokenBalance();
-  }, [user]);
+  const { balance: tokenBalance, loading, error } = useTokenBalance();
 
   if (loading) {
     return (
