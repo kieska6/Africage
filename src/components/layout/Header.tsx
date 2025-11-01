@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
-import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard } from 'lucide-react';
+import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard, Coins } from 'lucide-react';
 import { NotificationsBell } from '../notifications/NotificationsBell';
 import logo from '../../assets/logo.png';
 
@@ -91,6 +91,10 @@ export function Header() {
                         <UserIcon className="w-4 h-4 mr-2" />
                         Mon Profil
                       </Link>
+                      <Link to="/buy-tokens" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100">
+                        <Coins className="w-4 h-4 mr-2" />
+                        Acheter des Tokens
+                      </Link>
                       <button onClick={handleSignOut} className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                         <LogOut className="w-4 h-4 mr-2" />
                         Déconnexion
@@ -146,6 +150,7 @@ export function Header() {
                 <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Tableau de bord</Link>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Mon Profil</Link>
                 <Link to="/messages" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Messages</Link>
+                <Link to="/buy-tokens" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Acheter des Tokens</Link>
                 <Button variant="outline" className="w-full mt-2" onClick={handleSignOut}>
                   Déconnexion
                 </Button>

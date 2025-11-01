@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
-import { Package, Plus, Inbox, Briefcase, Bell, History, Star } from 'lucide-react';
+import { Package, Plus, Inbox, Briefcase, Bell, History, Star, Coins, PlusCircle, Loader2 } from 'lucide-react';
 import { ShipmentList } from '../components/shipments/ShipmentList';
 import { IncomingOfferList } from '../components/offers/IncomingOfferList';
 import { AcceptedShipmentList } from '../components/my-shipments/AcceptedShipmentList';
@@ -18,43 +18,56 @@ interface CompletedTransaction {
 export function DashboardPage() {
   const { user } = useAuth();
   const [completedTransactions, setCompletedTransactions] = useState<CompletedTransaction[]>([]);
+  const [tokenBalance, setTokenBalance] = useState<number | null>(null);
 
   useEffect(() => {
-    const fetchCompletedTransactions = async () => {
-      if (!user) return;
+    if (!user) return;
 
-      const { data: transactions, error } = await supabase
+    const fetchDashboardData = async () => {
+      // Fetch completed transactions for review
+      const { data: transactions, error: txError } = await supabase
         .from('transactions')
         .select('id, shipments(title)')
         .eq('status', 'COMPLETED')
         .or(`sender_id.eq.${user.id},traveler_id.eq.${user.id}`);
 
-      if (error || !transactions) return;
+      if (!txError && transactions) {
+        const transactionIds = transactions.map(tx => tx.id);
+        const { data: reviews } = await supabase
+          .from('reviews')
+          .select('transaction_id')
+          .in('transaction_id', transactionIds)
+          .eq('reviewer_id', user.id);
+        
+        const reviewedIds = new Set(reviews?.map(r => r.transaction_id));
+        const transactionsWithReviewStatus = transactions.map(tx => ({
+          ...tx,
+          review_left: reviewedIds.has(tx.id),
+        }));
+        setCompletedTransactions(transactionsWithReviewStatus as CompletedTransaction[]);
+      }
 
-      const transactionIds = transactions.map(tx => tx.id);
-      const { data: reviews } = await supabase
-        .from('reviews')
-        .select('transaction_id')
-        .in('transaction_id', transactionIds)
-        .eq('reviewer_id', user.id);
+      // Fetch token balance
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('token_balance')
+        .eq('id', user.id)
+        .single();
 
-      const reviewedIds = new Set(reviews?.map(r => r.transaction_id));
-
-      const transactionsWithReviewStatus = transactions.map(tx => ({
-        ...tx,
-        review_left: reviewedIds.has(tx.id),
-      }));
-
-      setCompletedTransactions(transactionsWithReviewStatus as CompletedTransaction[]);
+      if (!userError && userData) {
+        setTokenBalance(userData.token_balance ?? 0);
+      } else {
+        setTokenBalance(0); // Default to 0 if not found or error
+      }
     };
 
-    fetchCompletedTransactions();
+    fetchDashboardData();
   }, [user]);
 
   return (
     <div className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-neutral-800">
               Votre Tableau de Bord
@@ -63,7 +76,7 @@ export function DashboardPage() {
               Bienvenue, {user?.user_metadata.first_name || user?.email} !
             </p>
           </div>
-          <div className="flex gap-4 mt-4 sm:mt-0">
+          <div className="flex flex-wrap gap-4 mt-4 sm:mt-0">
             <Link to="/create-trip">
               <Button size="lg" variant="outline">
                 <Plus className="w-5 h-5 mr-2" />
@@ -77,6 +90,25 @@ export function DashboardPage() {
               </Button>
             </Link>
           </div>
+        </div>
+
+        {/* Token Balance Section */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center justify-between mb-8 border border-primary/20">
+          <div>
+            <p className="text-sm text-neutral-500">Votre solde de tokens</p>
+            <div className="flex items-center gap-2 mt-1">
+              <Coins className="w-6 h-6 text-primary" />
+              <span className="text-3xl font-bold text-neutral-800">
+                {tokenBalance !== null ? tokenBalance : <Loader2 className="w-6 h-6 animate-spin" />}
+              </span>
+            </div>
+          </div>
+          <Link to="/buy-tokens">
+            <Button variant="outline">
+              <PlusCircle className="w-4 h-4 mr-2" />
+              Recharger
+            </Button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
