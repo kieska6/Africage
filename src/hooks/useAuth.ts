@@ -2,22 +2,58 @@ import { useState, useEffect } from 'react';
 import { User, SignUpWithPasswordCredentials } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
+interface UserProfile {
+  id: string;
+  role: 'ADMIN' | 'MODERATOR' | 'USER';
+  // Ajoutez d'autres champs de profil si nécessaire
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const fetchSessionAndProfile = async () => {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        const { data: userProfile, error: profileError } = await supabase
+          .from('users')
+          .select('id, role')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (userProfile) {
+          setProfile(userProfile);
+        } else if (profileError) {
+          console.error("Error fetching profile:", profileError);
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchSessionAndProfile();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        const { data: userProfile, error: profileError } = await supabase
+          .from('users')
+          .select('id, role')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (userProfile) {
+          setProfile(userProfile);
+        } else {
+          setProfile(null);
+          if (profileError) console.error("Error fetching profile on auth change:", profileError);
+        }
+      } else {
+        setProfile(null);
+      }
       setLoading(false);
     });
 
@@ -51,6 +87,7 @@ export function useAuth() {
 
   return {
     user,
+    profile,
     loading,
     signIn,
     signUp,

@@ -25,6 +25,7 @@ import { ConversationPage } from './pages/ConversationPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { BuyTokensPage } from './pages/BuyTokensPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
+import { AdminPage } from './pages/AdminPage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -61,6 +62,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminPage />
                 </ProtectedRoute>
               }
             />

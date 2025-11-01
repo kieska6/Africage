@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
-import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard, Coins } from 'lucide-react';
+import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard, Coins, Shield } from 'lucide-react';
 import { NotificationsBell } from '../notifications/NotificationsBell';
 import logo from '../../assets/logo.png';
-import { useTokenBalance } from '../../hooks/useTokenBalance'; // Import the new hook
+import { useTokenBalance } from '../../hooks/useTokenBalance';
 
 export function Header() {
-  const { user, signOut } = useAuth();
-  const { balance: tokenBalance } = useTokenBalance(); // Use the new hook
+  const { user, profile, signOut } = useAuth();
+  const { balance: tokenBalance } = useTokenBalance();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -22,7 +22,6 @@ export function Header() {
     navigate('/');
   };
 
-  // Close profile dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
@@ -33,7 +32,6 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close mobile menu on resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -45,17 +43,16 @@ export function Header() {
   }, []);
 
   const userInitials = user?.user_metadata.first_name?.[0] + user?.user_metadata.last_name?.[0] || user?.email?.[0] || 'U';
+  const isPrivilegedUser = profile && (profile.role === 'ADMIN' || profile.role === 'MODERATOR');
 
   return (
     <header className="bg-white shadow-sm border-b border-neutral-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
             <img src="https://ibb.co/QvjGVNQd" alt="AFRICAGE" className="h-10 w-auto" />
           </Link>
 
-          {/* Navigation Links - Desktop */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link to="/send-package" className="text-neutral-700 hover:text-primary transition-colors font-medium">
               Envoyer un colis
@@ -63,9 +60,14 @@ export function Header() {
             <Link to="/travel" className="text-neutral-700 hover:text-primary transition-colors font-medium">
               Voyager
             </Link>
+            {isPrivilegedUser && (
+              <Link to="/admin" className="text-accent hover:text-primary transition-colors font-medium flex items-center">
+                <Shield className="w-4 h-4 mr-1" />
+                Admin
+              </Link>
+            )}
           </nav>
 
-          {/* Auth Buttons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
@@ -74,7 +76,6 @@ export function Header() {
                   <MessageSquare className="w-5 h-5 text-neutral-600" />
                 </Link>
                 
-                {/* Profile Dropdown */}
                 <div className="relative" ref={profileMenuRef}>
                   <button onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} className="w-9 h-9 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                     {userInitials.toUpperCase()}
@@ -104,6 +105,12 @@ export function Header() {
                         <Coins className="w-4 h-4 mr-2" />
                         Acheter des Tokens
                       </Link>
+                      {isPrivilegedUser && (
+                        <Link to="/admin" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-accent hover:bg-neutral-100">
+                          <Shield className="w-4 h-4 mr-2" />
+                          Panneau Admin
+                        </Link>
+                      )}
                       <button onClick={handleSignOut} className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                         <LogOut className="w-4 h-4 mr-2" />
                         Déconnexion
@@ -128,7 +135,6 @@ export function Header() {
             )}
           </div>
 
-          {/* Mobile menu button */}
           <div className="md:hidden">
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-neutral-700 hover:text-primary p-2">
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -137,7 +143,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-neutral-200">
           <div className="px-4 pt-2 pb-4 space-y-2">
@@ -160,6 +165,9 @@ export function Header() {
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Mon Profil</Link>
                 <Link to="/messages" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Messages</Link>
                 <Link to="/buy-tokens" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Acheter des Tokens</Link>
+                {isPrivilegedUser && (
+                  <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-accent hover:text-primary font-medium">Panneau Admin</Link>
+                )}
                 <Button variant="outline" className="w-full mt-2" onClick={handleSignOut}>
                   Déconnexion
                 </Button>
