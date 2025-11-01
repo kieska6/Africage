@@ -14,50 +14,38 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSessionAndProfile = async () => {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        setUser(session.user);
-        const { data: userProfile, error: profileError } = await supabase
-          .from('users')
-          .select('id, role')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (userProfile) {
-          setProfile(userProfile);
-        } else if (profileError) {
-          console.error("Error fetching profile:", profileError);
-        }
-      }
-      setLoading(false);
-    };
-
-    fetchSessionAndProfile();
-
+    // La méthode onAuthStateChange est la source de vérité unique.
+    // Elle se déclenche immédiatement avec la session en cours (ou null)
+    // et écoute les changements futurs (connexion, déconnexion).
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (currentUser) {
         const { data: userProfile, error: profileError } = await supabase
           .from('users')
           .select('id, role')
-          .eq('id', session.user.id)
+          .eq('id', currentUser.id)
           .single();
         
-        if (userProfile) {
-          setProfile(userProfile);
-        } else {
+        if (profileError) {
+          console.error("Error fetching profile on auth change:", profileError);
           setProfile(null);
-          if (profileError) console.error("Error fetching profile on auth change:", profileError);
+        } else {
+          setProfile(userProfile);
         }
       } else {
         setProfile(null);
       }
+      
+      // L'état d'authentification est maintenant connu, on peut arrêter le chargement.
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Nettoyage de l'écouteur lors du démontage du composant
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
