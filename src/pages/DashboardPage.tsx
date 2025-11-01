@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Package, Plus, Inbox, Briefcase, Bell, History, Star, Coins, PlusCircle, Loader2 } from 'lucide-react';
 import { ShipmentList } from '../components/shipments/ShipmentList';
 import { IncomingOfferList } from '../components/offers/IncomingOfferList';
 import { AcceptedShipmentList } from '../components/my-shipments/AcceptedShipmentList';
 import { ConfirmationList } from '../components/confirmations/ConfirmationList';
+import { useTokenBalance } from '../hooks/useTokenBalance'; // Import the new hook
 
 interface CompletedTransaction {
   id: string;
@@ -17,14 +17,13 @@ interface CompletedTransaction {
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const [completedTransactions, setCompletedTransactions] = useState<CompletedTransaction[]>([]);
-  const [tokenBalance, setTokenBalance] = useState<number | null>(null);
+  const { balance: tokenBalance, loading: balanceLoading } = useTokenBalance(); // Use the new hook
+  const [completedTransactions, setCompletedTransactions] = React.useState<CompletedTransaction[]>([]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!user) return;
 
-    const fetchDashboardData = async () => {
-      // Fetch completed transactions for review
+    const fetchCompletedTransactions = async () => {
       const { data: transactions, error: txError } = await supabase
         .from('transactions')
         .select('id, shipments(title)')
@@ -46,22 +45,9 @@ export function DashboardPage() {
         }));
         setCompletedTransactions(transactionsWithReviewStatus as CompletedTransaction[]);
       }
-
-      // Fetch token balance
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('token_balance')
-        .eq('id', user.id)
-        .single();
-
-      if (!userError && userData) {
-        setTokenBalance(userData.token_balance ?? 0);
-      } else {
-        setTokenBalance(0); // Default to 0 if not found or error
-      }
     };
 
-    fetchDashboardData();
+    fetchCompletedTransactions();
   }, [user]);
 
   return (
@@ -99,7 +85,7 @@ export function DashboardPage() {
             <div className="flex items-center gap-2 mt-1">
               <Coins className="w-6 h-6 text-primary" />
               <span className="text-3xl font-bold text-neutral-800">
-                {tokenBalance !== null ? tokenBalance : <Loader2 className="w-6 h-6 animate-spin" />}
+                {balanceLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : tokenBalance}
               </span>
             </div>
           </div>

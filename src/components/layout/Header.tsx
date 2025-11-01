@@ -5,9 +5,11 @@ import { Button } from '../ui/Button';
 import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard, Coins } from 'lucide-react';
 import { NotificationsBell } from '../notifications/NotificationsBell';
 import logo from '../../assets/logo.png';
+import { useTokenBalance } from '../../hooks/useTokenBalance'; // Import the new hook
 
 export function Header() {
   const { user, signOut } = useAuth();
+  const { balance: tokenBalance } = useTokenBalance(); // Use the new hook
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -82,6 +84,13 @@ export function Header() {
                       <div className="px-4 py-2 border-b">
                         <p className="text-sm font-medium text-neutral-800 truncate">{user.user_metadata.first_name} {user.user_metadata.last_name}</p>
                         <p className="text-xs text-neutral-500 truncate">{user.email}</p>
+                      </div>
+                      <div className="flex items-center justify-between px-4 py-2 text-sm text-neutral-700 border-b">
+                        <div className="flex items-center">
+                          <Coins className="w-4 h-4 mr-2 text-primary" />
+                          <span>Solde</span>
+                        </div>
+                        <span className="font-bold text-primary">{tokenBalance ?? 0}</span>
                       </div>
                       <Link to="/dashboard" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100">
                         <LayoutDashboard className="w-4 h-4 mr-2" />
