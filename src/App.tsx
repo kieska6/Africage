@@ -23,6 +23,8 @@ import { LeaveReviewPage } from './pages/LeaveReviewPage';
 import { MessagesPage } from './pages/MessagesPage';
 import { ConversationPage } from './pages/ConversationPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { BuyTokensPage } from './pages/BuyTokensPage';
+import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -46,6 +48,7 @@ function App() {
             <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/success" element={<SuccessPage />} />
+            <Route path="/payment-success" element={<PaymentSuccessPage />} />
             
             {/* Public Detail Pages */}
             <Route path="/shipments/:id" element={<ShipmentDetailsPage />} />
@@ -66,6 +69,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/buy-tokens"
+              element={
+                <ProtectedRoute>
+                  <BuyTokensPage />
                 </ProtectedRoute>
               }
             />
