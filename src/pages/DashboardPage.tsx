@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Package, Plus, Inbox, Briefcase, Bell, History, Star, Coins, PlusCircle, Loader2 } from 'lucide-react';
 import { ShipmentList } from '../components/shipments/ShipmentList';
 import { IncomingOfferList } from '../components/offers/IncomingOfferList';
 import { AcceptedShipmentList } from '../components/my-shipments/AcceptedShipmentList';
 import { ConfirmationList } from '../components/confirmations/ConfirmationList';
-import { useTokenBalance } from '../hooks/useTokenBalance'; // Import the new hook
+import { useTokenBalance } from '../hooks/useTokenBalance';
 
 interface CompletedTransaction {
   id: string;
@@ -17,7 +18,7 @@ interface CompletedTransaction {
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const { balance: tokenBalance, loading: balanceLoading } = useTokenBalance(); // Use the new hook
+  const { balance: tokenBalance, loading: balanceLoading } = useTokenBalance();
   const [completedTransactions, setCompletedTransactions] = React.useState<CompletedTransaction[]>([]);
 
   React.useEffect(() => {
