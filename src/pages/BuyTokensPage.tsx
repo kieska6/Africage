@@ -4,10 +4,10 @@ import { supabase } from '../lib/supabase';
 import { Alert } from '../components/ui/Alert';
 import { Loader2, ServerCrash, Coins, Star } from 'lucide-react';
 
-// IMPORTANT: Remplacez ces placeholders par vos vrais liens de paiement Stripe
-const STRIPE_LINK_DISCOVERY = 'https://buy.stripe.com/test_...'; // Pack Découverte
-const STRIPE_LINK_ADVANTAGE = 'https://buy.stripe.com/test_...'; // Pack Avantage
-const STRIPE_LINK_PREMIUM = 'https://buy.stripe.com/test_...'; // Pack Premium
+// Liens de paiement Stripe mis à jour
+const STRIPE_LINK_DISCOVERY = 'https://buy.stripe.com/bJe00i0u1ck1dqf0Pcbsc04'; // Pack Découverte
+const STRIPE_LINK_ADVANTAGE = 'https://buy.stripe.com/6oU5kCfoVgAh5XNeG2bsc05'; // Pack Avantage
+const STRIPE_LINK_PREMIUM = 'https://buy.stripe.com/4gM4gya4BbfX2LBbtQbsc03'; // Pack Premium
 
 const tokenPacks = [
   {
