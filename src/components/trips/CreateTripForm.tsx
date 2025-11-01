@@ -35,11 +35,62 @@ interface City {
 }
 
 const currencies = [
-  { code: 'XOF', name: 'Franc CFA (BCEAO)' },
-  { code: 'XAF', name: 'Franc CFA (BEAC)' },
-  { code: 'USD', name: 'Dollar Américain' },
+  { code: 'AED', name: 'Dirham des É.A.U.' },
+  { code: 'AOA', name: 'Kwanza Angolais' },
+  { code: 'AUD', name: 'Dollar Australien' },
+  { code: 'BIF', name: 'Franc Burundais' },
+  { code: 'BRL', name: 'Réal Brésilien' },
+  { code: 'BWP', name: 'Pula Botswanais' },
+  { code: 'CAD', name: 'Dollar Canadien' },
+  { code: 'CDF', name: 'Franc Congolais' },
+  { code: 'CHF', name: 'Franc Suisse' },
+  { code: 'CNY', name: 'Yuan Chinois' },
+  { code: 'CVE', name: 'Escudo Cap-Verdien' },
+  { code: 'DJF', name: 'Franc Djiboutien' },
+  { code: 'DZD', name: 'Dinar Algérien' },
+  { code: 'EGP', name: 'Livre Égyptienne' },
+  { code: 'ERN', name: 'Nakfa Érythréen' },
+  { code: 'ETB', name: 'Birr Éthiopien' },
   { code: 'EUR', name: 'Euro' },
-];
+  { code: 'GBP', name: 'Livre Sterling' },
+  { code: 'GHS', name: 'Cedi Ghanéen' },
+  { code: 'GMD', name: 'Dalasi Gambien' },
+  { code: 'GNF', name: 'Franc Guinéen' },
+  { code: 'INR', name: 'Roupie Indienne' },
+  { code: 'JPY', name: 'Yen Japonais' },
+  { code: 'KES', name: 'Shilling Kenyan' },
+  { code: 'KMF', name: 'Franc Comorien' },
+  { code: 'LRD', name: 'Dollar Libérien' },
+  { code: 'LSL', name: 'Loti Lesothan' },
+  { code: 'LYD', name: 'Dinar Libyen' },
+  { code: 'MAD', name: 'Dirham Marocain' },
+  { code: 'MGA', name: 'Ariary Malgache' },
+  { code: 'MRU', name: 'Ouguiya Mauritanien' },
+  { code: 'MUR', name: 'Roupie Mauricienne' },
+  { code: 'MWK', name: 'Kwacha Malawite' },
+  { code: 'MZN', name: 'Metical Mozambicain' },
+  { code: 'NAD', name: 'Dollar Namibien' },
+  { code: 'NGN', name: 'Naira Nigérian' },
+  { code: 'RWF', name: 'Franc Rwandais' },
+  { code: 'RUB', name: 'Rouble Russe' },
+  { code: 'SAR', name: 'Riyal Saoudien' },
+  { code: 'SCR', name: 'Roupie Seychelloise' },
+  { code: 'SDG', name: 'Livre Soudanaise' },
+  { code: 'SLE', name: 'Leone Sierra-Léonais' },
+  { code: 'SOS', name: 'Shilling Somali' },
+  { code: 'SSP', name: 'Livre Sud-Soudanaise' },
+  { code: 'STN', name: 'Dobra Santoméen' },
+  { code: 'SZL', name: 'Lilangeni Swazi' },
+  { code: 'TND', name: 'Dinar Tunisien' },
+  { code: 'TZS', name: 'Shilling Tanzanien' },
+  { code: 'UGX', name: 'Shilling Ougandais' },
+  { code: 'USD', name: 'Dollar Américain' },
+  { code: 'XAF', name: 'Franc CFA (BEAC)' },
+  { code: 'XOF', name: 'Franc CFA (BCEAO)' },
+  { code: 'ZAR', name: 'Rand Sud-Africain' },
+  { code: 'ZMW', name: 'Kwacha Zambien' },
+  { code: 'ZWL', name: 'Dollar Zimbabwéen' },
+].sort((a, b) => a.name.localeCompare(b.name));
 
 export function CreateTripForm() {
   const { user } = useAuth();
@@ -206,7 +257,7 @@ export function CreateTripForm() {
           <div className="grid grid-cols-2 gap-3">
             <Input label="Prix par kg *" name="price_per_kg" type="number" step="100" min="0" value={formData.price_per_kg} onChange={handleInputChange} placeholder="Ex: 5000" required />
             <Select label="Devise *" name="currency" value={formData.currency} onChange={handleInputChange} required>
-              {currencies.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
+              {currencies.map(c => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
             </Select>
           </div>
         </div>
