@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../context/AuthContext';
 import { IncomingOfferCard } from './IncomingOfferCard';
 import { Loader2, ServerCrash, Inbox } from 'lucide-react';
 

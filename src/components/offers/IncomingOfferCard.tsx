@@ -3,7 +3,7 @@ import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
 import { Alert } from '../ui/Alert';
 import { Check, User, Package } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../context/AuthContext';
 
 // Définition des types pour les données de la transaction
 interface Traveler {

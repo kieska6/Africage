@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import { Loader2, ServerCrash, Inbox, MessageSquare, User, Package } from 'lucide-react';
 
 interface Participant {

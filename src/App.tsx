@@ -10,7 +10,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { SuccessPage } from './pages/SuccessPage';
 import { ShipmentsPage } from './pages/ShipmentsPage';
 import { CreateShipmentPage } from './pages/CreateShipmentPage';
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from './context/AuthContext';
 import { SendPackagePage } from './pages/SendPackagePage';
 import { TravelPage } from './pages/TravelPage';
 import { TripsPage } from './pages/TripsPage';
@@ -25,6 +25,7 @@ import { ConversationPage } from './pages/ConversationPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { BuyTokensPage } from './pages/BuyTokensPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
+import { AdminPage } from './pages/AdminPage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -56,6 +57,14 @@ function App() {
             <Route path="/users/:id" element={<UserProfilePage />} />
 
             {/* Protected Routes */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/dashboard"
               element={

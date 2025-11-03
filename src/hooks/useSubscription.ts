@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from './useAuth';
+import { useAuth } from '../context/AuthContext';
 import { products } from '../stripe-config';
 
 interface Subscription {

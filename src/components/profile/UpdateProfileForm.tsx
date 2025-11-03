@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -7,7 +7,7 @@ import { Alert } from '../ui/Alert';
 import { User } from 'lucide-react';
 
 export function UpdateProfileForm() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -15,11 +15,11 @@ export function UpdateProfileForm() {
   const [lastName, setLastName] = useState('');
 
   useEffect(() => {
-    if (user) {
-      setFirstName(user.user_metadata.first_name || '');
-      setLastName(user.user_metadata.last_name || '');
+    if (profile) {
+      setFirstName(profile.first_name || '');
+      setLastName(profile.last_name || '');
     }
-  }, [user]);
+  }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

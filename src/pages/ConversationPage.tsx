@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Loader2, Send } from 'lucide-react';

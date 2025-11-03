@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import { GiveTokensForm } from '../components/admin/GiveTokensForm';
 import { ManageUserRole } from '../components/admin/ManageUserRole';
 import { ManageTransactions } from '../components/admin/ManageTransactions';
 import { Loader2, Lock } from 'lucide-react';
 
 export function AdminPage() {
-  const { user, loading } = useAuth();
+  const { profile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -17,7 +17,7 @@ export function AdminPage() {
     );
   }
 
-  const userRole = user?.profile?.role;
+  const userRole = profile?.role;
 
   if (userRole !== 'ADMIN' && userRole !== 'MODERATOR') {
     return (
@@ -42,7 +42,7 @@ export function AdminPage() {
             {userRole === 'ADMIN' ? "Panneau d'Administration" : "Panneau de Modération"}
           </h1>
           <p className="text-lg text-neutral-600 mt-2">
-            Bienvenue, {user?.profile?.first_name}.
+            Bienvenue, {profile?.first_name}.
           </p>
         </div>
 

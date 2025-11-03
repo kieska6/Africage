@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
-import { Package, Plus, Inbox, Briefcase, Bell, History, Star, Coins, PlusCircle, Loader2 } from 'lucide-react';
+import { Package, Plus, Inbox, Briefcase, Bell, History, Star, Coins, PlusCircle, Loader2, Shield } from 'lucide-react';
 import { ShipmentList } from '../components/shipments/ShipmentList';
 import { IncomingOfferList } from '../components/offers/IncomingOfferList';
 import { AcceptedShipmentList } from '../components/my-shipments/AcceptedShipmentList';
@@ -17,7 +17,7 @@ interface CompletedTransaction {
 }
 
 export function DashboardPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { balance: tokenBalance, loading: balanceLoading } = useTokenBalance();
   const [completedTransactions, setCompletedTransactions] = React.useState<CompletedTransaction[]>([]);
 
@@ -51,6 +51,8 @@ export function DashboardPage() {
     fetchCompletedTransactions();
   }, [user]);
 
+  const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'MODERATOR';
+
   return (
     <div className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -60,7 +62,7 @@ export function DashboardPage() {
               Votre Tableau de Bord
             </h1>
             <p className="text-lg text-neutral-600 mt-2">
-              Bienvenue, {user?.user_metadata.first_name || user?.email} !
+              Bienvenue, {profile?.first_name || user?.email} !
             </p>
           </div>
           <div className="flex flex-wrap gap-4 mt-4 sm:mt-0">
@@ -78,6 +80,17 @@ export function DashboardPage() {
             </Link>
           </div>
         </div>
+
+        {isAdmin && (
+          <div className="mb-8">
+            <Link to="/admin">
+              <Button size="lg" className="w-full bg-accent hover:bg-accent/90 text-white">
+                <Shield className="w-5 h-5 mr-2" />
+                Accéder au Panneau d'Administration
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {/* Token Balance Section */}
         <div className="bg-white rounded-2xl shadow-lg p-6 flex items-center justify-between mb-8 border border-primary/20">
