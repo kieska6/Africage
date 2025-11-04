@@ -32,32 +32,56 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(`Auth event: ${event}`);
-      setError(null);
+    setLoading(true);
+    
+    // 1. Vérifier la session active au chargement initial
+    supabase.auth.getSession().then(async ({ data: { session }, error: sessionError }) => {
+      if (sessionError) {
+        console.error("Auth Error on getSession:", sessionError.message);
+        setError("Erreur lors de la récupération de la session.");
+        setLoading(false);
+        return;
+      }
+
       const currentUser = session?.user ?? null;
       setUser(currentUser);
-      
+
       if (currentUser) {
-        const { data, error: profileError } = await supabase
+        const { data: userProfile, error: profileError } = await supabase
           .from('users')
           .select('*')
           .eq('id', currentUser.id)
           .single();
         
-        if (profileError) {
-          console.error('Error fetching profile:', profileError.message);
-          setProfile(null);
-          setError('Impossible de récupérer le profil utilisateur.');
-        } else {
-          setProfile(data as Profile);
+        if (!profileError) {
+          setProfile(userProfile as Profile | null);
+        }
+      }
+      setLoading(false);
+    }).catch(err => {
+        console.error("Catastrophic error on getSession:", err);
+        setError("Une erreur critique est survenue.");
+        setLoading(false);
+    });
+
+    // 2. Écouter les changements d'état d'authentification
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        const { data: userProfile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+        
+        if (!profileError) {
+          setProfile(userProfile as Profile | null);
         }
       } else {
         setProfile(null);
       }
-      
-      // Le chargement initial est terminé après la première vérification de la session.
-      setLoading(false);
     });
 
     return () => {
@@ -74,6 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signUp: (credentials: SignUpWithPasswordCredentials) => supabase.auth.signUp(credentials),
     signOut: async () => {
       setProfile(null);
+      setUser(null);
       return supabase.auth.signOut();
     },
     signInWithGoogle: () => supabase.auth.signInWithOAuth({ provider: 'google' }),
