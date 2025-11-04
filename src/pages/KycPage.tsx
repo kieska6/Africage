@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
 import { Alert } from '../components/ui/Alert';
-import { Loader2, ShieldCheck, Clock, AlertCircle, UploadCloud } from 'lucide-react';
+import { Loader2, ShieldCheck, Clock, UploadCloud } from 'lucide-react';
 
 export function KycPage() {
   const { user, profile, loading: authLoading } = useAuth();

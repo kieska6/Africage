@@ -8,6 +8,7 @@ export interface Profile {
   first_name: string;
   last_name: string;
   role: 'USER' | 'MODERATOR' | 'ADMIN';
+  kyc_status: 'NOT_SUBMITTED' | 'PENDING_REVIEW' | 'VERIFIED' | 'REJECTED';
 }
 
 // Définition du type pour la valeur du contexte
