@@ -70,7 +70,7 @@ export function TripsPage() {
         throw fetchError;
       }
       
-      setTrips(data as Trip[] || []);
+      setTrips(data as any || []);
     } catch (err: any) {
       setError('Erreur lors du chargement des voyages.');
       console.error('Error fetching trips:', err);
