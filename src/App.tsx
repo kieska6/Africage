@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
@@ -32,11 +33,45 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 
 function App() {
   const { user, loading } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Ajout de logs pour le debugging
+    console.log('App component rendered');
+    console.log('Auth loading state:', loading);
+    console.log('User state:', user);
+    
+    // Gestion des erreurs de l'authentification
+    if (!loading && typeof user === 'undefined') {
+      console.error('Auth context error: user is undefined');
+      setError('Erreur d\'authentification. Veuillez recharger la page.');
+    }
+  }, [user, loading]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Erreur d'application</h1>
+          <p className="text-red-800 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+          >
+            Recharger la page
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-neutral-600">Chargement de l'application...</p>
+        </div>
       </div>
     );
   }

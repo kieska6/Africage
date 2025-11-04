@@ -16,6 +16,7 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  error: string | null;
   signIn: (email: string, password: string) => Promise<any>;
   signUp: (credentials: SignUpWithPasswordCredentials) => Promise<any>;
   signOut: () => Promise<any>;
@@ -28,46 +29,93 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('AuthProvider: Initializing session');
+    
     const fetchSessionAndProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('AuthProvider: Session error', sessionError);
+          setError('Erreur de session: ' + sessionError.message);
+          setLoading(false);
+          return;
+        }
+        
+        const currentUser = session?.user ?? null;
+        console.log('AuthProvider: Current user', currentUser);
+        setUser(currentUser);
 
-      if (currentUser) {
-        const { data: userProfile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-        setProfile(userProfile as Profile | null);
-      } else {
-        setProfile(null);
+        if (currentUser) {
+          console.log('AuthProvider: Fetching profile for user', currentUser.id);
+          const { data: userProfile, error: profileError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', currentUser.id)
+            .single();
+          
+          if (profileError) {
+            console.error('AuthProvider: Profile fetch error', profileError);
+            setError('Erreur de profil: ' + profileError.message);
+          } else {
+            console.log('AuthProvider: Profile fetched', userProfile);
+            setProfile(userProfile as Profile | null);
+          }
+        } else {
+          setProfile(null);
+        }
+      } catch (err) {
+        console.error('AuthProvider: Unexpected error', err);
+        setError('Erreur inattendue: ' + (err as Error).message);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchSessionAndProfile();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('AuthProvider: Auth state changed', event);
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
 
-      if (currentUser) {
-        const { data: userProfile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-        setProfile(userProfile as Profile | null);
-      } else {
-        setProfile(null);
+        if (currentUser) {
+          const { data: userProfile, error: profileError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', currentUser.id)
+            .single();
+          
+          if (profileError) {
+            console.error('AuthProvider: Profile update error', profileError);
+            setError('Erreur de mise à jour du profil: ' + profileError.message);
+          } else {
+            setProfile(userProfile as Profile | null);
+          }
+        } else {
+          setProfile(null);
+        }
+      } catch (err) {
+        console.error('AuthProvider: Error in auth state change', err);
+        setError('Erreur d\'état d\'authentification: ' + (err as Error).message);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
+      console.log('AuthProvider: Cleaning up auth listener');
       authListener.subscription.unsubscribe();
     };
   }, []);
@@ -76,6 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     profile,
     loading,
+    error,
     signIn: (email: string, password: string) => supabase.auth.signInWithPassword({ email, password }),
     signUp: (credentials: SignUpWithPasswordCredentials) => supabase.auth.signUp(credentials),
     signOut: async () => {
