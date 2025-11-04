@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { MapPin, Calendar, DollarSign, Package } from 'lucide-react';
@@ -66,7 +65,7 @@ export function ShipmentCard({ shipment }: ShipmentCardProps) {
           </div>
         </div>
         
-        <Button as="div" className="w-full bg-primary hover:bg-primary/90 text-white rounded-2xl mt-auto">
+        <Button className="w-full bg-primary hover:bg-primary/90 text-white rounded-2xl mt-auto">
           Voir les détails
         </Button>
       </div>

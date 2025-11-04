@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { AcceptedShipmentCard } from './AcceptedShipmentCard';
@@ -47,7 +47,7 @@ export function AcceptedShipmentList() {
 
       if (fetchError) throw fetchError;
 
-      setShipments(data || []);
+      setShipments(data as any || []);
     } catch (err: any) {
       console.error("Erreur lors de la récupération des transports:", err);
       setError("Impossible de charger vos transports à venir.");

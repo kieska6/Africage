@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
 import { Alert } from '../ui/Alert';
-import { Check, Package, User } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 // Définition des types pour les données
 interface Traveler {

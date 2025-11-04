@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { IncomingOfferCard } from './IncomingOfferCard';
@@ -49,7 +49,7 @@ export function IncomingOfferList() {
 
       if (fetchError) throw fetchError;
 
-      setOffers(data || []);
+      setOffers(data as any || []);
     } catch (err: any) {
       console.error("Erreur lors de la récupération des offres:", err);
       setError("Impossible de charger les offres reçues.");

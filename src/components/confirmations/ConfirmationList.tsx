@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { ConfirmationCard } from './ConfirmationCard';
@@ -47,7 +47,7 @@ export function ConfirmationList() {
 
       if (fetchError) throw fetchError;
 
-      setConfirmations(data || []);
+      setConfirmations(data as any || []);
     } catch (err: any) {
       console.error("Erreur lors de la récupération des confirmations:", err);
       setError("Impossible de charger les confirmations en attente.");

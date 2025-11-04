@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -42,7 +42,7 @@ export function MessagesPage() {
           .or(`sender_id.eq.${user.id},traveler_id.eq.${user.id}`);
 
         if (fetchError) throw fetchError;
-        setConversations(data as Conversation[] || []);
+        setConversations(data as any || []);
       } catch (err: any) {
         setError("Impossible de charger vos conversations.");
         console.error("Error fetching conversations:", err);

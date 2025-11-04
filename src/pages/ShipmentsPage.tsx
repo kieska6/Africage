@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Package, Plus, MapPin, Calendar, DollarSign, Eye } from 'lucide-react';
@@ -175,7 +175,7 @@ export function ShipmentsPage() {
                     )}
                   </div>
                   <Link to={`/shipments/${shipment.id}`}>
-                    <Button variant="outline" size="sm" as="div" className="border-primary text-primary hover:bg-primary/10">
+                    <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary/10">
                       <Eye className="w-4 h-4 mr-2" />
                       Voir détails
                     </Button>

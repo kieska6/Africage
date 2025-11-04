@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Alert } from '../ui/Alert';
 import { Select } from '../ui/Select';
-import { Briefcase, MapPin, Calendar, Weight, DollarSign } from 'lucide-react';
+import { Briefcase, MapPin, Calendar, Weight } from 'lucide-react';
 import countriesWithCities from '../../data/countries+cities.json';
 
 interface TripFormData {
@@ -26,12 +26,7 @@ interface TripFormData {
 interface Country {
   name: string;
   iso2: string;
-  cities: City[];
-}
-
-interface City {
-  id: number;
-  name: string;
+  cities: string[];
 }
 
 const currencies = [

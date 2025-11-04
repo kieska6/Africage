@@ -1,5 +1,4 @@
-import React from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/ui/Alert';
 import { Loader2, Coins, Star } from 'lucide-react';
 import { useTokenBalance } from '../hooks/useTokenBalance';

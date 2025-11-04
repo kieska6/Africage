@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard, Coins, Shield } from 'lucide-react';
 import { NotificationsBell } from '../notifications/NotificationsBell';
-import logo from '../../assets/logo.png';
 import { useTokenBalance } from '../../hooks/useTokenBalance';
 
 export function Header() {
@@ -42,7 +41,7 @@ export function Header() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const userInitials = profile?.first_name?.[0] + profile?.last_name?.[0] || user?.email?.[0] || 'U';
+  const userInitials = (profile?.first_name && profile?.last_name) ? `${profile.first_name[0]}${profile.last_name[0]}` : user?.email?.[0] || 'U';
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'MODERATOR';
 
   return (
@@ -50,7 +49,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-            <img src="https://ibb.co/QvjGVNQd" alt="AFRICAGE" className="h-10 w-auto" />
+            <img src="https://i.ibb.co/gP1hDCR/logo.png" alt="AFRICAGE" className="h-10 w-auto" />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">

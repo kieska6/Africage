@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Search, Package, Users, Shield, Loader2, ServerCrash, Briefcase } from 'lucide-react';
+import { Search, Package, Users, Shield, Loader2, ServerCrash } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ShipmentCard } from '../components/shipments/ShipmentCard';
 import { TripCard } from '../components/trips/TripCard';

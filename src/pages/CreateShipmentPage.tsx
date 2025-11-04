@@ -1,4 +1,3 @@
-import React from 'react';
 import { CreateShipmentForm } from '../components/shipments/CreateShipmentForm';
 
 export function CreateShipmentPage() {

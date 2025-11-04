@@ -27,12 +27,7 @@ interface ShipmentFormData {
 interface Country {
   name: string;
   iso2: string;
-  cities: City[];
-}
-
-interface City {
-  id: number;
-  name: string;
+  cities: string[];
 }
 
 const currencies = [

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Loader2, ServerCrash, Briefcase, MapPin, Calendar, Weight, User, MessageSquare, DollarSign } from 'lucide-react';
+import { Loader2, ServerCrash, MapPin, Calendar, Weight, User, MessageSquare, DollarSign } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 interface UserProfile {

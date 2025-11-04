@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ShipmentCard } from './ShipmentCard';
 import { Loader2, ServerCrash, Package } from 'lucide-react';
@@ -13,6 +13,9 @@ interface Shipment {
   delivery_city: string;
   proposed_price: number | null;
   currency: string;
+  delivery_date_by: string | null;
+  weight: number;
+  is_urgent: boolean;
 }
 
 export function ShipmentList() {

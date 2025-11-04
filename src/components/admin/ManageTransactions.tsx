@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { Alert } from '../ui/Alert';
-import { Loader2, ServerCrash, ListChecks } from 'lucide-react';
+import { Loader2, ListChecks } from 'lucide-react';
 
 interface Transaction {
   id: string;
@@ -36,7 +36,7 @@ export function ManageTransactions() {
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
-      setTransactions(data as Transaction[] || []);
+      setTransactions(data as any || []);
     } catch (err: any) {
       setError("Impossible de charger les transactions.");
     } finally {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { CreateTripForm } from '../components/trips/CreateTripForm';
 
 export function CreateTripPage() {

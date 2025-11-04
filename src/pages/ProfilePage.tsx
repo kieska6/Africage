@@ -1,4 +1,3 @@
-import React from 'react';
 import { UpdateProfileForm } from '../components/profile/UpdateProfileForm';
 
 export function ProfilePage() {

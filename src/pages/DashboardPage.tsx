@@ -44,7 +44,7 @@ export function DashboardPage() {
           ...tx,
           review_left: reviewedIds.has(tx.id),
         }));
-        setCompletedTransactions(transactionsWithReviewStatus as CompletedTransaction[]);
+        setCompletedTransactions(transactionsWithReviewStatus as any);
       }
     };
 

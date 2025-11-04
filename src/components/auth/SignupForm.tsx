@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -17,7 +17,6 @@ export function SignupForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const { signUp, signInWithGoogle } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +42,7 @@ export function SignupForm() {
     }
 
     try {
-      const { data, error } = await signUp({
+      const { error } = await signUp({
         email: email,
         password: password,
         options: {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { ProductCard } from '../components/products/ProductCard';
 import { products } from '../stripe-config';
 
