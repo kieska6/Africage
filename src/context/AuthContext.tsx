@@ -32,91 +32,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('AuthProvider: Initializing session');
-    
-    const fetchSessionAndProfile = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error('AuthProvider: Session error', sessionError);
-          setError('Erreur de session: ' + sessionError.message);
-          setLoading(false);
-          return;
-        }
-        
-        const currentUser = session?.user ?? null;
-        console.log('AuthProvider: Current user', currentUser);
-        setUser(currentUser);
-
-        if (currentUser) {
-          console.log('AuthProvider: Fetching profile for user', currentUser.id);
-          const { data: userProfile, error: profileError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', currentUser.id)
-            .single();
-          
-          if (profileError) {
-            console.error('AuthProvider: Profile fetch error', profileError);
-            setError('Erreur de profil: ' + profileError.message);
-          } else {
-            console.log('AuthProvider: Profile fetched', userProfile);
-            setProfile(userProfile as Profile | null);
-          }
-        } else {
-          setProfile(null);
-        }
-      } catch (err) {
-        console.error('AuthProvider: Unexpected error', err);
-        setError('Erreur inattendue: ' + (err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSessionAndProfile();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('AuthProvider: Auth state changed', event);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log(`Auth event: ${event}`);
+      setError(null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
       
-      try {
-        setLoading(true);
-        setError(null);
+      if (currentUser) {
+        const { data, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
         
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-
-        if (currentUser) {
-          const { data: userProfile, error: profileError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', currentUser.id)
-            .single();
-          
-          if (profileError) {
-            console.error('AuthProvider: Profile update error', profileError);
-            setError('Erreur de mise à jour du profil: ' + profileError.message);
-          } else {
-            setProfile(userProfile as Profile | null);
-          }
-        } else {
+        if (profileError) {
+          console.error('Error fetching profile:', profileError.message);
           setProfile(null);
+          setError('Impossible de récupérer le profil utilisateur.');
+        } else {
+          setProfile(data as Profile);
         }
-      } catch (err) {
-        console.error('AuthProvider: Error in auth state change', err);
-        setError('Erreur d\'état d\'authentification: ' + (err as Error).message);
-      } finally {
-        setLoading(false);
+      } else {
+        setProfile(null);
       }
+      
+      // Le chargement initial est terminé après la première vérification de la session.
+      setLoading(false);
     });
 
     return () => {
-      console.log('AuthProvider: Cleaning up auth listener');
-      authListener.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
