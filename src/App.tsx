@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/layout/Header';
+import { Footer } from './components/layout/Footer';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
@@ -26,6 +27,8 @@ import { BuyTokensPage } from './pages/BuyTokensPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { AdminPage } from './pages/AdminPage';
 import { KycPage } from './pages/KycPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -40,9 +43,9 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-neutral-50 flex flex-col">
         <Header />
-        <main>
+        <main className="flex-grow">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
@@ -50,6 +53,8 @@ function App() {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/success" element={<SuccessPage />} />
             <Route path="/payment-success" element={<PaymentSuccessPage />} />
+            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             
             {/* Public Detail Pages */}
             <Route path="/shipments/:id" element={<ShipmentDetailsPage />} />
@@ -57,128 +62,24 @@ function App() {
             <Route path="/users/:id" element={<UserProfilePage />} />
 
             {/* Protected Routes */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/buy-tokens"
-              element={
-                <ProtectedRoute>
-                  <BuyTokensPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/shipments"
-              element={
-                <ProtectedRoute>
-                  <ShipmentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/create-shipment"
-              element={
-                <ProtectedRoute>
-                  <CreateShipmentPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/send-package"
-              element={
-                <ProtectedRoute>
-                  <SendPackagePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/travel"
-              element={
-                <ProtectedRoute>
-                  <TravelPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/trips"
-              element={
-                <ProtectedRoute>
-                  <TripsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/create-trip"
-              element={
-                <ProtectedRoute>
-                  <CreateTripPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/shipments-list"
-              element={
-                <ProtectedRoute>
-                  <ShipmentsListPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave-review/:transactionId"
-              element={
-                <ProtectedRoute>
-                  <LeaveReviewPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/messages"
-              element={
-                <ProtectedRoute>
-                  <MessagesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/messages/:conversationId"
-              element={
-                <ProtectedRoute>
-                  <ConversationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/kyc"
-              element={
-                <ProtectedRoute>
-                  <KycPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/buy-tokens" element={<ProtectedRoute><BuyTokensPage /></ProtectedRoute>} />
+            <Route path="/shipments" element={<ProtectedRoute><ShipmentsPage /></ProtectedRoute>} />
+            <Route path="/create-shipment" element={<ProtectedRoute><CreateShipmentPage /></ProtectedRoute>} />
+            <Route path="/send-package" element={<ProtectedRoute><SendPackagePage /></ProtectedRoute>} />
+            <Route path="/travel" element={<ProtectedRoute><TravelPage /></ProtectedRoute>} />
+            <Route path="/trips" element={<ProtectedRoute><TripsPage /></ProtectedRoute>} />
+            <Route path="/create-trip" element={<ProtectedRoute><CreateTripPage /></ProtectedRoute>} />
+            <Route path="/shipments-list" element={<ProtectedRoute><ShipmentsListPage /></ProtectedRoute>} />
+            <Route path="/leave-review/:transactionId" element={<ProtectedRoute><LeaveReviewPage /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+            <Route path="/messages/:conversationId" element={<ProtectedRoute><ConversationPage /></ProtectedRoute>} />
+            <Route path="/kyc" element={<ProtectedRoute><KycPage /></ProtectedRoute>} />
           </Routes>
         </main>
+        <Footer />
       </div>
     </Router>
   );
