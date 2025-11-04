@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Loader2, ServerCrash, User, Package, Briefcase, Star } from 'lucide-react';
+import { Loader2, ServerCrash, User, Package, Briefcase, Star, ShieldCheck } from 'lucide-react';
 import { ShipmentCard } from '../components/shipments/ShipmentCard';
 import { TripCard } from '../components/trips/TripCard';
 
@@ -12,6 +12,7 @@ interface UserProfile {
   last_name: string;
   profile_picture: string | null;
   created_at: string;
+  kyc_status: 'NOT_SUBMITTED' | 'PENDING_REVIEW' | 'VERIFIED' | 'REJECTED';
 }
 
 interface Review {
@@ -131,7 +132,15 @@ export function UserProfilePage() {
               </div>
             )}
             <div>
-              <h1 className="text-4xl font-bold text-neutral-800">{profile.first_name} {profile.last_name}</h1>
+              <div className="flex items-center gap-4">
+                <h1 className="text-4xl font-bold text-neutral-800">{profile.first_name} {profile.last_name}</h1>
+                {profile.kyc_status === 'VERIFIED' && (
+                  <span className="flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
+                    <ShieldCheck className="w-4 h-4 mr-1.5" />
+                    Identité Vérifiée
+                  </span>
+                )}
+              </div>
               <p className="text-neutral-500 mt-2">Membre depuis {new Date(profile.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}</p>
               <div className="flex items-center gap-2 mt-3 text-lg">
                 <Star className="w-6 h-6 text-yellow-400 fill-current" />

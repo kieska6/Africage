@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
-import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard, Coins, Shield } from 'lucide-react';
+import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard, Coins, Shield, CheckCircle } from 'lucide-react';
 import { NotificationsBell } from '../notifications/NotificationsBell';
 import { useTokenBalance } from '../../hooks/useTokenBalance';
 
@@ -94,6 +94,10 @@ export function Header() {
                         <UserIcon className="w-4 h-4 mr-2" />
                         Mon Profil
                       </Link>
+                      <Link to="/kyc" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Vérification d'identité
+                      </Link>
                       <Link to="/buy-tokens" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100">
                         <Coins className="w-4 h-4 mr-2" />
                         Acheter des Tokens
@@ -156,6 +160,7 @@ export function Header() {
                 </div>
                 <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Tableau de bord</Link>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Mon Profil</Link>
+                <Link to="/kyc" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Vérification d'identité</Link>
                 <Link to="/messages" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Messages</Link>
                 <Link to="/buy-tokens" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Acheter des Tokens</Link>
                 {isAdmin && (

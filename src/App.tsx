@@ -25,6 +25,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { BuyTokensPage } from './pages/BuyTokensPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { AdminPage } from './pages/AdminPage';
+import { KycPage } from './pages/KycPage';
 
 function App() {
   const { user, loading } = useAuth();
@@ -165,6 +166,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ConversationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/kyc"
+              element={
+                <ProtectedRoute>
+                  <KycPage />
                 </ProtectedRoute>
               }
             />

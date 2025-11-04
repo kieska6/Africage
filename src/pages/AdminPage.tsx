@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { GiveTokensForm } from '../components/admin/GiveTokensForm';
 import { ManageUserRole } from '../components/admin/ManageUserRole';
 import { ManageTransactions } from '../components/admin/ManageTransactions';
+import { KycReviewPanel } from '../components/admin/KycReviewPanel';
 import { Loader2, Lock } from 'lucide-react';
 
 export function AdminPage() {
@@ -46,6 +47,8 @@ export function AdminPage() {
         </div>
 
         <div className="space-y-8">
+          <KycReviewPanel />
+
           {userRole === 'ADMIN' && (
             <>
               <GiveTokensForm />
@@ -55,12 +58,7 @@ export function AdminPage() {
           )}
 
           {userRole === 'MODERATOR' && (
-            <div className="bg-white p-8 rounded-lg shadow-md border text-center">
-              <h2 className="text-xl font-semibold text-neutral-800">Outils de modération</h2>
-              <p className="text-neutral-500 mt-2">
-                Les fonctionnalités de modération seront bientôt disponibles ici.
-              </p>
-            </div>
+            <ManageTransactions />
           )}
         </div>
       </div>
