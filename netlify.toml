@@ -1,0 +1,14 @@
+# Fichier de configuration pour Netlify
+
+[build]
+  # La commande EXACTE pour construire le site.
+  # On force l'utilisation de pnpm.
+  command = "pnpm build"
+  
+  # Le dossier où se trouve le site une fois construit.
+  publish = "dist"
+
+[build.environment]
+  # On fixe la version de Node.js pour éviter les incompatibilités.
+  # La version 18 est une version LTS (Long-Term Support) très stable.
+  NODE_VERSION = "18"
