@@ -168,7 +168,7 @@ const LandingPage = () => (
             <div className="flex items-start"><div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center mr-4 flex-shrink-0"><Users className="w-6 h-6 text-accent" /></div><div><h3 className="text-xl font-semibold">Communauté Solidaire</h3><p className="text-neutral-600">Rejoignez un réseau de membres qui s'entraident pour connecter les continents.</p></div></div>
           </div>
         </div>
-        <div className="hidden md:block"><img src="https://i.ibb.co/L6R4bXq/logo-africage-2.png" alt="Illustration Africage" className="rounded-lg" /></div>
+        <div className="hidden md:block"><img src="https://ibb.co/CK8P2gNT" alt="Illustration Africage" className="rounded-lg" /></div>
       </div>
     </section>
 
