@@ -1,49 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { HomePage } from './pages/HomePage';
-import { LoginPage } from './pages/LoginPage';
-import { SignupPage } from './pages/SignupPage';
-import { PricingPage } from './pages/PricingPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { SuccessPage } from './pages/SuccessPage';
-import { ShipmentsPage } from './pages/ShipmentsPage';
-import { CreateShipmentPage } from './pages/CreateShipmentPage';
 import { useAuth } from './context/AuthContext';
-import { SendPackagePage } from './pages/SendPackagePage';
-import { TravelPage } from './pages/TravelPage';
-import { TripsPage } from './pages/TripsPage';
-import { CreateTripPage } from './pages/CreateTripPage';
-import { ShipmentsListPage } from './pages/ShipmentsListPage';
-import { ShipmentDetailsPage } from './pages/ShipmentDetailsPage';
-import { TripDetailsPage } from './pages/TripDetailsPage';
-import { UserProfilePage } from './pages/UserProfilePage';
-import { LeaveReviewPage } from './pages/LeaveReviewPage';
-import { MessagesPage } from './pages/MessagesPage';
-import { ConversationPage } from './pages/ConversationPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { BuyTokensPage } from './pages/BuyTokensPage';
-import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
-import { AdminPage } from './pages/AdminPage';
-import { KycPage } from './pages/KycPage';
-import { TermsOfServicePage } from './pages/TermsOfServicePage';
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { Loader2 } from 'lucide-react';
+
+// Lazy load pages
+const HomePage = lazy(() => import('./pages/HomePage').then(module => ({ default: module.HomePage })));
+const LoginPage = lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })));
+const SignupPage = lazy(() => import('./pages/SignupPage').then(module => ({ default: module.SignupPage })));
+const PricingPage = lazy(() => import('./pages/PricingPage').then(module => ({ default: module.PricingPage })));
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then(module => ({ default: module.DashboardPage })));
+const SuccessPage = lazy(() => import('./pages/SuccessPage').then(module => ({ default: module.SuccessPage })));
+const ShipmentsPage = lazy(() => import('./pages/ShipmentsPage').then(module => ({ default: module.ShipmentsPage })));
+const CreateShipmentPage = lazy(() => import('./pages/CreateShipmentPage').then(module => ({ default: module.CreateShipmentPage })));
+const SendPackagePage = lazy(() => import('./pages/SendPackagePage').then(module => ({ default: module.SendPackagePage })));
+const TravelPage = lazy(() => import('./pages/TravelPage').then(module => ({ default: module.TravelPage })));
+const TripsPage = lazy(() => import('./pages/TripsPage').then(module => ({ default: module.TripsPage })));
+const CreateTripPage = lazy(() => import('./pages/CreateTripPage').then(module => ({ default: module.CreateTripPage })));
+const ShipmentsListPage = lazy(() => import('./pages/ShipmentsListPage').then(module => ({ default: module.ShipmentsListPage })));
+const ShipmentDetailsPage = lazy(() => import('./pages/ShipmentDetailsPage').then(module => ({ default: module.ShipmentDetailsPage })));
+const TripDetailsPage = lazy(() => import('./pages/TripDetailsPage').then(module => ({ default: module.TripDetailsPage })));
+const UserProfilePage = lazy(() => import('./pages/UserProfilePage').then(module => ({ default: module.UserProfilePage })));
+const LeaveReviewPage = lazy(() => import('./pages/LeaveReviewPage').then(module => ({ default: module.LeaveReviewPage })));
+const MessagesPage = lazy(() => import('./pages/MessagesPage').then(module => ({ default: module.MessagesPage })));
+const ConversationPage = lazy(() => import('./pages/ConversationPage').then(module => ({ default: module.ConversationPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(module => ({ default: module.ProfilePage })));
+const BuyTokensPage = lazy(() => import('./pages/BuyTokensPage').then(module => ({ default: module.BuyTokensPage })));
+const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage').then(module => ({ default: module.PaymentSuccessPage })));
+const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
+const KycPage = lazy(() => import('./pages/KycPage').then(module => ({ default: module.KycPage })));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(module => ({ default: module.TermsOfServicePage })));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(module => ({ default: module.PrivacyPolicyPage })));
+
+const SuspenseFallback = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <Loader2 className="w-12 h-12 text-primary animate-spin" />
+  </div>
+);
 
 function App() {
   const { user, loading } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Ajout de logs pour le debugging
-    console.log('App component rendered');
-    console.log('Auth loading state:', loading);
-    console.log('User state:', user);
-    
-    // Gestion des erreurs de l'authentification
     if (!loading && typeof user === 'undefined') {
-      console.error('Auth context error: user is undefined');
       setError('Erreur d\'authentification. Veuillez recharger la page.');
     }
   }, [user, loading]);
@@ -66,14 +68,7 @@ function App() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-neutral-600">Chargement de l'application...</p>
-        </div>
-      </div>
-    );
+    return <SuspenseFallback />;
   }
 
   return (
@@ -81,38 +76,38 @@ function App() {
       <div className="min-h-screen bg-neutral-50 flex flex-col">
         <Header />
         <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
-            <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/success" element={<SuccessPage />} />
-            <Route path="/payment-success" element={<PaymentSuccessPage />} />
-            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            
-            {/* Public Detail Pages */}
-            <Route path="/shipments/:id" element={<ShipmentDetailsPage />} />
-            <Route path="/trips/:id" element={<TripDetailsPage />} />
-            <Route path="/users/:id" element={<UserProfilePage />} />
+          <Suspense fallback={<SuspenseFallback />}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+              <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/success" element={<SuccessPage />} />
+              <Route path="/payment-success" element={<PaymentSuccessPage />} />
+              <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              
+              <Route path="/shipments/:id" element={<ShipmentDetailsPage />} />
+              <Route path="/trips/:id" element={<TripDetailsPage />} />
+              <Route path="/users/:id" element={<UserProfilePage />} />
 
-            {/* Protected Routes */}
-            <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-            <Route path="/buy-tokens" element={<ProtectedRoute><BuyTokensPage /></ProtectedRoute>} />
-            <Route path="/shipments" element={<ProtectedRoute><ShipmentsPage /></ProtectedRoute>} />
-            <Route path="/create-shipment" element={<ProtectedRoute><CreateShipmentPage /></ProtectedRoute>} />
-            <Route path="/send-package" element={<ProtectedRoute><SendPackagePage /></ProtectedRoute>} />
-            <Route path="/travel" element={<ProtectedRoute><TravelPage /></ProtectedRoute>} />
-            <Route path="/trips" element={<ProtectedRoute><TripsPage /></ProtectedRoute>} />
-            <Route path="/create-trip" element={<ProtectedRoute><CreateTripPage /></ProtectedRoute>} />
-            <Route path="/shipments-list" element={<ProtectedRoute><ShipmentsListPage /></ProtectedRoute>} />
-            <Route path="/leave-review/:transactionId" element={<ProtectedRoute><LeaveReviewPage /></ProtectedRoute>} />
-            <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
-            <Route path="/messages/:conversationId" element={<ProtectedRoute><ConversationPage /></ProtectedRoute>} />
-            <Route path="/kyc" element={<ProtectedRoute><KycPage /></ProtectedRoute>} />
-          </Routes>
+              <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/buy-tokens" element={<ProtectedRoute><BuyTokensPage /></ProtectedRoute>} />
+              <Route path="/shipments" element={<ProtectedRoute><ShipmentsPage /></ProtectedRoute>} />
+              <Route path="/create-shipment" element={<ProtectedRoute><CreateShipmentPage /></ProtectedRoute>} />
+              <Route path="/send-package" element={<ProtectedRoute><SendPackagePage /></ProtectedRoute>} />
+              <Route path="/travel" element={<ProtectedRoute><TravelPage /></ProtectedRoute>} />
+              <Route path="/trips" element={<ProtectedRoute><TripsPage /></ProtectedRoute>} />
+              <Route path="/create-trip" element={<ProtectedRoute><CreateTripPage /></ProtectedRoute>} />
+              <Route path="/shipments-list" element={<ProtectedRoute><ShipmentsListPage /></ProtectedRoute>} />
+              <Route path="/leave-review/:transactionId" element={<ProtectedRoute><LeaveReviewPage /></ProtectedRoute>} />
+              <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+              <Route path="/messages/:conversationId" element={<ProtectedRoute><ConversationPage /></ProtectedRoute>} />
+              <Route path="/kyc" element={<ProtectedRoute><KycPage /></ProtectedRoute>} />
+            </Routes>
+          </Suspense>
         </main>
         <Footer />
       </div>
