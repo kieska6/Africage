@@ -27,11 +27,7 @@ export function ManageUserRole() {
         .eq('email', email)
         .single();
 
-      if (userError) {
-        throw userError;
-      }
-
-      if (!userData) {
+      if (userError || !userData) {
         throw new Error("Utilisateur non trouvé avec cet email.");
       }
 
@@ -84,7 +80,7 @@ export function ManageUserRole() {
           <option value="MODERATOR">Modérateur</option>
           <option value="ADMIN">Administrateur</option>
         </Select>
-        <Button type="submit" loading={loading} className="w-full">
+        <Button type="submit" loading={loading} className="w-full sm:w-auto">
           Mettre à jour le rôle
         </Button>
       </form>

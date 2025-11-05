@@ -1,46 +1,13 @@
-# Netlify Configuration File
-
-[build]
-  publish = "dist"
-  command = "npm run build"
-
-[build.environment]
-  NODE_VERSION = "20"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
+# Règle de cache pour les assets immuables (JS, CSS, images, etc.)
+# On leur donne une longue durée de vie en cache car leur nom change à chaque build.
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-
-[[headers]]
-  for = "*.js"
-  [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Règle spécifique pour le fichier HTML principal.
+# On empêche sa mise en cache pour que les utilisateurs aient toujours la dernière version.
 [[headers]]
-  for = "*.css"
+  for = "/index.html"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "*.png"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "*.jpg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "no-cache, no-store, must-revalidate"
+    Cache-Control = "public, max-age=0, must-revalidate"

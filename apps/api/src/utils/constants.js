@@ -62,7 +62,7 @@ const REVIEW_TYPES = {
   TRAVELER_TO_SENDER: 'TRAVELER_TO_SENDER'
 };
 
-export {
+module.exports = {
   USER_ROLES,
   USER_STATUS,
   SHIPMENT_STATUS,

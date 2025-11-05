@@ -1,7 +1,8 @@
-import { param } from 'express-validator';
-import notificationController from '../controllers/notification.controller.js';
-import { validateRequest } from '../middleware/validation.middleware.js';
-import { authenticateToken } from '../middleware/auth.middleware.js';
+const express = require('express');
+const { param } = require('express-validator');
+const notificationController = require('../controllers/notification.controller');
+const { validateRequest } = require('../middleware/validation.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
@@ -15,4 +16,4 @@ router.patch('/:id/read', [param('id').isString()], validateRequest, notificatio
 router.patch('/mark-all-read', notificationController.markAllAsRead);
 router.delete('/:id', [param('id').isString()], validateRequest, notificationController.deleteNotification);
 
-export default router;
+module.exports = router;

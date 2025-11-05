@@ -90,7 +90,7 @@ export function UpdateProfileForm() {
         disabled
       />
       <div className="pt-4">
-        <Button type="submit" loading={loading} className="w-full bg-primary hover:bg-primary/90 text-white">
+        <Button type="submit" loading={loading} className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white">
           Enregistrer les modifications
         </Button>
       </div>

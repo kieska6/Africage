@@ -168,9 +168,7 @@ export function CompleteProfilePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-neutral-800 mb-2">
-            Profil complété avec succès !
-          </h2>
+          <h2 className="text-2xl font-bold text-neutral-800 mb-2">Profil complété avec succès !</h2>
           <p className="text-neutral-600 mb-6">
             Bienvenue sur Africage ! Votre compte est maintenant prêt à l'emploi.
           </p>
@@ -245,7 +243,7 @@ export function CompleteProfilePage() {
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-4 py-3 border border-neutral-300 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 py-3 border border-neutral-300 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 required
                 disabled={countriesLoading}
               >

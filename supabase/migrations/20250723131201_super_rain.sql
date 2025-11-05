@@ -1,264 +1,308 @@
--- This migration was automatically generated. It's important to check it for unintended changes.
--- If you want to revert this migration, run: npx supabase migration down
--- To apply this migration, run: npx supabase migration up
+/*
+  # Configuration de la sécurité Row Level Security (RLS)
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET client_min_messages = warning;
-SET default_tablespace = '';
-SET default_table_access_method = heap;
+  1. Activation de RLS sur toutes les tables
+  2. Politiques de sécurité pour chaque table :
+    - users : Accès uniquement à son propre profil
+    - shipments : Lecture publique, modification par le propriétaire
+    - trips : Lecture publique, modification par le propriétaire
+    - transactions : Accès limité aux parties impliquées
+    - reviews : Accès limité aux parties impliquées
+    - notifications : Accès uniquement à ses propres notifications
+    - payment_methods : Accès uniquement à ses propres moyens de paiement
+    - payments : Accès uniquement à ses propres paiements
+    - sessions : Accès uniquement à ses propres sessions
+*/
 
--- Create additional functions for business logic
-CREATE OR REPLACE FUNCTION public.update_user_average_rating()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $function$
-BEGIN
-    UPDATE public.users
-    SET
-        average_rating = (
-            SELECT AVG(rating)
-            FROM public.reviews
-            WHERE reviewee_id = NEW.reviewee_id
-        ),
-        review_count = (
-            SELECT COUNT(*)
-            FROM public.reviews
-            WHERE reviewee_id = NEW.reviewee_id
-        )
-    WHERE id = NEW.reviewee_id;
-    RETURN NEW;
-END;
-$function$;
+-- =============================================
+-- ACTIVATION DE ROW LEVEL SECURITY
+-- =============================================
 
-CREATE OR REPLACE FUNCTION public.create_notification_on_shipment_update()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $function$
-BEGIN
-    -- CAS 1: Une offre vient d'être acceptée.
-    -- Le statut passe de PENDING à CONFIRMED et un voyageur est assigné.
-    IF OLD.status = 'PENDING' AND NEW.status = 'CONFIRMED' THEN
-        INSERT INTO public.notifications (user_id, type, message, link_to)
-        VALUES (
-            NEW.traveler_id,
-            'OFFER_ACCEPTED',
-            'Bonne nouvelle ! Votre offre pour le colis "' || NEW.title || '" a été acceptée.',
-            '/shipments/' || NEW.id
-        );
-    END IF;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shipments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE trips ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payment_methods ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 
-    -- CAS 2: Le colis est marqué comme livré.
-    -- Le statut passe de CONFIRMED à DELIVERED.
-    IF OLD.status = 'CONFIRMED' AND NEW.status = 'DELIVERED' THEN
-        -- Notifie l'expéditeur
-        INSERT INTO public.notifications (user_id, type, message, link_to)
-        VALUES (
-            NEW.sender_id,
-            'SHIPMENT_COMPLETED',
-            'Votre colis "' || NEW.title || '" a bien été livré. N''oubliez pas de laisser une évaluation !',
-            '/shipments/' || NEW.id
-        );
-        -- Notifie le voyageur
-        INSERT INTO public.notifications (user_id, type, message, link_to)
-        VALUES (
-            NEW.traveler_id,
-            'SHIPMENT_COMPLETED',
-            'La livraison du colis "' || NEW.title || '" est terminée. N''oubliez pas de laisser une évaluation !',
-            '/shipments/' || NEW.id
-        );
-    END IF;
+-- =============================================
+-- POLITIQUES POUR LA TABLE USERS
+-- =============================================
 
-    RETURN NEW;
-END;
-$function$;
-
-CREATE OR REPLACE FUNCTION public.create_notification_on_new_message()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $function$
-DECLARE
-    recipient_id UUID;
-    conversation_details RECORD;
-BEGIN
-    -- Trouve les détails de la conversation.
-    SELECT sender_id, traveler_id INTO conversation_details FROM public.conversations WHERE id = NEW.conversation_id;
-
-    -- Détermine qui est le destinataire (celui qui N'EST PAS l'expéditeur du message).
-    IF NEW.sender_id = conversation_details.sender_id THEN
-        recipient_id := conversation_details.traveler_id;
-    ELSE
-        recipient_id := conversation_details.sender_id;
-    END IF;
-
-    -- Insère la notification pour le destinataire.
-    INSERT INTO public.notifications (user_id, type, message, link_to)
-    VALUES (
-        recipient_id,
-        'NEW_MESSAGE',
-        'Vous avez reçu un nouveau message.',
-        '/messages/' || NEW.conversation_id
-    );
-    RETURN NEW;
-END;
-$function$;
-
--- Create triggers for the new functions
-CREATE TRIGGER update_user_average_rating
-  AFTER INSERT ON public.reviews
-  FOR EACH ROW EXECUTE FUNCTION update_user_average_rating();
-
-CREATE TRIGGER create_notification_on_shipment_update
-  AFTER UPDATE ON public.transactions
-  FOR EACH ROW EXECUTE FUNCTION create_notification_on_shipment_update();
-
-CREATE TRIGGER create_notification_on_new_message
-  AFTER INSERT ON public.messages
-  FOR EACH ROW EXECUTE FUNCTION create_notification_on_new_message();
-
--- Add more RLS policies for enhanced security
-CREATE POLICY "Users can view own shipments" ON public.shipments
+-- Les utilisateurs peuvent voir leur propre profil
+CREATE POLICY "Users can view own profile"
+  ON users
   FOR SELECT
   TO authenticated
-  USING (auth.uid() = sender_id);
+  USING (auth.uid() = id);
 
-CREATE POLICY "Users can update own shipments" ON public.shipments
+-- Les utilisateurs peuvent mettre à jour leur propre profil
+CREATE POLICY "Users can update own profile"
+  ON users
+  FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = id);
+
+-- Permettre l'insertion lors de l'inscription (via trigger ou fonction)
+CREATE POLICY "Users can insert own profile"
+  ON users
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = id);
+
+-- =============================================
+-- POLITIQUES POUR LA TABLE SHIPMENTS
+-- =============================================
+
+-- Tous les utilisateurs authentifiés peuvent voir les colis disponibles
+CREATE POLICY "Authenticated users can view shipments"
+  ON shipments
+  FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- Seuls les expéditeurs peuvent créer des colis
+CREATE POLICY "Senders can create shipments"
+  ON shipments
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = sender_id);
+
+-- Seuls les propriétaires peuvent modifier leurs colis
+CREATE POLICY "Senders can update own shipments"
+  ON shipments
   FOR UPDATE
   TO authenticated
   USING (auth.uid() = sender_id);
 
-CREATE POLICY "Users can delete own shipments" ON public.shipments
+-- Seuls les propriétaires peuvent supprimer leurs colis
+CREATE POLICY "Senders can delete own shipments"
+  ON shipments
   FOR DELETE
   TO authenticated
   USING (auth.uid() = sender_id);
 
-CREATE POLICY "Users can view own trips" ON public.trips
+-- =============================================
+-- POLITIQUES POUR LA TABLE TRIPS
+-- =============================================
+
+-- Tous les utilisateurs authentifiés peuvent voir les trajets disponibles
+CREATE POLICY "Authenticated users can view trips"
+  ON trips
   FOR SELECT
   TO authenticated
-  USING (auth.uid() = traveler_id);
+  USING (true);
 
-CREATE POLICY "Users can update own trips" ON public.trips
+-- Seuls les voyageurs peuvent créer des trajets
+CREATE POLICY "Travelers can create trips"
+  ON trips
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = traveler_id);
+
+-- Seuls les propriétaires peuvent modifier leurs trajets
+CREATE POLICY "Travelers can update own trips"
+  ON trips
   FOR UPDATE
   TO authenticated
   USING (auth.uid() = traveler_id);
 
-CREATE POLICY "Users can delete own trips" ON public.trips
+-- Seuls les propriétaires peuvent supprimer leurs trajets
+CREATE POLICY "Travelers can delete own trips"
+  ON trips
   FOR DELETE
   TO authenticated
   USING (auth.uid() = traveler_id);
 
-CREATE POLICY "Users can view own transactions" ON public.transactions
+-- =============================================
+-- POLITIQUES POUR LA TABLE TRANSACTIONS
+-- =============================================
+
+-- Seuls l'expéditeur et le voyageur peuvent voir leurs transactions
+CREATE POLICY "Users can view own transactions"
+  ON transactions
   FOR SELECT
   TO authenticated
-  USING ((auth.uid() = sender_id) OR (auth.uid() = traveler_id));
+  USING (auth.uid() = sender_id OR auth.uid() = traveler_id);
 
-CREATE POLICY "Users can update own transactions" ON public.transactions
+-- Les transactions peuvent être créées par l'expéditeur ou le voyageur
+CREATE POLICY "Users can create transactions"
+  ON transactions
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = sender_id OR auth.uid() = traveler_id);
+
+-- Seuls l'expéditeur et le voyageur peuvent modifier leurs transactions
+CREATE POLICY "Users can update own transactions"
+  ON transactions
   FOR UPDATE
   TO authenticated
-  USING ((auth.uid() = sender_id) OR (auth.uid() = traveler_id));
+  USING (auth.uid() = sender_id OR auth.uid() = traveler_id);
 
-CREATE POLICY "Users can view own conversations" ON public.conversations
+-- =============================================
+-- POLITIQUES POUR LA TABLE REVIEWS
+-- =============================================
+
+-- Seuls les participants à la transaction peuvent voir les évaluations
+CREATE POLICY "Transaction participants can view reviews"
+  ON reviews
   FOR SELECT
   TO authenticated
-  USING ((auth.uid() = sender_id) OR (auth.uid() = traveler_id));
+  USING (
+    auth.uid() = reviewer_id OR 
+    auth.uid() = reviewee_id OR
+    EXISTS (
+      SELECT 1 FROM transactions 
+      WHERE id = transaction_id 
+      AND (sender_id = auth.uid() OR traveler_id = auth.uid())
+    )
+  );
 
-CREATE POLICY "Users can send messages in their conversations" ON public.messages
+-- Seuls les participants peuvent créer des évaluations
+CREATE POLICY "Transaction participants can create reviews"
+  ON reviews
   FOR INSERT
   TO authenticated
   WITH CHECK (
+    auth.uid() = reviewer_id AND
     EXISTS (
-      SELECT 1
-      FROM public.conversations c
-      WHERE ((c.id = messages.conversation_id) AND ((c.sender_id = auth.uid()) OR (c.traveler_id = auth.uid())))
+      SELECT 1 FROM transactions 
+      WHERE id = transaction_id 
+      AND (sender_id = auth.uid() OR traveler_id = auth.uid())
     )
   );
 
-CREATE POLICY "Users can view messages in their conversations" ON public.messages
-  FOR SELECT
-  TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1
-      FROM public.conversations c
-      WHERE ((c.id = messages.conversation_id) AND ((c.sender_id = auth.uid()) OR (c.traveler_id = auth.uid())))
-    )
-  );
+-- =============================================
+-- POLITIQUES POUR LA TABLE NOTIFICATIONS
+-- =============================================
 
-CREATE POLICY "Users can view own notifications" ON public.notifications
+-- Les utilisateurs ne peuvent voir que leurs propres notifications
+CREATE POLICY "Users can view own notifications"
+  ON notifications
   FOR SELECT
   TO authenticated
   USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can update their own notifications" ON public.notifications
-  FOR UPDATE
-  TO authenticated
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can view own payment methods" ON public.payment_methods
-  FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can create own payment methods" ON public.payment_methods
+-- Les notifications peuvent être créées par le système (service role)
+CREATE POLICY "System can create notifications"
+  ON notifications
   FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own payment methods" ON public.payment_methods
+-- Les utilisateurs peuvent modifier leurs propres notifications (marquer comme lu)
+CREATE POLICY "Users can update own notifications"
+  ON notifications
   FOR UPDATE
   TO authenticated
   USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete own payment methods" ON public.payment_methods
+-- Les utilisateurs peuvent supprimer leurs propres notifications
+CREATE POLICY "Users can delete own notifications"
+  ON notifications
   FOR DELETE
   TO authenticated
   USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own payments" ON public.payments
+-- =============================================
+-- POLITIQUES POUR LA TABLE PAYMENT_METHODS
+-- =============================================
+
+-- Les utilisateurs ne peuvent voir que leurs propres moyens de paiement
+CREATE POLICY "Users can view own payment methods"
+  ON payment_methods
   FOR SELECT
   TO authenticated
   USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can create own payments" ON public.payments
+-- Les utilisateurs peuvent créer leurs propres moyens de paiement
+CREATE POLICY "Users can create own payment methods"
+  ON payment_methods
   FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Admins can view all shipments" ON public.shipments
-  FOR SELECT
+-- Les utilisateurs peuvent modifier leurs propres moyens de paiement
+CREATE POLICY "Users can update own payment methods"
+  ON payment_methods
+  FOR UPDATE
   TO authenticated
-  USING (
-    ( SELECT users.is_admin
-       FROM users
-      WHERE (users.id = auth.uid()))
-  );
+  USING (auth.uid() = user_id);
 
-CREATE POLICY "Admins can delete any shipment" ON public.shipments
+-- Les utilisateurs peuvent supprimer leurs propres moyens de paiement
+CREATE POLICY "Users can delete own payment methods"
+  ON payment_methods
   FOR DELETE
   TO authenticated
-  USING (
-    ( SELECT users.is_admin
-       FROM users
-      WHERE (users.id = auth.uid()))
+  USING (auth.uid() = user_id);
+
+-- =============================================
+-- POLITIQUES POUR LA TABLE PAYMENTS
+-- =============================================
+
+-- Les utilisateurs ne peuvent voir que leurs propres paiements
+CREATE POLICY "Users can view own payments"
+  ON payments
+  FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- Les paiements peuvent être créés par le système ou l'utilisateur
+CREATE POLICY "Users can create own payments"
+  ON payments
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+-- =============================================
+-- POLITIQUES POUR LA TABLE SESSIONS
+-- =============================================
+
+-- Les utilisateurs ne peuvent voir que leurs propres sessions
+CREATE POLICY "Users can view own sessions"
+  ON sessions
+  FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- Les utilisateurs peuvent créer leurs propres sessions
+CREATE POLICY "Users can create own sessions"
+  ON sessions
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+-- Les utilisateurs peuvent supprimer leurs propres sessions
+CREATE POLICY "Users can delete own sessions"
+  ON sessions
+  FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- =============================================
+-- FONCTION POUR CRÉER UN PROFIL UTILISATEUR
+-- =============================================
+
+-- Fonction pour créer automatiquement un profil utilisateur lors de l'inscription
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.users (id, email, first_name, last_name, is_email_verified)
+  VALUES (
+    new.id,
+    new.email,
+    COALESCE(new.raw_user_meta_data->>'first_name', ''),
+    COALESCE(new.raw_user_meta_data->>'last_name', ''),
+    new.email_confirmed_at IS NOT NULL
   );
+  RETURN new;
+END;
+$$ language plpgsql security definer;
 
--- Add additional indexes for performance
-CREATE INDEX IF NOT EXISTS idx_shipments_pickup_city ON public.shipments(pickup_city);
-CREATE INDEX IF NOT EXISTS idx_shipments_delivery_city ON public.shipments(delivery_city);
-CREATE INDEX IF NOT EXISTS idx_shipments_proposed_price ON public.shipments(proposed_price);
-CREATE INDEX IF NOT EXISTS idx_trips_departure_city ON public.trips(departure_city);
-CREATE INDEX IF NOT EXISTS idx_trips_arrival_city ON public.trips(arrival_city);
-CREATE INDEX IF NOT EXISTS idx_trips_price_per_kg ON public.trips(price_per_kg);
-CREATE INDEX IF NOT EXISTS idx_transactions_payment_status ON public.transactions(payment_status);
-CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at);
-CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON public.reviews(created_at);
-
--- Add more comments for documentation
-COMMENT ON FUNCTION public.update_user_average_rating() IS 'Updates user average rating and review count when a new review is added';
-COMMENT ON FUNCTION public.create_notification_on_shipment_update() IS 'Creates notifications when shipment status changes';
-COMMENT ON FUNCTION public.create_notification_on_new_message() IS 'Creates notifications when a new message is received';
+-- Trigger pour créer automatiquement un profil lors de l'inscription
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();

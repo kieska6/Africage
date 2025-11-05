@@ -1,7 +1,8 @@
-import { body, param, query } from 'express-validator';
-import tripController from '../controllers/trip.controller.js';
-import { validateRequest } from '../middleware/validation.middleware.js';
-import { authenticateToken, requireRole, requireVerifiedUser } from '../middleware/auth.middleware.js';
+const express = require('express');
+const { body, param, query } = require('express-validator');
+const tripController = require('../controllers/trip.controller');
+const { validateRequest } = require('../middleware/validation.middleware');
+const { authenticateToken, requireRole, requireVerifiedUser } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
@@ -45,4 +46,4 @@ router.delete('/:id', [param('id').isString()], validateRequest, tripController.
 router.get('/search/compatible', tripController.searchCompatibleTrips);
 router.get('/:id/available-capacity', [param('id').isString()], validateRequest, tripController.getAvailableCapacity);
 
-export default router;
+module.exports = router;

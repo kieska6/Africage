@@ -1,7 +1,8 @@
-import { body, param } from 'express-validator';
-import reviewController from '../controllers/review.controller.js';
-import { validateRequest } from '../middleware/validation.middleware.js';
-import { authenticateToken } from '../middleware/auth.middleware.js';
+const express = require('express');
+const { body, param } = require('express-validator');
+const reviewController = require('../controllers/review.controller');
+const { validateRequest } = require('../middleware/validation.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
@@ -26,4 +27,4 @@ router.get('/my-reviews', reviewController.getMyReviews);
 router.get('/user/:userId', [param('userId').isString()], validateRequest, reviewController.getUserReviews);
 router.get('/:id', [param('id').isString()], validateRequest, reviewController.getReviewById);
 
-export default router;
+module.exports = router;

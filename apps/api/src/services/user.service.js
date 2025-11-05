@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+const prisma = require('../utils/prisma');
 
 /**
  * Service pour la gestion des utilisateurs
@@ -301,4 +301,4 @@ class UserService {
   }
 }
 
-export default new UserService();
+module.exports = new UserService();

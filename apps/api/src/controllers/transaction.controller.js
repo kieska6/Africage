@@ -1,151 +1,164 @@
-import { PrismaClient } from '@prisma/client';
+const transactionService = require('../services/transaction.service');
+const { successResponse, errorResponse, paginatedResponse } = require('../utils/response');
 
 /**
- * Service pour la gestion des transactions
+ * Contrôleur pour la gestion des transactions
  */
-class TransactionService {
+class TransactionController {
   /**
    * Créer une nouvelle transaction (accord entre expéditeur et voyageur)
    */
-  async createTransaction(userId, transactionData) {
-    // TODO: Create new transaction
-    // - Verify shipment and trip exist and are available
-    // - Check capacity constraints
-    // - Generate security code
-    // - Create transaction
-    // - Send notifications to both parties
-    
-    throw new Error('Not implemented');
+  async createTransaction(req, res, next) {
+    try {
+      // TODO: Create new transaction
+      // - Verify shipment and trip exist and are available
+      // - Check capacity constraints
+      // - Generate security code
+      // - Create transaction
+      // - Send notifications to both parties
+      
+      const transaction = await transactionService.createTransaction(req.user.id, req.body);
+      return successResponse(res, transaction, 'Transaction created successfully', 201);
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
-   * Obtenir la liste des transactions (admin only)
+   * Obtenir la liste des transactions
    */
-  async getTransactions(queryParams) {
-    // TODO: Get paginated list of transactions (admin only)
-    // - Apply filters (status, date range, users)
-    // - Include shipment and trip details
-    // - Return paginated results
-    
-    throw new Error('Not implemented');
+  async getTransactions(req, res, next) {
+    try {
+      // TODO: Get paginated list of transactions (admin only)
+      
+      const { transactions, total } = await transactionService.getTransactions(req.query);
+      const pagination = {
+        page: parseInt(req.query.page) || 1,
+        limit: parseInt(req.query.limit) || 10,
+        total
+      };
+      
+      return paginatedResponse(res, transactions, pagination, 'Transactions retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
-   * Obtenir les transactions de l'utilisateur
+   * Obtenir les transactions de l'utilisateur connecté
    */
-  async getMyTransactions(userId, queryParams) {
-    // TODO: Get user's transactions
-    // - Filter by senderId OR travelerId
-    // - Apply status filter if provided
-    // - Include shipment and trip details
-    // - Return transactions
-    
-    throw new Error('Not implemented');
+  async getMyTransactions(req, res, next) {
+    try {
+      // TODO: Get user's transactions (as sender or traveler)
+      
+      const transactions = await transactionService.getMyTransactions(req.user.id, req.query);
+      return successResponse(res, transactions, 'My transactions retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
    * Obtenir une transaction par ID
    */
-  async getTransactionById(transactionId, userId) {
-    // TODO: Get transaction by ID
-    // - Verify user is involved (sender or traveler)
-    // - Include full details (shipment, trip, users)
-    // - Return transaction
-    
-    throw new Error('Not implemented');
+  async getTransactionById(req, res, next) {
+    try {
+      // TODO: Get transaction by ID
+      // - Verify user is involved in transaction
+      
+      const transaction = await transactionService.getTransactionById(req.params.id, req.user.id);
+      return successResponse(res, transaction, 'Transaction retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
    * Mettre à jour le statut d'une transaction
    */
-  async updateTransactionStatus(transactionId, userId, newStatus) {
-    // TODO: Update transaction status
-    // - Verify user permissions for status change
-    // - Validate status transition
-    // - Update status and related timestamps
-    // - Send notifications
-    // - Return updated transaction
-    
-    throw new Error('Not implemented');
+  async updateTransactionStatus(req, res, next) {
+    try {
+      // TODO: Update transaction status
+      // - Verify user permissions
+      // - Validate status transition
+      // - Update status and related timestamps
+      
+      const transaction = await transactionService.updateTransactionStatus(req.params.id, req.user.id, req.body.status);
+      return successResponse(res, transaction, 'Transaction status updated successfully');
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
    * Confirmer une transaction (voyageur accepte)
    */
-  async confirmTransaction(transactionId, userId) {
-    // TODO: Confirm transaction
-    // - Verify user is the traveler
-    // - Update status to CONFIRMED
-    // - Set confirmedAt timestamp
-    // - Send notification to sender
-    
-    throw new Error('Not implemented');
+  async confirmTransaction(req, res, next) {
+    try {
+      // TODO: Confirm transaction
+      // - Verify user is the traveler
+      // - Update status to CONFIRMED
+      // - Set confirmedAt timestamp
+      // - Send notification to sender
+      
+      const transaction = await transactionService.confirmTransaction(req.params.id, req.user.id);
+      return successResponse(res, transaction, 'Transaction confirmed successfully');
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
    * Confirmer la récupération du colis
    */
-  async confirmPickup(transactionId, userId) {
-    // TODO: Confirm pickup
-    // - Verify user is the traveler
-    // - Verify transaction is CONFIRMED
-    // - Update status to IN_PROGRESS
-    // - Set pickedUpAt timestamp
-    // - Send notification to sender
-    
-    throw new Error('Not implemented');
+  async confirmPickup(req, res, next) {
+    try {
+      // TODO: Confirm pickup
+      // - Verify user is the traveler
+      // - Update status to IN_PROGRESS
+      // - Set pickedUpAt timestamp
+      
+      const transaction = await transactionService.confirmPickup(req.params.id, req.user.id);
+      return successResponse(res, transaction, 'Pickup confirmed successfully');
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
    * Confirmer la livraison du colis
    */
-  async confirmDelivery(transactionId, userId, securityCode) {
-    // TODO: Confirm delivery
-    // - Verify security code
-    // - Update status to DELIVERED
-    // - Set deliveredAt timestamp
-    // - Process payment to traveler
-    // - Send notifications
-    
-    throw new Error('Not implemented');
+  async confirmDelivery(req, res, next) {
+    try {
+      // TODO: Confirm delivery
+      // - Verify security code
+      // - Update status to DELIVERED
+      // - Set deliveredAt timestamp
+      // - Process payment
+      
+      const transaction = await transactionService.confirmDelivery(req.params.id, req.user.id, req.body.securityCode);
+      return successResponse(res, transaction, 'Delivery confirmed successfully');
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
    * Créer un litige
    */
-  async createDispute(transactionId, userId, reason) {
-    // TODO: Create dispute
-    // - Update transaction status to DISPUTED
-    // - Create dispute record with reason
-    // - Send notifications to admin and other party
-    // - Return dispute information
-    
-    throw new Error('Not implemented');
-  }
-
-  /**
-   * Générer un code de sécurité unique
-   */
-  generateSecurityCode() {
-    // TODO: Generate unique security code
-    // - Generate random 6-digit code
-    // - Ensure uniqueness in database
-    // - Return code
-    
-    throw new Error('Not implemented');
-  }
-
-  /**
-   * Vérifier les contraintes de capacité
-   */
-  async checkCapacityConstraints(tripId, shipmentWeight) {
-    // TODO: Check capacity constraints
-    // - Get trip available capacity
-    // - Calculate current usage from active transactions
-    // - Verify shipment fits in remaining capacity
-    
-    throw new Error('Not implemented');
+  async createDispute(req, res, next) {
+    try {
+      // TODO: Create dispute
+      // - Update status to DISPUTED
+      // - Create dispute record
+      // - Send notifications to admin
+      
+      const dispute = await transactionService.createDispute(req.params.id, req.user.id, req.body.reason);
+      return successResponse(res, dispute, 'Dispute created successfully');
+    } catch (error) {
+      next(error);
+    }
   }
 }
 
-export default new TransactionService();
+module.exports = new TransactionController();

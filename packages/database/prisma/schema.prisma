@@ -10,68 +10,348 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Énumérations pour les statuts et rôles
+enum UserRole {
+  SENDER    // Expéditeur uniquement
+  TRAVELER  // Voyageur uniquement
+  BOTH      // Les deux rôles
+}
+
+enum UserStatus {
+  PENDING_VERIFICATION
+  VERIFIED
+  SUSPENDED
+  INACTIVE
+}
+
+enum ShipmentStatus {
+  PENDING_MATCH    // En attente de correspondance
+  MATCHED          // Correspondance trouvée
+  IN_TRANSIT       // En transit
+  DELIVERED        // Livré
+  CANCELED         // Annulé
+}
+
+enum TripStatus {
+  AVAILABLE        // Disponible pour transport
+  PARTIALLY_BOOKED // Partiellement réservé
+  FULLY_BOOKED     // Complet
+  COMPLETED        // Terminé
+  CANCELED         // Annulé
+}
+
+enum TransactionStatus {
+  PENDING          // En attente de confirmation
+  CONFIRMED        // Confirmé
+  IN_PROGRESS      // En cours
+  DELIVERED        // Livré
+  DISPUTED         // En litige
+  CANCELED         // Annulé
+  COMPLETED        // Terminé avec succès
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum NotificationType {
+  SHIPMENT_MATCHED
+  TRIP_BOOKED
+  DELIVERY_CONFIRMED
+  PAYMENT_RECEIVED
+  REVIEW_RECEIVED
+  SYSTEM_ALERT
+}
+
+enum ReviewType {
+  SENDER_TO_TRAVELER
+  TRAVELER_TO_SENDER
+}
+
+// Modèle principal des utilisateurs
 model User {
-  id                    String   @id @default(cuid())
-  email                 String   @unique
-  hashedPassword        String
-  salt                  String
-  resetToken            String?
-  resetTokenExpiresAt   DateTime?
-  memberships           Membership[]
-  sessions              Session[]
+  id                String     @id @default(cuid())
+  email             String     @unique
+  emailVerified     DateTime?
+  password          String?    // Nullable pour OAuth
+  firstName         String
+  lastName          String
+  phone             String?
+  profilePicture    String?
+  dateOfBirth       DateTime?
+  role              UserRole   @default(BOTH)
+  status            UserStatus @default(PENDING_VERIFICATION)
+  
+  // Informations de vérification KYC
+  isPhoneVerified   Boolean    @default(false)
+  isEmailVerified   Boolean    @default(false)
+  isIdentityVerified Boolean   @default(false)
+  identityDocument  String?    // URL du document d'identité
+  
+  // Informations de géolocalisation
+  city              String?
+  country           String?
+  address           String?
+  
+  // Métadonnées
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  lastLoginAt       DateTime?
+  
+  // Relations
+  sentShipments     Shipment[] @relation("ShipmentSender")
+  trips             Trip[]     @relation("TripTraveler")
+  transactions      Transaction[]
+  sentReviews       Review[]   @relation("ReviewSender")
+  receivedReviews   Review[]   @relation("ReviewReceiver")
+  notifications     Notification[]
+  paymentMethods    PaymentMethod[]
+  
+  @@map("users")
 }
 
-model Membership {
-  id        String   @id @default(cuid())
-  role      Role     @default(USER)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String
-
-  @@unique([userId, projectId], name: "user_project")
+// Modèle des colis à expédier
+model Shipment {
+  id                String         @id @default(cuid())
+  senderId          String
+  
+  // Détails du colis
+  title             String
+  description       String?
+  weight            Float          // En kg
+  length            Float?         // En cm
+  width             Float?         // En cm
+  height            Float?         // En cm
+  photos            String[]       // URLs des photos
+  
+  // Adresses
+  pickupAddress     String
+  pickupCity        String
+  pickupCountry     String
+  deliveryAddress   String
+  deliveryCity      String
+  deliveryCountry   String
+  
+  // Informations financières
+  proposedPrice     Float          // Prix proposé par l'expéditeur
+  currency          String         @default("XOF")
+  
+  // Contraintes temporelles
+  pickupDateFrom    DateTime?      // Date de récupération souhaitée (début)
+  pickupDateTo      DateTime?      // Date de récupération souhaitée (fin)
+  deliveryDateBy    DateTime?      // Date de livraison souhaitée
+  
+  // Statut et métadonnées
+  status            ShipmentStatus @default(PENDING_MATCH)
+  isUrgent          Boolean        @default(false)
+  isFragile         Boolean        @default(false)
+  requiresSignature Boolean        @default(false)
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  // Relations
+  sender            User           @relation("ShipmentSender", fields: [senderId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
+  
+  @@map("shipments")
 }
 
-model Project {
-  id            String       @id @default(cuid())
-  name          String
-  description   String?
-  memberships   Membership[]
-  sessions      Session[]
-  conversations Conversation[]
+// Modèle des trajets proposés par les voyageurs
+model Trip {
+  id                String      @id @default(cuid())
+  travelerId        String
+  
+  // Détails du trajet
+  title             String
+  description       String?
+  
+  // Itinéraire
+  departureCity     String
+  departureCountry  String
+  arrivalCity       String
+  arrivalCountry    String
+  
+  // Dates et horaires
+  departureDate     DateTime
+  arrivalDate       DateTime
+  
+  // Capacité de transport
+  availableWeight   Float       // Poids disponible en kg
+  availableVolume   Float?      // Volume disponible en litres
+  maxPackages       Int         @default(1)
+  
+  // Informations financières
+  pricePerKg        Float?      // Prix par kg
+  minimumPrice      Float?      // Prix minimum
+  currency          String      @default("XOF")
+  
+  // Statut et métadonnées
+  status            TripStatus  @default(AVAILABLE)
+  isRecurring       Boolean     @default(false)
+  recurringPattern  String?     // Pattern de récurrence (JSON)
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  // Relations
+  traveler          User        @relation("TripTraveler", fields: [travelerId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
+  
+  @@map("trips")
 }
 
-model Conversation {
-  id        String      @id @default(cuid())
-  name      String
-  messages  Message[]
-  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+// Modèle des transactions (contrats entre expéditeur et voyageur)
+model Transaction {
+  id                String            @id @default(cuid())
+  shipmentId        String
+  tripId            String
+  senderId          String            // Dénormalisé pour faciliter les requêtes
+  travelerId        String            // Dénormalisé pour faciliter les requêtes
+  
+  // Détails financiers
+  agreedPrice       Float
+  currency          String            @default("XOF")
+  platformFee       Float             @default(0)
+  
+  // Code de sécurité pour la livraison
+  securityCode      String            @unique
+  
+  // Statuts
+  status            TransactionStatus @default(PENDING)
+  paymentStatus     PaymentStatus     @default(PENDING)
+  
+  // Dates importantes
+  confirmedAt       DateTime?
+  pickedUpAt        DateTime?
+  deliveredAt       DateTime?
+  
+  // Métadonnées
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  // Relations
+  shipment          Shipment          @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  trip              Trip              @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  sender            User              @relation(fields: [senderId], references: [id])
+  reviews           Review[]
+  notifications     Notification[]
+  
+  @@map("transactions")
 }
 
-model Message {
-  id              String      @id @default(cuid())
-  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  conversationId  String
-  body            String
-  isEdited        Boolean     @default(false)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+// Modèle des évaluations
+model Review {
+  id              String     @id @default(cuid())
+  transactionId   String
+  reviewerId      String     // Celui qui donne l'avis
+  revieweeId      String     // Celui qui reçoit l'avis
+  type            ReviewType
+  
+  // Contenu de l'évaluation
+  rating          Int        // Note de 1 à 5
+  comment         String?
+  
+  // Critères spécifiques
+  punctuality     Int?       // Ponctualité (1-5)
+  communication   Int?       // Communication (1-5)
+  carefulness     Int?       // Soin apporté (1-5)
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  // Relations
+  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  reviewer        User       @relation("ReviewSender", fields: [reviewerId], references: [id])
+  reviewee        User       @relation("ReviewReceiver", fields: [revieweeId], references: [id])
+  
+  @@unique([transactionId, reviewerId]) // Un utilisateur ne peut évaluer qu'une fois par transaction
+  @@map("reviews")
 }
 
+// Modèle des notifications
+model Notification {
+  id              String           @id @default(cuid())
+  userId          String
+  transactionId   String?
+  
+  type            NotificationType
+  title           String
+  message         String
+  data            Json?            // Données additionnelles (JSON)
+  
+  isRead          Boolean          @default(false)
+  readAt          DateTime?
+  
+  createdAt       DateTime         @default(now())
+  
+  // Relations
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction     Transaction?     @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  
+  @@map("notifications")
+}
+
+// Modèle des moyens de paiement
+model PaymentMethod {
+  id              String   @id @default(cuid())
+  userId          String
+  
+  type            String   // "mobile_money", "bank_card", "bank_transfer"
+  provider        String   // "orange_money", "mtn_money", "visa", etc.
+  accountNumber   String   // Numéro de compte/carte (chiffré)
+  accountName     String?  // Nom du titulaire
+  
+  isDefault       Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("payment_methods")
+}
+
+// Modèle pour l'historique des paiements
+model Payment {
+  id              String        @id @default(cuid())
+  transactionId   String?       // Peut être null pour les recharges de portefeuille
+  userId          String
+  
+  amount          Float
+  currency        String        @default("XOF")
+  type            String        // "payment", "refund", "wallet_topup"
+  method          String        // "mobile_money", "bank_card", etc.
+  
+  status          PaymentStatus @default(PENDING)
+  externalId      String?       // ID de la transaction chez le prestataire de paiement
+  
+  metadata        Json?         // Métadonnées du paiement
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Relations
+  user            User          @relation(fields: [userId], references: [id])
+  
+  @@map("payments")
+}
+
+// Modèle pour les sessions utilisateur (optionnel, pour la gestion des sessions)
 model Session {
-  id        String   @id @default(cuid())
-  start     DateTime @default(now())
-  data      String   @db.Json
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-}
-
-enum Role {
-  USER
-  ADMIN
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
 }

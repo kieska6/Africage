@@ -35,7 +35,7 @@ const paginatedResponse = (res, data, pagination, message = 'Success') => {
   });
 };
 
-export {
+module.exports = {
   successResponse,
   errorResponse,
   paginatedResponse

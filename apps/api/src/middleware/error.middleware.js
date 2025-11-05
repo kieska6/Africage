@@ -1,4 +1,4 @@
-import { errorResponse } from '../utils/response.js';
+const { errorResponse } = require('../utils/response');
 
 /**
  * Middleware global de gestion des erreurs
@@ -36,4 +36,4 @@ const errorMiddleware = (error, req, res, next) => {
   return errorResponse(res, 'Internal server error', 500);
 };
 
-export default errorMiddleware;
+module.exports = errorMiddleware;

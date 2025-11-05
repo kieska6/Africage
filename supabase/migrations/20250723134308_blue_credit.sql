@@ -1,145 +1,169 @@
--- This migration was automatically generated. It's important to check it for unintended changes.
--- If you want to revert this migration, run: npx supabase migration down
--- To apply this migration, run: npx supabase migration up
+/*
+  # Stripe Integration Schema
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET client_min_messages = warning;
-SET default_tablespace = '';
-SET default_table_access_method = heap;
+  1. New Tables
+    - `stripe_customers`: Links Supabase users to Stripe customers
+      - Includes `user_id` (references `auth.users`)
+      - Stores Stripe `customer_id`
+      - Implements soft delete
 
--- Add missing functions for user role management and token system
-CREATE OR REPLACE FUNCTION public.update_user_role(target_user_id uuid, new_role app_role)
-RETURNS void
-LANGUAGE plpgsql
-AS $function$
-BEGIN
-  -- Vérifie si l'appelant est un admin
-  IF NOT is_admin() THEN
-    RAISE EXCEPTION 'Permission denied: Only admins can change user roles.';
-  END IF;
+    - `stripe_subscriptions`: Manages subscription data
+      - Tracks subscription status, periods, and payment details
+      - Links to `stripe_customers` via `customer_id`
+      - Custom enum type for subscription status
+      - Implements soft delete
 
-  -- Met à jour le rôle de l'utilisateur cible
-  UPDATE public.users
-  SET role = new_role
-  WHERE id = target_user_id;
-END;
-$function$;
+    - `stripe_orders`: Stores order/purchase information
+      - Records checkout sessions and payment intents
+      - Tracks payment amounts and status
+      - Custom enum type for order status
+      - Implements soft delete
 
-CREATE OR REPLACE FUNCTION public.add_tokens_to_user(user_id_input uuid, tokens_to_add integer)
-RETURNS void
-LANGUAGE plpgsql
-AS $function$
-BEGIN
-  UPDATE public.users
-  SET token_balance = token_balance + tokens_to_add
-  WHERE id = user_id_input;
-END;
-$function$;
+  2. Views
+    - `stripe_user_subscriptions`: Secure view for user subscription data
+      - Joins customers and subscriptions
+      - Filtered by authenticated user
 
-CREATE OR REPLACE FUNCTION public.get_user_role()
-RETURNS app_role
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $function$
-DECLARE
-  user_role app_role;
-BEGIN
-  SELECT role INTO user_role FROM public.users WHERE id = auth.uid();
-  RETURN user_role;
-END;
-$function$;
+    - `stripe_user_orders`: Secure view for user order history
+      - Joins customers and orders
+      - Filtered by authenticated user
 
-CREATE OR REPLACE FUNCTION public.is_admin()
-RETURNS boolean
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $function$
-BEGIN
-  RETURN get_user_role() = 'ADMIN';
-END;
-$function$;
+  3. Security
+    - Enables Row Level Security (RLS) on all tables
+    - Implements policies for authenticated users to view their own data
+*/
 
-CREATE OR REPLACE FUNCTION public.is_moderator()
-RETURNS boolean
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $function$
-BEGIN
-  RETURN get_user_role() = 'MODERATOR';
-END;
-$function$;
+CREATE TABLE IF NOT EXISTS stripe_customers (
+  id bigint primary key generated always as identity,
+  user_id uuid references auth.users(id) not null unique,
+  customer_id text not null unique,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  deleted_at timestamp with time zone default null
+);
 
-CREATE OR REPLACE FUNCTION public.get_total_shipment_count()
-RETURNS integer
-LANGUAGE plpgsql
-AS $function$
-BEGIN
-    RETURN (SELECT COUNT(*) FROM public.shipments);
-END;
-$function$;
+ALTER TABLE stripe_customers ENABLE ROW LEVEL SECURITY;
 
-CREATE OR REPLACE FUNCTION public.get_total_user_count()
-RETURNS integer
-LANGUAGE plpgsql
-AS $function$
-BEGIN
-    RETURN (SELECT COUNT(*) FROM public.users);
-END;
-$function$;
+CREATE POLICY "Users can view their own customer data"
+    ON stripe_customers
+    FOR SELECT
+    TO authenticated
+    USING (user_id = auth.uid() AND deleted_at IS NULL);
 
--- Create additional RLS policies for admin functions
-CREATE POLICY "Admins can update any user" ON public.users
-  FOR UPDATE
-  TO authenticated
-  USING (
-    ( SELECT users.is_admin
-       FROM users
-      WHERE (users.id = auth.uid()))
-  );
+CREATE TYPE stripe_subscription_status AS ENUM (
+    'not_started',
+    'incomplete',
+    'incomplete_expired',
+    'trialing',
+    'active',
+    'past_due',
+    'canceled',
+    'unpaid',
+    'paused'
+);
 
-CREATE POLICY "Admins can view all transactions" ON public.transactions
-  FOR SELECT
-  TO authenticated
-  USING (
-    ( SELECT users.is_admin
-       FROM users
-      WHERE (users.id = auth.uid()))
-  );
+CREATE TABLE IF NOT EXISTS stripe_subscriptions (
+  id bigint primary key generated always as identity,
+  customer_id text unique not null,
+  subscription_id text default null,
+  price_id text default null,
+  current_period_start bigint default null,
+  current_period_end bigint default null,
+  cancel_at_period_end boolean default false,
+  payment_method_brand text default null,
+  payment_method_last4 text default null,
+  status stripe_subscription_status not null,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  deleted_at timestamp with time zone default null
+);
 
--- Add more indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
-CREATE INDEX IF NOT EXISTS idx_users_role ON public.users(role);
-CREATE INDEX IF NOT EXISTS idx_users_status ON public.users(status);
-CREATE INDEX IF NOT EXISTS idx_users_token_balance ON public.users(token_balance);
+ALTER TABLE stripe_subscriptions ENABLE ROW LEVEL SECURITY;
 
--- Add comments for the new functions
-COMMENT ON FUNCTION public.update_user_role(uuid, app_role) IS 'Updates user role (admin only)';
-COMMENT ON FUNCTION public.add_tokens_to_user(uuid, integer) IS 'Adds tokens to user balance';
-COMMENT ON FUNCTION public.get_user_role() IS 'Gets current user role';
-COMMENT ON FUNCTION public.is_admin() IS 'Checks if current user is admin';
-COMMENT ON FUNCTION public.is_moderator() IS 'Checks if current user is moderator';
-COMMENT ON FUNCTION public.get_total_shipment_count() IS 'Gets total shipment count';
-COMMENT ON FUNCTION public.get_total_user_count() IS 'Gets total user count';
+CREATE POLICY "Users can view their own subscription data"
+    ON stripe_subscriptions
+    FOR SELECT
+    TO authenticated
+    USING (
+        customer_id IN (
+            SELECT customer_id
+            FROM stripe_customers
+            WHERE user_id = auth.uid() AND deleted_at IS NULL
+        )
+        AND deleted_at IS NULL
+    );
 
--- Create additional constraints
-ALTER TABLE public.users ADD CONSTRAINT valid_role CHECK (role IN ('USER', 'MODERATOR', 'ADMIN'));
-ALTER TABLE public.users ADD CONSTRAINT valid_status CHECK (status IN ('PENDING_VERIFICATION', 'VERIFIED', 'SUSPENDED', 'INACTIVE'));
-ALTER TABLE public.users ADD CONSTRAINT valid_kyc_status CHECK (kyc_status IN ('NOT_SUBMITTED', 'PENDING_REVIEW', 'VERIFIED', 'REJECTED'));
-ALTER TABLE public.shipments ADD CONSTRAINT valid_status CHECK (status IN ('PENDING_MATCH', 'MATCHED', 'IN_TRANSIT', 'DELIVERED', 'CANCELED'));
-ALTER TABLE public.trips ADD CONSTRAINT valid_status CHECK (status IN ('AVAILABLE', 'PARTIALLY_BOOKED', 'FULLY_BOOKED', 'COMPLETED', 'CANCELED'));
-ALTER TABLE public.transactions ADD CONSTRAINT valid_status CHECK (status IN ('PENDING', 'CONFIRMED', 'IN_PROGRESS', 'DELIVERED', 'DISPUTED', 'CANCELED', 'COMPLETED'));
-ALTER TABLE public.transactions ADD CONSTRAINT valid_payment_status CHECK (payment_status IN ('PENDING', 'PAID', 'REFUNDED', 'FAILED'));
-ALTER TABLE public.notifications ADD CONSTRAINT valid_type CHECK (type IN ('NEW_MESSAGE', 'OFFER_ACCEPTED', 'SHIPMENT_COMPLETED', 'PAYMENT_RECEIVED', 'REVIEW_RECEIVED', 'SYSTEM_ALERT'));
-ALTER TABLE public.reviews ADD CONSTRAINT valid_type CHECK (type IN ('SENDER_TO_TRAVELER', 'TRAVELER_TO_SENDER'));
-ALTER TABLE public.reviews ADD CONSTRAINT valid_rating CHECK (rating >= 1 AND rating <= 5);
-ALTER TABLE public.reviews ADD CONSTRAINT valid_punctuality CHECK (punctuality IS NULL OR (punctuality >= 1 AND punctuality <= 5));
-ALTER TABLE public.reviews ADD CONSTRAINT valid_communication CHECK (communication IS NULL OR (communication >= 1 AND communication <= 5));
-ALTER TABLE public.reviews ADD CONSTRAINT valid_carefulness CHECK (carefulness IS NULL OR (carefulness >= 1 AND carefulness <= 5));
+CREATE TYPE stripe_order_status AS ENUM (
+    'pending',
+    'completed',
+    'canceled'
+);
 
--- Grant necessary permissions
-GRANT USAGE ON SCHEMA public TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+CREATE TABLE IF NOT EXISTS stripe_orders (
+    id bigint primary key generated always as identity,
+    checkout_session_id text not null,
+    payment_intent_id text not null,
+    customer_id text not null,
+    amount_subtotal bigint not null,
+    amount_total bigint not null,
+    currency text not null,
+    payment_status text not null,
+    status stripe_order_status not null default 'pending',
+    created_at timestamp with time zone default now(),
+    updated_at timestamp with time zone default now(),
+    deleted_at timestamp with time zone default null
+);
+
+ALTER TABLE stripe_orders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own order data"
+    ON stripe_orders
+    FOR SELECT
+    TO authenticated
+    USING (
+        customer_id IN (
+            SELECT customer_id
+            FROM stripe_customers
+            WHERE user_id = auth.uid() AND deleted_at IS NULL
+        )
+        AND deleted_at IS NULL
+    );
+
+-- View for user subscriptions
+CREATE VIEW stripe_user_subscriptions WITH (security_invoker = true) AS
+SELECT
+    c.customer_id,
+    s.subscription_id,
+    s.status as subscription_status,
+    s.price_id,
+    s.current_period_start,
+    s.current_period_end,
+    s.cancel_at_period_end,
+    s.payment_method_brand,
+    s.payment_method_last4
+FROM stripe_customers c
+LEFT JOIN stripe_subscriptions s ON c.customer_id = s.customer_id
+WHERE c.user_id = auth.uid()
+AND c.deleted_at IS NULL
+AND s.deleted_at IS NULL;
+
+GRANT SELECT ON stripe_user_subscriptions TO authenticated;
+
+-- View for user orders
+CREATE VIEW stripe_user_orders WITH (security_invoker) AS
+SELECT
+    c.customer_id,
+    o.id as order_id,
+    o.checkout_session_id,
+    o.payment_intent_id,
+    o.amount_subtotal,
+    o.amount_total,
+    o.currency,
+    o.payment_status,
+    o.status as order_status,
+    o.created_at as order_date
+FROM stripe_customers c
+LEFT JOIN stripe_orders o ON c.customer_id = o.customer_id
+WHERE c.user_id = auth.uid()
+AND c.deleted_at IS NULL
+AND o.deleted_at IS NULL;

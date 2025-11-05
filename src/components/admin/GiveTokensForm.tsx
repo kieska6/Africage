@@ -43,7 +43,7 @@ export function GiveTokensForm() {
       setAmount('');
 
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Une erreur est survenue.");
     } finally {
       setLoading(false);
     }

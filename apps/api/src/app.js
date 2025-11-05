@@ -1,24 +1,22 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+require('dotenv').config();
 
 // Import routes
-import authRoutes from './routes/auth.routes.js';
-import userRoutes from './routes/user.routes.js';
-import shipmentRoutes from './routes/shipment.routes.js';
-import tripRoutes from './routes/trip.routes.js';
-import transactionRoutes from './routes/transaction.routes.js';
-import reviewRoutes from './routes/review.routes.js';
-import notificationRoutes from './routes/notification.routes.js';
-import paymentRoutes from './routes/payment.routes.js';
+const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
+const shipmentRoutes = require('./routes/shipment.routes');
+const tripRoutes = require('./routes/trip.routes');
+const transactionRoutes = require('./routes/transaction.routes');
+const reviewRoutes = require('./routes/review.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const paymentRoutes = require('./routes/payment.routes');
 
 // Import middleware
-import errorMiddleware from './middleware/error.middleware.js';
-
-dotenv.config();
+const errorMiddleware = require('./middleware/error.middleware');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -84,4 +82,4 @@ app.listen(PORT, () => {
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
 });
 
-export default app;
+module.exports = app;
