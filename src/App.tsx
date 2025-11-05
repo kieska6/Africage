@@ -1,17 +1,15 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { ProfileCompletionGuard } from './components/auth/ProfileCompletionGuard';
 import { useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load pages
-const HomePage = lazy(() => import('./pages/HomePage'));
+const HomePage = lazy(() => import('./pages/HomePage').then(module => ({ default: module.HomePage })));
 const LoginPage = lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })));
 const SignupPage = lazy(() => import('./pages/SignupPage').then(module => ({ default: module.SignupPage })));
-const CompleteProfilePage = lazy(() => import('./pages/CompleteProfilePage').then(module => ({ default: module.CompleteProfilePage })));
 const PricingPage = lazy(() => import('./pages/PricingPage').then(module => ({ default: module.PricingPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(module => ({ default: module.DashboardPage })));
 const SuccessPage = lazy(() => import('./pages/SuccessPage').then(module => ({ default: module.SuccessPage })));
@@ -80,7 +78,6 @@ function App() {
         <main className="flex-grow">
           <Suspense fallback={<SuspenseFallback />}>
             <Routes>
-              {/* Public Routes */}
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
               <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
@@ -89,33 +86,26 @@ function App() {
               <Route path="/payment-success" element={<PaymentSuccessPage />} />
               <Route path="/terms-of-service" element={<TermsOfServicePage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              
               <Route path="/shipments/:id" element={<ShipmentDetailsPage />} />
               <Route path="/trips/:id" element={<TripDetailsPage />} />
               <Route path="/users/:id" element={<UserProfilePage />} />
 
-              {/* Protected Routes */}
-              <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
-                <Route path="/complete-profile" element={<CompleteProfilePage />} />
-                
-                {/* Routes requiring profile completion */}
-                <Route element={<ProfileCompletionGuard />}>
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/buy-tokens" element={<BuyTokensPage />} />
-                  <Route path="/shipments" element={<ShipmentsPage />} />
-                  <Route path="/create-shipment" element={<CreateShipmentPage />} />
-                  <Route path="/send-package" element={<SendPackagePage />} />
-                  <Route path="/travel" element={<TravelPage />} />
-                  <Route path="/trips" element={<TripsPage />} />
-                  <Route path="/create-trip" element={<CreateTripPage />} />
-                  <Route path="/shipments-list" element={<ShipmentsListPage />} />
-                  <Route path="/leave-review/:transactionId" element={<LeaveReviewPage />} />
-                  <Route path="/messages" element={<MessagesPage />} />
-                  <Route path="/messages/:conversationId" element={<ConversationPage />} />
-                  <Route path="/kyc" element={<KycPage />} />
-                  <Route path="/admin" element={<AdminPage />} />
-                </Route>
-              </Route>
+              <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/buy-tokens" element={<ProtectedRoute><BuyTokensPage /></ProtectedRoute>} />
+              <Route path="/shipments" element={<ProtectedRoute><ShipmentsPage /></ProtectedRoute>} />
+              <Route path="/create-shipment" element={<ProtectedRoute><CreateShipmentPage /></ProtectedRoute>} />
+              <Route path="/send-package" element={<ProtectedRoute><SendPackagePage /></ProtectedRoute>} />
+              <Route path="/travel" element={<ProtectedRoute><TravelPage /></ProtectedRoute>} />
+              <Route path="/trips" element={<ProtectedRoute><TripsPage /></ProtectedRoute>} />
+              <Route path="/create-trip" element={<ProtectedRoute><CreateTripPage /></ProtectedRoute>} />
+              <Route path="/shipments-list" element={<ProtectedRoute><ShipmentsListPage /></ProtectedRoute>} />
+              <Route path="/leave-review/:transactionId" element={<ProtectedRoute><LeaveReviewPage /></ProtectedRoute>} />
+              <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+              <Route path="/messages/:conversationId" element={<ProtectedRoute><ConversationPage /></ProtectedRoute>} />
+              <Route path="/kyc" element={<ProtectedRoute><KycPage /></ProtectedRoute>} />
             </Routes>
           </Suspense>
         </main>

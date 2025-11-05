@@ -186,7 +186,7 @@ const LandingPage = () => (
   </>
 );
 
-export default function HomePage() {
+export function HomePage() {
   const { user } = useAuth();
   return user ? <LoggedInHomePage /> : <LandingPage />;
 }
