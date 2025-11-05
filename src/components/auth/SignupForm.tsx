@@ -49,7 +49,7 @@ export function SignupForm() {
           emailRedirectTo: `${window.location.origin}/login`, // Redirect after email confirmation
           data: {
             first_name: firstName,
-            last_name: lastName
+            last_name: lastName,
           }
         }
       });
@@ -58,7 +58,6 @@ export function SignupForm() {
         setError(error.message);
       } else {
         setSuccess(true);
-        // No longer navigating automatically. User must confirm email.
       }
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue lors de la création du compte');

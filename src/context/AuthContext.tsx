@@ -7,6 +7,11 @@ export interface Profile {
   id: string;
   first_name: string;
   last_name: string;
+  phone_number: string | null;
+  country: string | null;
+  date_of_birth: string | null;
+  profile_avatar_url: string | null;
+  is_profile_complete: boolean;
   role: 'USER' | 'MODERATOR' | 'ADMIN';
   kyc_status: 'NOT_SUBMITTED' | 'PENDING_REVIEW' | 'VERIFIED' | 'REJECTED';
 }
@@ -34,18 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setLoading(true);
     
-    // 1. Vérifier la session active au chargement initial
-    supabase.auth.getSession().then(async ({ data: { session }, error: sessionError }) => {
-      if (sessionError) {
-        console.error("Auth Error on getSession:", sessionError.message);
-        setError("Erreur lors de la récupération de la session.");
-        setLoading(false);
-        return;
-      }
-
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-
+    const fetchUserAndProfile = async (currentUser: User | null) => {
       if (currentUser) {
         const { data: userProfile, error: profileError } = await supabase
           .from('users')
@@ -53,9 +47,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           .eq('id', currentUser.id)
           .single();
         
-        if (!profileError) {
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          setProfile(null);
+        } else {
           setProfile(userProfile as Profile | null);
         }
+      } else {
+        setProfile(null);
+      }
+      setUser(currentUser);
+    };
+
+    // 1. Vérifier la session active au chargement initial
+    supabase.auth.getSession().then(async ({ data: { session }, error: sessionError }) => {
+      if (sessionError) {
+        console.error("Auth Error on getSession:", sessionError.message);
+        setError("Erreur lors de la récupération de la session.");
+      } else {
+        await fetchUserAndProfile(session?.user ?? null);
       }
       setLoading(false);
     }).catch(err => {
@@ -66,28 +76,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // 2. Écouter les changements d'état d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-
-      if (currentUser) {
-        const { data: userProfile, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-        
-        if (!profileError) {
-          setProfile(userProfile as Profile | null);
-        }
-      } else {
-        setProfile(null);
-      }
+      await fetchUserAndProfile(session?.user ?? null);
+      // Set loading to false after the first auth state change
+      if (loading) setLoading(false);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [loading]);
 
   const value = {
     user,
