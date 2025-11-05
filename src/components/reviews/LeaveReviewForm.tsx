@@ -75,7 +75,6 @@ export function LeaveReviewForm({ transaction, revieweeId, reviewerId, onReviewS
               type="button"
               onClick={() => setRating(star)}
               className="focus:outline-none"
-              aria-label={`Donner ${star} étoiles`}
             >
               <Star
                 className={`w-8 h-8 transition-colors ${

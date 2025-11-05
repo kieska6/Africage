@@ -120,12 +120,12 @@ const LoggedInHomePage = () => {
 
 const LandingPage = () => (
   <>
-    <section className="bg-primary text-accent py-20 px-4 sm:px-6 lg:px-8">
+    <section className="bg-primary text-white py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
-          Envoyez et transportez des colis entre continents, <span className="text-white">en toute confiance.</span>
+          Envoyez et transportez des colis entre continents, <span className="text-accent">en toute confiance.</span>
         </h1>
-        <p className="text-xl md:text-2xl mb-12 text-accent/90 max-w-3xl mx-auto">
+        <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-3xl mx-auto">
           Africage connecte les expéditeurs avec des voyageurs vérifiés pour des livraisons rapides, économiques et sécurisées.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

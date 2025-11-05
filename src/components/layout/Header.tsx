@@ -5,7 +5,6 @@ import { Button } from '../ui/Button';
 import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard, Coins, Shield, CheckCircle } from 'lucide-react';
 import { NotificationsBell } from '../notifications/NotificationsBell';
 import { useTokenBalance } from '../../hooks/useTokenBalance';
-import logo from '../../assets/logo.png'; // Utilisation du logo local
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
@@ -50,7 +49,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-            <img src={logo} alt="Africage Logo" className="h-10 w-auto" />
+            <img src="https://i.ibb.co/mJ5pCYQ/logo.png" alt="Africage Logo" className="h-10 w-auto" />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
@@ -66,12 +65,12 @@ export function Header() {
             {user ? (
               <div className="flex items-center space-x-4">
                 <NotificationsBell />
-                <Link to="/messages" className="p-2 rounded-full hover:bg-neutral-100" aria-label="Ouvrir la messagerie">
+                <Link to="/messages" className="p-2 rounded-full hover:bg-neutral-100">
                   <MessageSquare className="w-5 h-5 text-neutral-600" />
                 </Link>
                 
                 <div className="relative" ref={profileMenuRef}>
-                  <button onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} aria-label="Ouvrir le menu du profil" className="w-9 h-9 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                  <button onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} className="w-9 h-9 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                     {userInitials.toUpperCase()}
                   </button>
                   {isProfileMenuOpen && (
@@ -134,7 +133,7 @@ export function Header() {
           </div>
 
           <div className="md:hidden">
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Ouvrir le menu principal" className="text-neutral-700 hover:text-primary p-2">
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-neutral-700 hover:text-primary p-2">
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
