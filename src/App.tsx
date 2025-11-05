@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { ProfileCompletionGuard } from './components/auth/ProfileCompletionGuard';
 import { useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
@@ -31,6 +32,7 @@ const BuyTokensPage = lazy(() => import('./pages/BuyTokensPage').then(module => 
 const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage').then(module => ({ default: module.PaymentSuccessPage })));
 const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
 const KycPage = lazy(() => import('./pages/KycPage').then(module => ({ default: module.KycPage })));
+const CompleteProfilePage = lazy(() => import('./pages/CompleteProfilePage').then(module => ({ default: module.CompleteProfilePage })));
 const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(module => ({ default: module.TermsOfServicePage })));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(module => ({ default: module.PrivacyPolicyPage })));
 
@@ -87,25 +89,29 @@ function App() {
               <Route path="/terms-of-service" element={<TermsOfServicePage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               
+              {/* Nouvelle route pour la complétion du profil */}
+              <Route path="/complete-profile" element={<CompleteProfilePage />} />
+              
               <Route path="/shipments/:id" element={<ShipmentDetailsPage />} />
               <Route path="/trips/:id" element={<TripDetailsPage />} />
               <Route path="/users/:id" element={<UserProfilePage />} />
 
+              {/* Routes protégées par authentification */}
               <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-              <Route path="/buy-tokens" element={<ProtectedRoute><BuyTokensPage /></ProtectedRoute>} />
-              <Route path="/shipments" element={<ProtectedRoute><ShipmentsPage /></ProtectedRoute>} />
-              <Route path="/create-shipment" element={<ProtectedRoute><CreateShipmentPage /></ProtectedRoute>} />
-              <Route path="/send-package" element={<ProtectedRoute><SendPackagePage /></ProtectedRoute>} />
-              <Route path="/travel" element={<ProtectedRoute><TravelPage /></ProtectedRoute>} />
-              <Route path="/trips" element={<ProtectedRoute><TripsPage /></ProtectedRoute>} />
-              <Route path="/create-trip" element={<ProtectedRoute><CreateTripPage /></ProtectedRoute>} />
-              <Route path="/shipments-list" element={<ProtectedRoute><ShipmentsListPage /></ProtectedRoute>} />
-              <Route path="/leave-review/:transactionId" element={<ProtectedRoute><LeaveReviewPage /></ProtectedRoute>} />
-              <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
-              <Route path="/messages/:conversationId" element={<ProtectedRoute><ConversationPage /></ProtectedRoute>} />
-              <Route path="/kyc" element={<ProtectedRoute><KycPage /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><ProfileCompletionGuard><DashboardPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfileCompletionGuard><ProfilePage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/buy-tokens" element={<ProtectedRoute><ProfileCompletionGuard><BuyTokensPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/shipments" element={<ProtectedRoute><ProfileCompletionGuard><ShipmentsPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/create-shipment" element={<ProtectedRoute><ProfileCompletionGuard><CreateShipmentPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/send-package" element={<ProtectedRoute><ProfileCompletionGuard><SendPackagePage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/travel" element={<ProtectedRoute><ProfileCompletionGuard><TravelPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/trips" element={<ProtectedRoute><ProfileCompletionGuard><TripsPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/create-trip" element={<ProtectedRoute><ProfileCompletionGuard><CreateTripPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/shipments-list" element={<ProtectedRoute><ProfileCompletionGuard><ShipmentsListPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/leave-review/:transactionId" element={<ProtectedRoute><ProfileCompletionGuard><LeaveReviewPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/messages" element={<ProtectedRoute><ProfileCompletionGuard><MessagesPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/messages/:conversationId" element={<ProtectedRoute><ProfileCompletionGuard><ConversationPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/kyc" element={<ProtectedRoute><ProfileCompletionGuard><KycPage /></ProfileCompletionGuard></ProtectedRoute>} />
             </Routes>
           </Suspense>
         </main>
