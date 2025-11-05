@@ -5,6 +5,7 @@ import { Button } from '../ui/Button';
 import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard, Coins, Shield, CheckCircle } from 'lucide-react';
 import { NotificationsBell } from '../notifications/NotificationsBell';
 import { useTokenBalance } from '../../hooks/useTokenBalance';
+import logo from '../../assets/logo.png';
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
@@ -49,7 +50,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-            <img src="https://i.ibb.co/ZzcJW9rL/Africage-remove-BG.png" alt="Africage Logo" className="h-10 w-auto" />
+            <img src={logo} alt="Africage Logo" className="h-10 w-auto" />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
