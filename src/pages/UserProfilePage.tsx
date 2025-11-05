@@ -13,6 +13,8 @@ interface UserProfile {
   profile_picture: string | null;
   created_at: string;
   kyc_status: 'NOT_SUBMITTED' | 'PENDING_REVIEW' | 'VERIFIED' | 'REJECTED';
+  average_rating: number | null;
+  review_count: number;
 }
 
 interface Review {
@@ -72,10 +74,10 @@ export function UserProfilePage() {
         setError(null);
 
         const [profileRes, shipmentsRes, tripsRes, reviewsRes] = await Promise.all([
-          supabase.from('users').select('*').eq('id', id).single(),
+          supabase.from('users').select('id, first_name, last_name, profile_picture, created_at, kyc_status, average_rating, review_count').eq('id', id).single(),
           supabase.from('shipments').select('*').eq('sender_id', id).order('created_at', { ascending: false }),
           supabase.from('trips').select('*, traveler:users!traveler_id(first_name, last_name, profile_picture)').eq('traveler_id', id).order('created_at', { ascending: false }),
-          supabase.from('reviews').select('*, reviewer:users!reviews_reviewer_id_fkey(first_name, last_name)').eq('reviewee_id', id)
+          supabase.from('reviews').select('*, reviewer:users!reviews_reviewer_id_fkey(first_name, last_name)').eq('reviewee_id', id).order('created_at', { ascending: false })
         ]);
 
         if (profileRes.error) throw new Error("Profil utilisateur non trouvé.");
@@ -101,9 +103,8 @@ export function UserProfilePage() {
     fetchProfileData();
   }, [id]);
 
-  const averageRating = reviews.length > 0
-    ? (reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length).toFixed(1)
-    : 'N/A';
+  const averageRating = profile?.average_rating || 0;
+  const totalReviews = profile?.review_count || 0;
 
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen"><Loader2 className="w-12 h-12 text-primary animate-spin" /></div>;
@@ -131,8 +132,8 @@ export function UserProfilePage() {
                 <User className="w-16 h-16 text-neutral-500" />
               </div>
             )}
-            <div>
-              <div className="flex items-center gap-4">
+            <div className="text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start gap-4">
                 <h1 className="text-4xl font-bold text-neutral-800">{profile.first_name} {profile.last_name}</h1>
                 {profile.kyc_status === 'VERIFIED' && (
                   <span className="flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
@@ -142,39 +143,28 @@ export function UserProfilePage() {
                 )}
               </div>
               <p className="text-neutral-500 mt-2">Membre depuis {new Date(profile.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}</p>
-              <div className="flex items-center gap-2 mt-3 text-lg">
-                <Star className="w-6 h-6 text-yellow-400 fill-current" />
-                <span className="font-bold text-neutral-700">{averageRating}</span>
-                <span className="text-neutral-500">({reviews.length} avis)</span>
+              
+              {/* Affichage de la note moyenne */}
+              <div className="flex items-center justify-center sm:justify-start gap-2 mt-3 text-lg">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className={`w-6 h-6 ${i < averageRating ? 'text-yellow-400 fill-current' : 'text-neutral-300'}`} />
+                  ))}
+                </div>
+                <span className="font-bold text-neutral-700">{averageRating.toFixed(1)}</span>
+                <span className="text-neutral-500">({totalReviews} avis)</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center mb-12">
-          <div className="bg-white p-6 rounded-2xl shadow-lg border">
-            <Package className="w-10 h-10 text-accent mx-auto mb-3" />
-            <p className="text-3xl font-bold text-neutral-800">{shipments.length}</p>
-            <p className="text-neutral-600">Colis envoyés</p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl shadow-lg border">
-            <Briefcase className="w-10 h-10 text-accent mx-auto mb-3" />
-            <p className="text-3xl font-bold text-neutral-800">{trips.length}</p>
-            <p className="text-neutral-600">Voyages effectués</p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl shadow-lg border">
-            <Star className="w-10 h-10 text-accent mx-auto mb-3" />
-            <p className="text-3xl font-bold text-neutral-800">{reviews.length}</p>
-            <p className="text-neutral-600">Avis reçus</p>
-          </div>
-        </div>
-
+        {/* Section des avis reçus */}
         <div className="mb-12">
           <div className="flex items-center mb-6">
             <Star className="w-6 h-6 text-accent mr-3" />
-            <h2 className="text-2xl font-bold text-neutral-800">Avis reçus</h2>
+            <h2 className="text-2xl font-bold text-neutral-800">Avis reçus ({totalReviews})</h2>
           </div>
+          
           {reviews.length > 0 ? (
             <div className="space-y-6">
               {reviews.map(review => (
@@ -188,6 +178,13 @@ export function UserProfilePage() {
                     </div>
                   </div>
                   <p className="text-neutral-600 italic">"{review.comment}"</p>
+                  <p className="text-xs text-neutral-500 mt-2">
+                    {new Date(review.created_at).toLocaleDateString('fr-FR', { 
+                      day: 'numeric', 
+                      month: 'long', 
+                      year: 'numeric' 
+                    })}
+                  </p>
                 </div>
               ))}
             </div>
@@ -196,6 +193,25 @@ export function UserProfilePage() {
               <p className="text-neutral-600">{profile.first_name} n'a pas encore reçu d'avis.</p>
             </div>
           )}
+        </div>
+
+        {/* Autres sections existantes */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center mb-12">
+          <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <Package className="w-10 h-10 text-accent mx-auto mb-3" />
+            <p className="text-3xl font-bold text-neutral-800">{shipments.length}</p>
+            <p className="text-neutral-600">Colis envoyés</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <Briefcase className="w-10 h-10 text-accent mx-auto mb-3" />
+            <p className="text-3xl font-bold text-neutral-800">{trips.length}</p>
+            <p className="text-neutral-600">Voyages effectués</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <Star className="w-10 h-10 text-accent mx-auto mb-3" />
+            <p className="text-3xl font-bold text-neutral-800">{totalReviews}</p>
+            <p className="text-neutral-600">Avis reçus</p>
+          </div>
         </div>
 
         <div className="mb-12">
