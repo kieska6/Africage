@@ -12,6 +12,7 @@ import countriesData from '../data/countries+cities.json';
 interface Country {
   name: string;
   iso2: string;
+  cities: string[];
 }
 
 export function CompleteProfilePage() {
