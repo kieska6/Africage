@@ -50,6 +50,7 @@ export function ShipmentDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [hasUserReviewed, setHasUserReviewed] = useState(false);
+  const [conversation, setConversation] = useState<any>(null);
 
   useEffect(() => {
     const fetchShipmentAndReviews = async () => {
@@ -86,6 +87,20 @@ export function ShipmentDetailsPage() {
           setHasUserReviewed(!!userHasReviewed);
         }
 
+        // Check if there's a conversation for this shipment
+        if (user) {
+          const { data: convoData, error: convoError } = await supabase
+            .from('conversations')
+            .select('*')
+            .eq('shipment_id', id)
+            .in('sender_id', [user.id])
+            .single();
+
+          if (!convoError && convoData) {
+            setConversation(convoData);
+          }
+        }
+
       } catch (err: any) {
         setError("Impossible de charger les détails de l'annonce.");
         console.error(err);
@@ -120,6 +135,12 @@ export function ShipmentDetailsPage() {
     user && 
     shipment.status === 'COMPLETED' && 
     !hasUserReviewed && 
+    (user.id === shipment.sender_id);
+
+  // Vérifier si on doit afficher le bouton de conversation
+  const canShowChatButton = 
+    user && 
+    (shipment.status === 'IN_TRANSIT' || shipment.status === 'COMPLETED') && 
     (user.id === shipment.sender_id);
 
   const formatDate = (dateString: string) => {
@@ -207,6 +228,16 @@ export function ShipmentDetailsPage() {
                   </Link>
                 </div>
               </div>
+
+              {/* Bouton de conversation */}
+              {canShowChatButton && conversation && (
+                <Link 
+                  to={`/messages/${conversation.id}`}
+                  className="block bg-primary text-white text-center py-3 px-4 rounded-2xl hover:bg-primary/90 transition-colors font-semibold"
+                >
+                  Voir la conversation
+                </Link>
+              )}
             </div>
           </div>
 
