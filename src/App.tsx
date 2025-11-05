@@ -8,7 +8,7 @@ import { useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load pages
-const HomePage = lazy(() => import('./pages/HomePage').then(module => ({ default: module.HomePage })));
+const HomePage = lazy(() => import('./pages/HomePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })));
 const SignupPage = lazy(() => import('./pages/SignupPage').then(module => ({ default: module.SignupPage })));
 const CompleteProfilePage = lazy(() => import('./pages/CompleteProfilePage').then(module => ({ default: module.CompleteProfilePage })));
