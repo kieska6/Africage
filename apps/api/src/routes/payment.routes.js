@@ -1,8 +1,7 @@
-const express = require('express');
-const { body, param } = require('express-validator');
-const paymentController = require('../controllers/payment.controller');
-const { validateRequest } = require('../middleware/validation.middleware');
-const { authenticateToken } = require('../middleware/auth.middleware');
+import { body, param } from 'express-validator';
+import paymentController from '../controllers/payment.controller.js';
+import { validateRequest } from '../middleware/validation.middleware.js';
+import { authenticateToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
@@ -34,4 +33,4 @@ router.get('/history', paymentController.getPaymentHistory);
 router.post('/process', processPaymentValidation, validateRequest, paymentController.processPayment);
 router.post('/webhook', paymentController.handleWebhook);
 
-module.exports = router;
+export default router;

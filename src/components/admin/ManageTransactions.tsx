@@ -35,7 +35,10 @@ export function ManageTransactions() {
         .not('status', 'in', '("COMPLETED", "CANCELLED")')
         .order('created_at', { ascending: false });
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        throw fetchError;
+      }
+      
       setTransactions(data as any || []);
     } catch (err: any) {
       setError("Impossible de charger les transactions.");

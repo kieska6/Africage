@@ -1,5 +1,5 @@
-const { validationResult } = require('express-validator');
-const { errorResponse } = require('../utils/response');
+import { validationResult } from 'express-validator';
+import { errorResponse } from '../utils/response.js';
 
 /**
  * Middleware pour valider les données d'entrée
@@ -20,6 +20,6 @@ const validateRequest = (req, res, next) => {
   next();
 };
 
-module.exports = {
+export {
   validateRequest
 };

@@ -1,20 +1,17 @@
-// vite.config.ts
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// https://vitejs.dev/config/
+// Générer un timestamp de build pour le versioning
+const buildTimestamp = Date.now();
+
 export default defineConfig({
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
-      // 🚨 CORRECTION : Ajout de la configuration Workbox
       workbox: {
-        // Augmente la limite de taille des fichiers à pré-cacher de 2 MiB (par défaut) à 5 MiB.
-        // Cela permet d'inclure votre chunk "countries_cities".
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
       manifest: {
@@ -47,4 +44,22 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    // Générer des noms de fichiers avec hash pour le cache busting
+    rollupOptions: {
+      output: {
+        entryFileNames: `assets/[name]-${buildTimestamp}.js`,
+        chunkFileNames: `assets/[name]-${buildTimestamp}.js`,
+        assetFileNames: `assets/[name]-${buildTimestamp}.[ext]`
+      }
+    },
+    // Configurer le répertoire de build
+    outDir: 'dist',
+    // Configurer le chemin de base pour les assets
+    assetsDir: 'assets'
+  },
+  define: {
+    // Exposer le timestamp de build aux composants React
+    '__BUILD_VERSION__': JSON.stringify(buildTimestamp.toString())
+  }
 });

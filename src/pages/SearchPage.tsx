@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { ShipmentCard } from '../components/shipments/ShipmentCard';
 import { Button } from '../components/ui/Button';
@@ -18,6 +19,7 @@ interface Shipment {
 }
 
 export function SearchPage() {
+  const navigate = useNavigate();
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
   const [results, setResults] = useState<Shipment[]>([]);

@@ -1,6 +1,6 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const prisma = require('../utils/prisma');
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import prisma from '../utils/prisma.js';
 
 /**
  * Service pour l'authentification
@@ -163,7 +163,9 @@ class AuthService {
         isIdentityVerified: true,
         city: true,
         country: true,
+        address: true,
         createdAt: true,
+        updatedAt: true,
         lastLoginAt: true
       }
     });
@@ -194,4 +196,4 @@ class AuthService {
   }
 }
 
-module.exports = new AuthService();
+export default new AuthService();

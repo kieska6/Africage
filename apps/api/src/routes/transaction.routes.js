@@ -1,8 +1,7 @@
-const express = require('express');
-const { body, param } = require('express-validator');
-const transactionController = require('../controllers/transaction.controller');
-const { validateRequest } = require('../middleware/validation.middleware');
-const { authenticateToken, requireVerifiedUser } = require('../middleware/auth.middleware');
+import { body, param } from 'express-validator';
+import transactionController from '../controllers/transaction.controller.js';
+import { validateRequest } from '../middleware/validation.middleware.js';
+import { authenticateToken, requireVerifiedUser } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
@@ -35,4 +34,4 @@ router.post('/:id/delivery', [param('id').isString(), body('securityCode').isStr
 // Routes de gestion des litiges
 router.post('/:id/dispute', [param('id').isString(), body('reason').isString()], validateRequest, transactionController.createDispute);
 
-module.exports = router;
+export default router;

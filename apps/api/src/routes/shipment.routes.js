@@ -1,8 +1,7 @@
-const express = require('express');
-const { body, param, query } = require('express-validator');
-const shipmentController = require('../controllers/shipment.controller');
-const { validateRequest } = require('../middleware/validation.middleware');
-const { authenticateToken, requireRole, requireVerifiedUser } = require('../middleware/auth.middleware');
+import { body, param, query } from 'express-validator';
+import shipmentController from '../controllers/shipment.controller.js';
+import { validateRequest } from '../middleware/validation.middleware.js';
+import { authenticateToken, requireRole, requireVerifiedUser } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
@@ -45,4 +44,4 @@ router.delete('/:id', [param('id').isString()], validateRequest, shipmentControl
 router.get('/search/compatible', shipmentController.searchCompatibleShipments);
 router.post('/:id/photos', [param('id').isString()], validateRequest, shipmentController.uploadPhotos);
 
-module.exports = router;
+export default router;

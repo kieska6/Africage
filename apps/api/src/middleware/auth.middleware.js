@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
-const { errorResponse } = require('../utils/response');
-const prisma = require('../utils/prisma');
+import jwt from 'jsonwebtoken';
+import { errorResponse } from '../utils/response.js';
+import prisma from '../utils/prisma.js';
 
 /**
  * Middleware d'authentification JWT
@@ -140,7 +140,7 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   authenticateToken,
   requireRole,
   requireVerifiedUser,

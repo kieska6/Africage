@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { Alert } from '../ui/Alert';
 import { Check } from 'lucide-react';
 
-// Définition des types pour les données
+// Définition des types
 interface Traveler {
   first_name: string;
   last_name: string;
@@ -18,7 +18,7 @@ interface Transaction {
   id: string;
   shipment_id: string;
   shipments: Shipment;
-  users: Traveler | null;
+  users: Traveler;
 }
 
 interface ConfirmationCardProps {

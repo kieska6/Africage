@@ -1,5 +1,4 @@
-const prisma = require('../utils/prisma');
-const { SHIPMENT_STATUS } = require('../utils/constants');
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Service pour la gestion des colis
@@ -23,6 +22,7 @@ class ShipmentService {
       deliveryCity,
       deliveryCountry,
       proposedPrice,
+      currency,
       pickupDateFrom,
       pickupDateTo,
       deliveryDateBy,
@@ -47,24 +47,14 @@ class ShipmentService {
         deliveryCity,
         deliveryCountry,
         proposedPrice,
+        currency,
         pickupDateFrom: pickupDateFrom ? new Date(pickupDateFrom) : null,
         pickupDateTo: pickupDateTo ? new Date(pickupDateTo) : null,
         deliveryDateBy: deliveryDateBy ? new Date(deliveryDateBy) : null,
         isUrgent,
         isFragile,
-        requiresSignature
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            profilePicture: true,
-            city: true,
-            country: true
-          }
-        }
+        requiresSignature,
+        status: 'PENDING_MATCH'
       }
     });
 
@@ -74,7 +64,7 @@ class ShipmentService {
   }
 
   /**
-   * Obtenir la liste des colis avec filtres
+   * Obtenir la liste des colis
    */
   async getShipments(queryParams) {
     const { 
@@ -133,9 +123,6 @@ class ShipmentService {
               city: true,
               country: true
             }
-          },
-          transactions: {
-            select: { id: true, status: true }
           }
         },
         orderBy: { createdAt: 'desc' }
@@ -163,20 +150,10 @@ class ShipmentService {
         transactions: {
           include: {
             trip: {
-              select: {
-                id: true,
-                title: true,
-                departureDate: true,
-                arrivalDate: true
-              }
+              select: { id: true, title: true, departureDate: true, arrivalDate: true }
             },
             traveler: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                profilePicture: true
-              }
+              select: { id: true, firstName: true, lastName: true, profilePicture: true }
             }
           }
         }
@@ -338,10 +315,6 @@ class ShipmentService {
       deliveryCity: { contains: arrivalCity, mode: 'insensitive' }
     };
 
-    if (availableWeight) {
-      where.weight = { lte: parseFloat(availableWeight) };
-    }
-
     // Filtrer par dates si spécifiées
     if (departureDate && arrivalDate) {
       const depDate = new Date(departureDate);
@@ -399,7 +372,7 @@ class ShipmentService {
       throw new Error('Vous n\'êtes pas autorisé à modifier ce colis');
     }
 
-    // TODO: Implémenter l'upload réel vers un service cloud
+    // TODO: Implémenter l'upload réel vers cloud storage
     // Pour l'instant, on simule avec des URLs fictives
     const photoUrls = files.map((file, index) => 
       `https://example.com/shipments/${shipmentId}/photo-${index + 1}-${Date.now()}.jpg`
@@ -450,4 +423,4 @@ class ShipmentService {
   }
 }
 
-module.exports = new ShipmentService();
+export default new ShipmentService();

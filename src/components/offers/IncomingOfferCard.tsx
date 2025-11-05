@@ -20,7 +20,7 @@ interface Transaction {
   traveler_id: string;
   shipment_id: string;
   shipments: Shipment;
-  users: Traveler | null;
+  users: Traveler;
 }
 
 interface IncomingOfferCardProps {
