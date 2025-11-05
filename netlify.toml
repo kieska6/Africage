@@ -12,3 +12,22 @@
   # On fixe la version de Node.js pour éviter les incompatibilités.
   # La version 18 est une version LTS (Long-Term Support) très stable.
   NODE_VERSION = "18"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https://cvgphokecoacqleecflb.supabase.co https://i.ibb.co https://imgur.com;
+      connect-src 'self' https://*.supabase.co;
+      font-src 'self';
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'none';
+    """
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
