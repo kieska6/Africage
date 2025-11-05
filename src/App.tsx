@@ -31,7 +31,7 @@ const ChatPage = lazy(() => import('./pages/ChatPage').then(module => ({ default
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(module => ({ default: module.ProfilePage })));
 const BuyTokensPage = lazy(() => import('./pages/BuyTokensPage').then(module => ({ default: module.BuyTokensPage })));
 const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage').then(module => ({ default: module.PaymentSuccessPage })));
-const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then(module => ({ default: module.AdminDashboardPage })));
 const KycPage = lazy(() => import('./pages/KycPage').then(module => ({ default: module.KycPage })));
 const CompleteProfilePage = lazy(() => import('./pages/CompleteProfilePage').then(module => ({ default: module.CompleteProfilePage })));
 const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(module => ({ default: module.TermsOfServicePage })));
@@ -98,7 +98,7 @@ function App() {
               <Route path="/users/:id" element={<UserProfilePage />} />
 
               {/* Routes protégées par authentification */}
-              <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><ProfileCompletionGuard><DashboardPage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfileCompletionGuard><ProfilePage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/buy-tokens" element={<ProtectedRoute><ProfileCompletionGuard><BuyTokensPage /></ProfileCompletionGuard></ProtectedRoute>} />

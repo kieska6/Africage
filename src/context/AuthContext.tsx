@@ -17,6 +17,7 @@ export interface Profile {
   is_profile_complete: boolean;
   average_rating: number | null;
   review_count: number;
+  is_admin: boolean;
 }
 
 // Définition du type pour la valeur du contexte
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { data: userProfile, error: profileError } = await supabase
         .from('users')
-        .select('id, email, first_name, last_name, phone_number, profile_avatar_url, country, date_of_birth, role, kyc_status, is_profile_complete, average_rating, review_count')
+        .select('id, email, first_name, last_name, phone_number, profile_avatar_url, country, date_of_birth, role, kyc_status, is_profile_complete, average_rating, review_count, is_admin')
         .eq('id', userId)
         .single();
       
