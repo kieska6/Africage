@@ -27,6 +27,8 @@ export function ShipmentList() {
     const fetchShipments = async () => {
       try {
         setLoading(true);
+        setError(null); // Ajout: reset error state
+
         const { data, error: fetchError } = await supabase
           .from('shipments')
           .select('*')
@@ -36,10 +38,11 @@ export function ShipmentList() {
           throw fetchError;
         }
 
+        console.log('Données reçues:', data); // Debug: vérifier les données
         setShipments(data || []);
       } catch (err: any) {
-        setError('Impossible de charger vos annonces. Veuillez réessayer.');
         console.error('Error fetching shipments:', err);
+        setError('Impossible de charger vos annonces. Veuillez réessayer.');
       } finally {
         setLoading(false);
       }
@@ -63,6 +66,9 @@ export function ShipmentList() {
         <ServerCrash className="w-12 h-12 text-red-500 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-red-700">Une erreur est survenue</h3>
         <p className="text-red-600 mt-2">{error}</p>
+        <Button onClick={() => window.location.reload()} className="mt-4">
+          Réessayer
+        </Button>
       </div>
     );
   }
