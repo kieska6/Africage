@@ -60,9 +60,6 @@ export function Header() {
             <Link to="/travel" className="text-neutral-700 hover:text-primary transition-colors font-medium">
               Voyager
             </Link>
-            <Link to="/search" className="text-neutral-700 hover:text-primary transition-colors font-medium">
-              Rechercher un colis
-            </Link>
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -152,9 +149,6 @@ export function Header() {
             </Link>
             <Link to="/travel" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">
               Voyager
-            </Link>
-            <Link to="/search" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">
-              Rechercher un colis
             </Link>
             
             <hr className="my-2" />

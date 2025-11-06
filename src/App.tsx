@@ -21,7 +21,6 @@ const TravelPage = lazy(() => import('./pages/TravelPage').then(module => ({ def
 const TripsPage = lazy(() => import('./pages/TripsPage').then(module => ({ default: module.TripsPage })));
 const CreateTripPage = lazy(() => import('./pages/CreateTripPage').then(module => ({ default: module.CreateTripPage })));
 const ShipmentsListPage = lazy(() => import('./pages/ShipmentsListPage').then(module => ({ default: module.ShipmentsListPage })));
-const SearchPage = lazy(() => import('./pages/SearchPage').then(module => ({ default: module.SearchPage })));
 const ShipmentDetailsPage = lazy(() => import('./pages/ShipmentDetailsPage').then(module => ({ default: module.ShipmentDetailsPage })));
 const TripDetailsPage = lazy(() => import('./pages/TripDetailsPage').then(module => ({ default: module.TripDetailsPage })));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage').then(module => ({ default: module.UserProfilePage })));
@@ -109,7 +108,6 @@ function App() {
               <Route path="/trips" element={<ProtectedRoute><ProfileCompletionGuard><TripsPage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/create-trip" element={<ProtectedRoute><ProfileCompletionGuard><CreateTripPage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/shipments-list" element={<ProtectedRoute><ProfileCompletionGuard><ShipmentsListPage /></ProfileCompletionGuard></ProtectedRoute>} />
-              <Route path="/search" element={<SearchPage />} />
               <Route path="/leave-review/:transactionId" element={<ProtectedRoute><ProfileCompletionGuard><LeaveReviewPage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><ProfileCompletionGuard><MessagesPage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/messages/:conversationId" element={<ProtectedRoute><ProfileCompletionGuard><ChatPage /></ProfileCompletionGuard></ProtectedRoute>} />
