@@ -27,7 +27,7 @@ export function ShipmentList() {
     const fetchShipments = async () => {
       try {
         setLoading(true);
-        setError(null); // Ajout: reset error state
+        setError(null);
 
         const { data, error: fetchError } = await supabase
           .from('shipments')
@@ -38,11 +38,26 @@ export function ShipmentList() {
           throw fetchError;
         }
 
-        console.log('Données reçues:', data); // Debug: vérifier les données
-        setShipments(data || []);
+        console.log('Données brutes de Supabase:', data);
+        
+        // Vérification que les données sont bien un tableau
+        if (!Array.isArray(data)) {
+          throw new Error('Les données reçues ne sont pas un tableau');
+        }
+
+        // Filtrage des données invalides
+        const validShipments = data.filter(item => 
+          item && 
+          typeof item === 'object' && 
+          item.id && 
+          item.title
+        ) as Shipment[];
+
+        console.log('Annonces valides:', validShipments);
+        setShipments(validShipments);
       } catch (err: any) {
-        console.error('Error fetching shipments:', err);
-        setError('Impossible de charger vos annonces. Veuillez réessayer.');
+        console.error('Erreur lors du chargement des annonces:', err);
+        setError(err.message || 'Impossible de charger vos annonces. Veuillez réessayer.');
       } finally {
         setLoading(false);
       }
