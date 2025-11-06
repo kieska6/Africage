@@ -5,13 +5,17 @@ import { Alert } from '../ui/Alert';
 import { Star } from 'lucide-react';
 
 interface LeaveReviewFormProps {
-  transactionId: string;
+  transaction: {
+    id: string;
+    sender_id: string;
+    traveler_id: string;
+  };
   revieweeId: string;
   reviewerId: string;
   onReviewSubmitted: () => void;
 }
 
-export function LeaveReviewForm({ transactionId, revieweeId, reviewerId, onReviewSubmitted }: LeaveReviewFormProps) {
+export function LeaveReviewForm({ transaction, revieweeId, reviewerId, onReviewSubmitted }: LeaveReviewFormProps) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,12 +33,15 @@ export function LeaveReviewForm({ transactionId, revieweeId, reviewerId, onRevie
     setError('');
 
     try {
+      const reviewType = reviewerId === transaction.sender_id ? 'SENDER_TO_TRAVELER' : 'TRAVELER_TO_SENDER';
+
       const { error: insertError } = await supabase.from('reviews').insert({
-        transaction_id: transactionId,
+        transaction_id: transaction.id,
         reviewee_id: revieweeId,
         reviewer_id: reviewerId,
         rating,
-        comment
+        comment,
+        type: reviewType
       });
 
       if (insertError) throw insertError;
