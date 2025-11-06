@@ -34,8 +34,6 @@ export function ConfirmationList() {
       setLoading(true);
       setError(null);
 
-      // On ne sélectionne que les transactions où le statut est 'DELIVERED' ET
-      // où l'utilisateur est l'expéditeur (sender_id)
       const { data, error: fetchError } = await supabase
         .from('transactions')
         .select(`
@@ -49,15 +47,7 @@ export function ConfirmationList() {
 
       if (fetchError) throw fetchError;
 
-      // Typage correct des données retournées par Supabase
-      const formattedData = data?.map(item => ({
-        id: item.id,
-        shipment_id: item.shipment_id,
-        shipments: item.shipments[0],
-        users: item.users[0]
-      })) || [];
-
-      setConfirmations(formattedData);
+      setConfirmations(data as any || []);
     } catch (err: any) {
       console.error("Erreur lors de la récupération des confirmations:", err);
       setError("Impossible de charger les confirmations en attente.");

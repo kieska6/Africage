@@ -45,20 +45,6 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
-// Middleware pour les en-têtes de cache
-const setCacheHeaders = (req, res, next) => {
-  // Pour les fichiers statiques (HTML, JS, CSS)
-  if (req.path.endsWith('.html') || req.path.endsWith('.js') || req.path.endsWith('.css')) {
-    res.set('Cache-Control', 'no-cache, max-age=0, must-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-  }
-  next();
-};
-
-// Appliquer le middleware de cache
-app.use(setCacheHeaders);
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
