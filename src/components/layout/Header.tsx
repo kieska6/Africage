@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { MessageSquare, Menu, X, User as UserIcon, LogOut, LayoutDashboard, Coins, Shield, CheckCircle } from 'lucide-react';
-import { NotificationsBell } from '../notifications/NotificationsBell';
+import { NotificationBell } from '../notifications/NotificationBell';
 import { useTokenBalance } from '../../hooks/useTokenBalance';
 import logo from '../../assets/logo.png';
 
@@ -60,12 +60,15 @@ export function Header() {
             <Link to="/travel" className="text-neutral-700 hover:text-primary transition-colors font-medium">
               Voyager
             </Link>
+            <Link to="/search" className="text-neutral-700 hover:text-primary transition-colors font-medium">
+              Rechercher un colis
+            </Link>
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
-                <NotificationsBell />
+                <NotificationBell />
                 <Link to="/messages" className="p-2 rounded-full hover:bg-neutral-100">
                   <MessageSquare className="w-5 h-5 text-neutral-600" />
                 </Link>
@@ -150,6 +153,9 @@ export function Header() {
             <Link to="/travel" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">
               Voyager
             </Link>
+            <Link to="/search" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">
+              Rechercher un colis
+            </Link>
             
             <hr className="my-2" />
 
@@ -157,7 +163,7 @@ export function Header() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center py-2">
                   <span className="font-medium text-neutral-700">Notifications</span>
-                  <NotificationsBell />
+                  <NotificationBell />
                 </div>
                 <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Tableau de bord</Link>
                 <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-neutral-700 hover:text-primary font-medium">Mon Profil</Link>
