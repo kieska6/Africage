@@ -43,6 +43,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Récupération du profil pour userId:', userId);
+      
       const { data: userProfile, error: profileError } = await supabase
         .from('users')
         .select('id, email, first_name, last_name, phone_number, profile_avatar_url, country, date_of_birth, role, kyc_status, is_profile_complete, average_rating, review_count, is_admin')
@@ -54,6 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return null;
       }
 
+      console.log('Profil récupéré:', userProfile);
       return userProfile as Profile | null;
     } catch (err) {
       console.error("Error in fetchUserProfile:", err);
@@ -80,6 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
+      console.log('Session récupérée:', session ? 'Session existante' : 'Pas de session');
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
@@ -96,6 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // 2. Écouter les changements d'état d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log('Auth state changed:', _event);
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
