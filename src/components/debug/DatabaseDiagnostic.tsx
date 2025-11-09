@@ -2,11 +2,8 @@ import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useSupabaseConnection } from '../../hooks/useSupabaseConnection';
 import { Button } from '../ui/Button';
-import { Alert } from '../ui/Alert';
-import { 
+import {
   Database, 
-  User, 
-  Package, 
   CheckCircle, 
   XCircle, 
   AlertTriangle, 
@@ -24,7 +21,7 @@ interface DiagnosticResult {
 }
 
 export function DatabaseDiagnostic() {
-  const { testConnection, connected, loading, error: connectionError } = useSupabaseConnection();
+  const { connected } = useSupabaseConnection();
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [runningTest, setRunningTest] = useState(false);
@@ -141,7 +138,7 @@ export function DatabaseDiagnostic() {
       console.log('🔍 Test 5: RLS Policies');
       try {
         // Test avec une requête simple pour voir si les RLS bloquent
-        const { error: rlsError, data: testData } = await supabase
+        const { error: rlsError } = await supabase
           .from('users')
           .select('id')
           .limit(1);
