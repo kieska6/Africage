@@ -21,17 +21,16 @@ const TravelPage = lazy(() => import('./pages/TravelPage').then(module => ({ def
 const TripsPage = lazy(() => import('./pages/TripsPage').then(module => ({ default: module.TripsPage })));
 const CreateTripPage = lazy(() => import('./pages/CreateTripPage').then(module => ({ default: module.CreateTripPage })));
 const ShipmentsListPage = lazy(() => import('./pages/ShipmentsListPage').then(module => ({ default: module.ShipmentsListPage })));
-const SearchPage = lazy(() => import('./pages/SearchPage').then(module => ({ default: module.SearchPage })));
 const ShipmentDetailsPage = lazy(() => import('./pages/ShipmentDetailsPage').then(module => ({ default: module.ShipmentDetailsPage })));
 const TripDetailsPage = lazy(() => import('./pages/TripDetailsPage').then(module => ({ default: module.TripDetailsPage })));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage').then(module => ({ default: module.UserProfilePage })));
 const LeaveReviewPage = lazy(() => import('./pages/LeaveReviewPage').then(module => ({ default: module.LeaveReviewPage })));
 const MessagesPage = lazy(() => import('./pages/MessagesPage').then(module => ({ default: module.MessagesPage })));
-const ChatPage = lazy(() => import('./pages/ChatPage').then(module => ({ default: module.ChatPage })));
+const ConversationPage = lazy(() => import('./pages/ConversationPage').then(module => ({ default: module.ConversationPage })));
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(module => ({ default: module.ProfilePage })));
 const BuyTokensPage = lazy(() => import('./pages/BuyTokensPage').then(module => ({ default: module.BuyTokensPage })));
 const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage').then(module => ({ default: module.PaymentSuccessPage })));
-const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then(module => ({ default: module.AdminDashboardPage })));
+const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
 const KycPage = lazy(() => import('./pages/KycPage').then(module => ({ default: module.KycPage })));
 const CompleteProfilePage = lazy(() => import('./pages/CompleteProfilePage').then(module => ({ default: module.CompleteProfilePage })));
 const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(module => ({ default: module.TermsOfServicePage })));
@@ -98,7 +97,7 @@ function App() {
               <Route path="/users/:id" element={<UserProfilePage />} />
 
               {/* Routes protégées par authentification */}
-              <Route path="/admin" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><ProfileCompletionGuard><DashboardPage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfileCompletionGuard><ProfilePage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/buy-tokens" element={<ProtectedRoute><ProfileCompletionGuard><BuyTokensPage /></ProfileCompletionGuard></ProtectedRoute>} />
@@ -109,10 +108,9 @@ function App() {
               <Route path="/trips" element={<ProtectedRoute><ProfileCompletionGuard><TripsPage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/create-trip" element={<ProtectedRoute><ProfileCompletionGuard><CreateTripPage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/shipments-list" element={<ProtectedRoute><ProfileCompletionGuard><ShipmentsListPage /></ProfileCompletionGuard></ProtectedRoute>} />
-              <Route path="/search" element={<SearchPage />} />
               <Route path="/leave-review/:transactionId" element={<ProtectedRoute><ProfileCompletionGuard><LeaveReviewPage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><ProfileCompletionGuard><MessagesPage /></ProfileCompletionGuard></ProtectedRoute>} />
-              <Route path="/messages/:conversationId" element={<ProtectedRoute><ProfileCompletionGuard><ChatPage /></ProfileCompletionGuard></ProtectedRoute>} />
+              <Route path="/messages/:conversationId" element={<ProtectedRoute><ProfileCompletionGuard><ConversationPage /></ProfileCompletionGuard></ProtectedRoute>} />
               <Route path="/kyc" element={<ProtectedRoute><ProfileCompletionGuard><KycPage /></ProfileCompletionGuard></ProtectedRoute>} />
             </Routes>
           </Suspense>

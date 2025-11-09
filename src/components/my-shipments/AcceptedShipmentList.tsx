@@ -4,29 +4,22 @@ import { useAuth } from '../../context/AuthContext';
 import { AcceptedShipmentCard } from './AcceptedShipmentCard';
 import { Loader2, ServerCrash, Briefcase } from 'lucide-react';
 
-// Types corrigés pour Supabase joins
-interface SupabaseShipment {
+// Définition des types pour les données
+interface Sender {
+  first_name: string;
+  last_name: string;
+}
+
+interface Shipment {
   title: string;
   pickup_city: string;
   delivery_city: string;
 }
 
-interface SupabaseUser {
-  first_name: string;
-  last_name: string;
-}
-
-interface SupabaseTransaction {
-  id: string;
-  shipments: SupabaseShipment[];
-  users: SupabaseUser[];
-}
-
-// Type pour notre interface après transformation
 interface Transaction {
   id: string;
-  shipments: { title: string; pickup_city: string; delivery_city: string };
-  users: { first_name: string; last_name: string };
+  shipments: Shipment;
+  users: Sender;
 }
 
 export function AcceptedShipmentList() {
@@ -36,16 +29,11 @@ export function AcceptedShipmentList() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchAcceptedShipments = useCallback(async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
 
     try {
       setLoading(true);
       setError(null);
-
-      console.log('Récupération des transports pour user:', user.id);
 
       const { data, error: fetchError } = await supabase
         .from('transactions')
@@ -57,27 +45,12 @@ export function AcceptedShipmentList() {
         .eq('traveler_id', user.id)
         .eq('status', 'CONFIRMED');
 
-      console.log('Réponse des transports:', { data, error: fetchError });
+      if (fetchError) throw fetchError;
 
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      if (!Array.isArray(data)) {
-        throw new Error('Les données reçues ne sont pas un tableau');
-      }
-
-      // Transformation des données pour correspondre à notre interface
-      const transformedData: Transaction[] = data.map((item: SupabaseTransaction) => ({
-        id: item.id,
-        shipments: item.shipments[0] || { title: '', pickup_city: '', delivery_city: '' },
-        users: item.users[0] || { first_name: '', last_name: '' }
-      }));
-
-      setShipments(transformedData);
+      setShipments(data as any || []);
     } catch (err: any) {
       console.error("Erreur lors de la récupération des transports:", err);
-      setError(err.message || "Impossible de charger vos transports à venir.");
+      setError("Impossible de charger vos transports à venir.");
     } finally {
       setLoading(false);
     }
@@ -111,7 +84,7 @@ export function AcceptedShipmentList() {
       <div className="text-center py-8 bg-neutral-100 rounded-lg">
         <Briefcase className="w-10 h-10 text-neutral-400 mx-auto mb-3" />
         <h3 className="text-lg font-semibold text-neutral-700">Aucun transport à venir</h3>
-        <p className="text-neutral-500 mt-1">Parcourez les annonces pour trouver des colis à transporter.</p>
+        <p className="text-neutral-500 mt-1">Lorsqu'un expéditeur acceptera votre offre, le colis apparaîtra ici.</p>
       </div>
     );
   }

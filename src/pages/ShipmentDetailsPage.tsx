@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, ServerCrash, MapPin, Ruler, Weight, User } from 'lucide-react';
+import { Loader2, ServerCrash, MapPin, Ruler, Weight, User, CheckCircle } from 'lucide-react';
+import { Button } from '../components/ui/Button';
 import { Alert } from '../components/ui/Alert';
-import { LeaveReviewForm } from '../components/reviews/LeaveReviewForm';
 
 interface UserProfile {
   first_name: string;
@@ -26,19 +26,7 @@ interface Shipment {
   width: number | null;
   height: number | null;
   created_at: string;
-  status: string;
   sender: UserProfile | null;
-}
-
-interface Review {
-  id: string;
-  transaction_id: string;
-  reviewee_id: string;
-  reviewer_id: string;
-  rating: number;
-  comment: string;
-  created_at: string;
-  reviewer: UserProfile;
 }
 
 export function ShipmentDetailsPage() {
@@ -48,19 +36,21 @@ export function ShipmentDetailsPage() {
   const [shipment, setShipment] = useState<Shipment | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [hasUserReviewed, setHasUserReviewed] = useState(false);
-  const [conversation, setConversation] = useState<any>(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [offerSent, setOfferSent] = useState(false);
+  const [actionError, setActionError] = useState('');
 
   useEffect(() => {
-    const fetchShipmentAndReviews = async () => {
+    const fetchShipmentAndOffer = async () => {
       if (!id) return;
 
       try {
         setLoading(true);
         setError(null);
+        setActionError('');
 
-        // Fetch shipment details
+        // Fetch shipment details with an explicit join
         const { data, error: fetchError } = await supabase
           .from('shipments')
           .select('*, sender:users!sender_id(first_name, last_name, profile_picture)')
@@ -72,32 +62,19 @@ export function ShipmentDetailsPage() {
 
         setShipment(data as Shipment);
 
-        // Fetch reviews for this shipment
-        const { data: reviewsData, error: reviewsError } = await supabase
-          .from('reviews')
-          .select('*, reviewer:users!reviews_reviewer_id_fkey(first_name, last_name)')
-          .eq('transaction_id', id);
-
-        if (reviewsError) throw reviewsError;
-        setReviews(reviewsData as Review[]);
-
-        // Check if current user has already reviewed
+        // If user is logged in, check for an existing offer
         if (user) {
-          const userHasReviewed = reviewsData?.some(review => review.reviewer_id === user.id);
-          setHasUserReviewed(!!userHasReviewed);
-        }
-
-        // Check if there's a conversation for this shipment
-        if (user) {
-          const { data: convoData, error: convoError } = await supabase
-            .from('conversations')
-            .select('*')
+          const { data: offerData, error: offerError } = await supabase
+            .from('transactions')
+            .select('id')
             .eq('shipment_id', id)
-            .in('sender_id', [user.id])
-            .single();
-
-          if (!convoError && convoData) {
-            setConversation(convoData);
+            .eq('traveler_id', user.id)
+            .maybeSingle();
+          
+          if (offerError) console.error("Error checking for existing offer:", offerError);
+          
+          if (offerData) {
+            setOfferSent(true);
           }
         }
 
@@ -109,8 +86,47 @@ export function ShipmentDetailsPage() {
       }
     };
 
-    fetchShipmentAndReviews();
+    fetchShipmentAndOffer();
   }, [id, user]);
+
+  const handleMakeOffer = async () => {
+    if (!user || !shipment) return;
+
+    setIsSubmitting(true);
+    setActionError('');
+
+    const security_code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const { data: newTransaction, error: insertError } = await supabase.from('transactions').insert({
+      shipment_id: shipment.id,
+      traveler_id: user.id,
+      sender_id: shipment.sender_id,
+      status: 'PENDING',
+      agreed_price: shipment.proposed_price,
+      currency: shipment.currency,
+      security_code,
+    }).select('id').single();
+
+    if (insertError) {
+      setActionError("Une erreur est survenue lors de l'envoi de votre offre. Veuillez réessayer.");
+      console.error("Error making offer:", insertError);
+    } else {
+      // Send notification to the sender
+      const { error: notificationError } = await supabase.from('notifications').insert({
+        recipient_id: shipment.sender_id,
+        type: 'NEW_OFFER',
+        related_entity_id: newTransaction.id,
+        content: `Vous avez reçu une nouvelle offre pour : ${shipment.title}`
+      });
+
+      if (notificationError) {
+        console.error("Error creating notification:", notificationError);
+      }
+
+      setOfferSent(true);
+    }
+    setIsSubmitting(false);
+  };
 
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen"><Loader2 className="w-12 h-12 text-primary animate-spin" /></div>;
@@ -130,26 +146,7 @@ export function ShipmentDetailsPage() {
     return <div className="text-center py-20">Annonce non trouvée.</div>;
   }
 
-  // Vérifier si l'utilisateur peut laisser un avis
-  const canLeaveReview = 
-    user && 
-    shipment.status === 'COMPLETED' && 
-    !hasUserReviewed && 
-    (user.id === shipment.sender_id);
-
-  // Vérifier si on doit afficher le bouton de conversation
-  const canShowChatButton = 
-    user && 
-    (shipment.status === 'IN_TRANSIT' || shipment.status === 'COMPLETED') && 
-    (user.id === shipment.sender_id);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
+  const canMakeOffer = user && user.id !== shipment.sender_id;
 
   return (
     <div className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -185,33 +182,7 @@ export function ShipmentDetailsPage() {
                   De <strong>{shipment.pickup_city}</strong> à <strong>{shipment.delivery_city}</strong>
                 </div>
               </div>
-              
-              {/* Section des avis existants */}
-              {reviews.length > 0 && (
-                <div>
-                  <h3 className="text-xl font-semibold text-neutral-800 mb-4">Avis sur cet envoi</h3>
-                  <div className="space-y-4">
-                    {reviews.map(review => (
-                      <div key={review.id} className="bg-neutral-50 p-4 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="font-semibold">{review.reviewer.first_name} {review.reviewer.last_name}</p>
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <svg key={i} className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-neutral-300'}`} viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                              </svg>
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-neutral-600 italic">"{review.comment}"</p>
-                        <p className="text-xs text-neutral-500 mt-2">{formatDate(review.created_at)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
-            
             <div className="md:col-span-1 space-y-6">
               <div className="bg-neutral-50 rounded-2xl p-6">
                 <h3 className="text-lg font-semibold text-neutral-800 mb-4 text-center">Expéditeur</h3>
@@ -227,49 +198,28 @@ export function ShipmentDetailsPage() {
                     {shipment.sender ? `${shipment.sender.first_name} ${shipment.sender.last_name}` : 'Utilisateur inconnu'}
                   </Link>
                 </div>
+                
+                {canMakeOffer && (
+                  <Button 
+                    onClick={handleMakeOffer}
+                    loading={isSubmitting}
+                    disabled={offerSent}
+                    className="w-full mt-6 bg-primary hover:bg-primary/90 text-white"
+                  >
+                    {offerSent ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Offre envoyée !
+                      </>
+                    ) : (
+                      'Proposer de prendre en charge'
+                    )}
+                  </Button>
+                )}
+                {actionError && <Alert type="error" message={actionError} className="mt-4" />}
               </div>
-
-              {/* Bouton de conversation */}
-              {canShowChatButton && conversation && (
-                <Link 
-                  to={`/messages/${conversation.id}`}
-                  className="block bg-primary text-white text-center py-3 px-4 rounded-2xl hover:bg-primary/90 transition-colors font-semibold"
-                >
-                  Voir la conversation
-                </Link>
-              )}
             </div>
           </div>
-
-          {/* Formulaire de notation - seulement si les conditions sont remplies */}
-          {canLeaveReview && (
-            <div className="mt-8 pt-8 border-t border-neutral-200">
-              <h3 className="text-2xl font-semibold text-neutral-800 mb-6">Laisser un avis</h3>
-              <LeaveReviewForm
-                transactionId={shipment.id}
-                revieweeId={shipment.sender_id}
-                reviewerId={user.id}
-                onReviewSubmitted={() => {
-                  // Rafraîchir la page après soumission
-                  window.location.reload();
-                }}
-              />
-            </div>
-          )}
-
-          {/* Message si l'envoi n'est pas terminé */}
-          {!canLeaveReview && user && shipment.status !== 'COMPLETED' && (
-            <div className="mt-8 pt-8 border-t border-neutral-200">
-              <Alert type="info" message="Vous ne pouvez laisser un avis que lorsque l'envoi est terminé." />
-            </div>
-          )}
-
-          {/* Message si l'utilisateur a déjà laissé un avis */}
-          {!canLeaveReview && user && hasUserReviewed && (
-            <div className="mt-8 pt-8 border-t border-neutral-200">
-              <Alert type="success" message="Vous avez déjà laissé un avis pour cet envoi. Merci !" />
-            </div>
-          )}
         </div>
       </div>
     </div>

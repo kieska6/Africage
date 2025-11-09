@@ -4,31 +4,22 @@ import { useAuth } from '../../context/AuthContext';
 import { IncomingOfferCard } from './IncomingOfferCard';
 import { Loader2, ServerCrash, Inbox } from 'lucide-react';
 
-// Types corrigés pour Supabase joins
-interface SupabaseShipment {
-  title: string;
-}
-
-interface SupabaseUser {
+// Définition des types pour correspondre à la structure de la carte
+interface Traveler {
   first_name: string;
   last_name: string;
 }
 
-interface SupabaseTransaction {
-  id: string;
-  traveler_id: string;
-  shipment_id: string;
-  shipments: SupabaseShipment[];
-  users: SupabaseUser[];
+interface Shipment {
+  title: string;
 }
 
-// Type pour notre interface après transformation
 interface Transaction {
   id: string;
   traveler_id: string;
   shipment_id: string;
-  shipments: { title: string };
-  users: { first_name: string; last_name: string };
+  shipments: Shipment;
+  users: Traveler;
 }
 
 export function IncomingOfferList() {
@@ -38,16 +29,11 @@ export function IncomingOfferList() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchOffers = useCallback(async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
 
     try {
       setLoading(true);
       setError(null);
-
-      console.log('Récupération des offres pour user:', user.id);
 
       const { data, error: fetchError } = await supabase
         .from('transactions')
@@ -61,29 +47,12 @@ export function IncomingOfferList() {
         .eq('sender_id', user.id)
         .eq('status', 'PENDING');
 
-      console.log('Réponse des offres:', { data, error: fetchError });
+      if (fetchError) throw fetchError;
 
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      if (!Array.isArray(data)) {
-        throw new Error('Les données reçues ne sont pas un tableau');
-      }
-
-      // Transformation des données pour correspondre à notre interface
-      const transformedData: Transaction[] = data.map((item: SupabaseTransaction) => ({
-        id: item.id,
-        traveler_id: item.traveler_id,
-        shipment_id: item.shipment_id,
-        shipments: item.shipments[0] || { title: '' },
-        users: item.users[0] || { first_name: '', last_name: '' }
-      }));
-
-      setOffers(transformedData);
+      setOffers(data as any || []);
     } catch (err: any) {
       console.error("Erreur lors de la récupération des offres:", err);
-      setError(err.message || "Impossible de charger les offres reçues.");
+      setError("Impossible de charger les offres reçues.");
     } finally {
       setLoading(false);
     }

@@ -4,29 +4,21 @@ import { useAuth } from '../../context/AuthContext';
 import { ConfirmationCard } from './ConfirmationCard';
 import { Loader2, ServerCrash, Bell } from 'lucide-react';
 
-// Types corrigés pour Supabase joins
-interface SupabaseShipment {
-  title: string;
-}
-
-interface SupabaseUser {
+// Définition des types
+interface Traveler {
   first_name: string;
   last_name: string;
 }
 
-interface SupabaseTransaction {
-  id: string;
-  shipment_id: string;
-  shipments: SupabaseShipment[];
-  users: SupabaseUser[];
+interface Shipment {
+  title: string;
 }
 
-// Type pour notre interface après transformation
 interface Transaction {
   id: string;
   shipment_id: string;
-  shipments: { title: string };
-  users: { first_name: string; last_name: string };
+  shipments: Shipment;
+  users: Traveler;
 }
 
 export function ConfirmationList() {
@@ -36,16 +28,11 @@ export function ConfirmationList() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchConfirmations = useCallback(async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
 
     try {
       setLoading(true);
       setError(null);
-
-      console.log('Récupération des confirmations pour user:', user.id);
 
       const { data, error: fetchError } = await supabase
         .from('transactions')
@@ -58,28 +45,12 @@ export function ConfirmationList() {
         .eq('sender_id', user.id)
         .eq('status', 'DELIVERED');
 
-      console.log('Réponse des confirmations:', { data, error: fetchError });
+      if (fetchError) throw fetchError;
 
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      if (!Array.isArray(data)) {
-        throw new Error('Les données reçues ne sont pas un tableau');
-      }
-
-      // Transformation des données pour correspondre à notre interface
-      const transformedData: Transaction[] = data.map((item: SupabaseTransaction) => ({
-        id: item.id,
-        shipment_id: item.shipment_id,
-        shipments: item.shipments[0] || { title: '' },
-        users: item.users[0] || { first_name: '', last_name: '' }
-      }));
-
-      setConfirmations(transformedData);
+      setConfirmations(data as any || []);
     } catch (err: any) {
       console.error("Erreur lors de la récupération des confirmations:", err);
-      setError(err.message || "Impossible de charger les confirmations en attente.");
+      setError("Impossible de charger les confirmations en attente.");
     } finally {
       setLoading(false);
     }
