@@ -18,6 +18,8 @@ export interface Profile {
   average_rating: number | null;
   review_count: number;
   is_admin: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Définition du type pour la valeur du contexte
@@ -31,6 +33,7 @@ interface AuthContextType {
   signOut: () => Promise<any>;
   signInWithGoogle: () => Promise<any>;
   updateUser: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,25 +44,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = async (userId: string): Promise<Profile | null> => {
     try {
-      console.log('Récupération du profil pour userId:', userId);
+      console.log('📊 Récupération du profil pour userId:', userId);
       
       const { data: userProfile, error: profileError } = await supabase
         .from('users')
-        .select('id, email, first_name, last_name, phone_number, profile_avatar_url, country, date_of_birth, role, kyc_status, is_profile_complete, average_rating, review_count, is_admin')
+        .select(`
+          id, 
+          email, 
+          first_name, 
+          last_name, 
+          phone_number, 
+          profile_avatar_url, 
+          country, 
+          date_of_birth, 
+          role, 
+          kyc_status, 
+          is_profile_complete, 
+          average_rating, 
+          review_count, 
+          is_admin,
+          created_at,
+          updated_at
+        `)
         .eq('id', userId)
         .single();
       
       if (profileError) {
-        console.error("Error fetching user profile:", profileError);
-        return null;
+        console.error("❌ Erreur lors de la récupération du profil:", profileError);
+        throw profileError;
       }
 
-      console.log('Profil récupéré:', userProfile);
-      return userProfile as Profile | null;
+      console.log('✅ Profil récupéré avec succès:', userProfile);
+      return userProfile as Profile;
     } catch (err) {
-      console.error("Error in fetchUserProfile:", err);
+      console.error("❌ Erreur dans fetchUserProfile:", err);
       return null;
     }
   };
@@ -71,36 +91,49 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setProfile(userProfile);
   };
 
+  const refreshProfile = async () => {
+    if (!user) return;
+    await updateUserProfile();
+  };
+
   useEffect(() => {
     setLoading(true);
     
     // 1. Vérifier la session active au chargement initial
-    supabase.auth.getSession().then(async ({ data: { session }, error: sessionError }) => {
-      if (sessionError) {
-        console.error("Auth Error on getSession:", sessionError.message);
-        setError("Erreur lors de la récupération de la session.");
-        setLoading(false);
-        return;
-      }
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("❌ Erreur d'authentification:", sessionError.message);
+          setError("Erreur lors de la récupération de la session.");
+          setLoading(false);
+          return;
+        }
 
-      console.log('Session récupérée:', session ? 'Session existante' : 'Pas de session');
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
+        console.log('🔄 Session récupérée:', session ? 'Session existante' : 'Pas de session');
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
 
-      if (currentUser) {
-        const userProfile = await fetchUserProfile(currentUser.id);
-        setProfile(userProfile);
-      }
-      setLoading(false);
-    }).catch(err => {
-        console.error("Catastrophic error on getSession:", err);
+        if (currentUser) {
+          const userProfile = await fetchUserProfile(currentUser.id);
+          setProfile(userProfile);
+        } else {
+          setProfile(null);
+        }
+      } catch (err) {
+        console.error("❌ Erreur critique lors de l'initialisation:", err);
         setError("Une erreur critique est survenue.");
+      } finally {
         setLoading(false);
-    });
+      }
+    };
+
+    initializeAuth();
 
     // 2. Écouter les changements d'état d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log('Auth state changed:', _event);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Changement d\'état d\'auth:', event);
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
@@ -117,6 +150,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
+  // Test de connexion à la base de données
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        const { count: _countData, error } = await supabase
+          .from('users')
+          .select('count', { count: 'exact' })
+          .limit(1);
+        
+        if (error) {
+          console.error('❌ Test de connexion Supabase échoué:', error);
+          setError('Problème de connexion à la base de données');
+        } else {
+          console.log('✅ Test de connexion Supabase réussi');
+          setError(null);
+        }
+      } catch (err) {
+        console.error('❌ Erreur lors du test de connexion:', err);
+        setError('Impossible de se connecter à la base de données');
+      }
+    };
+
+    testConnection();
+  }, []);
+
   const value = {
     user,
     profile,
@@ -129,8 +187,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       return supabase.auth.signOut();
     },
-    signInWithGoogle: () => supabase.auth.signInWithOAuth({ provider: 'google' }),
+    signInWithGoogle: () => supabase.auth.signInWithOAuth({ 
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    }),
     updateUser: updateUserProfile,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
