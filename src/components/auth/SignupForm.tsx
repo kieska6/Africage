@@ -42,7 +42,7 @@ export function SignupForm() {
     }
 
     try {
-      const { error } = await signUp({
+      const { data, error } = await signUp({
         email: email,
         password: password,
         options: {
@@ -56,9 +56,12 @@ export function SignupForm() {
 
       if (error) {
         setError(error.message);
+      } else if (data?.user?.email_confirmed_at) {
+        // Si l'utilisateur est déjà confirmé (cas particulier), on redirige vers la complétion du profil
+        window.location.href = '/complete-profile';
       } else {
         setSuccess(true);
-        // No longer navigating automatically. User must confirm email.
+        // L'utilisateur doit confirmer son email avant de pouvoir continuer
       }
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue lors de la création du compte');
@@ -86,6 +89,11 @@ export function SignupForm() {
             title="Compte créé avec succès !"
             message="Veuillez consulter votre boîte de réception pour confirmer votre adresse e-mail."
           />
+          <div className="mt-4 text-center">
+            <p className="text-sm text-neutral-600">
+              Une fois confirmé, vous serez redirigé vers la complétion de votre profil.
+            </p>
+          </div>
         </div>
       </div>
     );

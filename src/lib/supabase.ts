@@ -14,7 +14,8 @@ const finalSupabaseUrl = supabaseUrl || "https://cvgphokecoacqleecflb.supabase.c
 const finalSupabaseAnonKey = supabaseAnonKey || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2Z3Bob2tlY29hY3FsZWVjZmxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxNTIwMzcsImV4cCI6MjA1OTcyODAzN30.fnGwyGSuLIHiDjkWI4JuAF22CMvGXN-nFgy39ul1fEQ";
 
 console.log('Supabase URL:', finalSupabaseUrl);
+console.log('Supabase Key présente:', !!finalSupabaseAnonKey);
 
 export const supabase = createClient(finalSupabaseUrl, finalSupabaseAnonKey);
 
-console.log('Client Supabase créé.');
+console.log('Client Supabase créé avec succès.');

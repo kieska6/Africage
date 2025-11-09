@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Cache de Vite pour éviter les problèmes de développement
+node_modules/.vite
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
