@@ -5,16 +5,10 @@ import { supabase } from '../lib/supabase';
 // Définition du type pour le profil utilisateur
 export interface Profile {
   id: string;
-  email: string;
   first_name: string;
   last_name: string;
-  phone_number?: string;
-  profile_avatar_url?: string;
-  country?: string;
-  date_of_birth?: string;
   role: 'USER' | 'MODERATOR' | 'ADMIN';
   kyc_status: 'NOT_SUBMITTED' | 'PENDING_REVIEW' | 'VERIFIED' | 'REJECTED';
-  is_profile_complete: boolean;
 }
 
 // Définition du type pour la valeur du contexte
@@ -27,7 +21,6 @@ interface AuthContextType {
   signUp: (credentials: SignUpWithPasswordCredentials) => Promise<any>;
   signOut: () => Promise<any>;
   signInWithGoogle: () => Promise<any>;
-  updateUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,33 +30,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data: userProfile, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-      
-      if (profileError) {
-        console.error("Error fetching user profile:", profileError);
-        return null;
-      }
-
-      return userProfile as Profile | null;
-    } catch (err) {
-      console.error("Error in fetchUserProfile:", err);
-      return null;
-    }
-  };
-
-  const updateUserProfile = async () => {
-    if (!user) return;
-    
-    const userProfile = await fetchUserProfile(user.id);
-    setProfile(userProfile);
-  };
 
   useEffect(() => {
     setLoading(true);
@@ -81,8 +47,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(currentUser);
 
       if (currentUser) {
-        const userProfile = await fetchUserProfile(currentUser.id);
-        setProfile(userProfile);
+        const { data: userProfile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+        
+        if (!profileError) {
+          setProfile(userProfile as Profile | null);
+        }
       }
       setLoading(false);
     }).catch(err => {
@@ -97,8 +70,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(currentUser);
 
       if (currentUser) {
-        const userProfile = await fetchUserProfile(currentUser.id);
-        setProfile(userProfile);
+        const { data: userProfile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+        
+        if (!profileError) {
+          setProfile(userProfile as Profile | null);
+        }
       } else {
         setProfile(null);
       }
@@ -122,7 +102,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return supabase.auth.signOut();
     },
     signInWithGoogle: () => supabase.auth.signInWithOAuth({ provider: 'google' }),
-    updateUser: updateUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
