@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Allow public read access to reviews" ON public.reviews;

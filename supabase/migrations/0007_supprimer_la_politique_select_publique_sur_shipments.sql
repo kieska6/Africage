@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Allow public read access to shipments" ON public.shipments;

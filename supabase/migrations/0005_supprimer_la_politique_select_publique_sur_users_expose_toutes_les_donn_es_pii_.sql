@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Enable select for users" ON public.users;
